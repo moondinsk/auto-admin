@@ -9,17 +9,6 @@ import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 
 const Components = () => {
   // ListTable (예: 상품 목록)
-  const listTableColumns = [
-    { key: "check", header: "", width: 44 },
-    { key: "no", header: "No", width: 70 },
-    { key: "groupName", header: "그룹명" },
-    { key: "exposureStatus", header: "노출 상태", width: 120 },
-    { key: "imageCount", header: "이미지 수", width: 110 },
-    { key: "effect", header: "배너 효과", width: 120 },
-    { key: "clickCount", header: "클릭 수", width: 110 },
-    { key: "bannerCode", header: "배너 코드", width: 160 },
-    { key: "manage", header: "관리", width: 120 },
-  ];
 
   const [listTableRows, setListTableRows] = useState([
     {
@@ -28,20 +17,55 @@ const Components = () => {
       groupName: "메인 상단 배너",
       exposureStatus: true,
       imageCount: 3,
-      effect: "Slider",
+      effect: "슬라이드",
       clickCount: 120,
       bannerCode: "B0000001",
-      manage: "관리", // 보통 버튼 렌더링용
+    },
+    {
+      id: "b2",
+      no: 2,
+      groupName: "메인 하단 배너",
+      exposureStatus: false,
+      imageCount: 1,
+      effect: "페이드",
+      clickCount: 32,
+      bannerCode: "B0000002",
     },
   ]);
 
-  const toggleExposure = (id) => {
+  const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
+
+  const toggleOne = (id) => {
+    setListTableCheckedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const toggleAll = (checked) => {
+    setListTableCheckedIds(checked ? listTableRows.map((r) => r.id) : []);
+  };
+
+  const allChecked = listTableRows.length > 0 && listTableCheckedIds.length === listTableRows.length;
+
+  const listTableColumns = [
+    {
+      key: "check",
+      header: <input type="checkbox" checked={allChecked} onChange={(e) => toggleAll(e.target.checked)} />,
+      width: 44,
+    },
+    { key: "no", header: "No", width: 70 },
+    { key: "groupName", header: "그룹명", align: "left" },
+    { key: "exposureStatus", header: "노출 상태", width: 120 },
+    { key: "imageCount", header: "이미지 수", width: 110 },
+    { key: "effect", header: "배너 효과", width: 120 },
+    { key: "clickCount", header: "클릭 수", width: 110 },
+    { key: "bannerCode", header: "배너 코드", width: 160 },
+    { key: "manage", header: "관리", width: 120 },
+  ];
+
+  const toggleExposureStatus = (id) => {
     setListTableRows((prev) =>
       prev.map((row) => (row.id === id ? { ...row, exposureStatus: !row.exposureStatus } : row)),
     );
   };
-
-  const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
 
   // FormTable (예: 배너 그룹 정보)
   const formFields = [
@@ -99,11 +123,21 @@ const Components = () => {
           rows={listTableRows}
           rowKey="id"
           renderCell={(row, col) => {
+            if (col.key === "check") {
+              return (
+                <input
+                  type="checkbox"
+                  checked={listTableCheckedIds.includes(row.id)}
+                  onChange={() => toggleOne(row.id)}
+                />
+              );
+            }
+
             if (col.key === "exposureStatus") {
               return (
                 <ToggleSwitch
                   checked={!!row.exposureStatus}
-                  onChange={() => toggleExposure(row.id)}
+                  onChange={() => toggleExposureStatus(row.id)}
                   ariaLabel={`${row.groupName} 노출 상태 토글`}
                 />
               );
