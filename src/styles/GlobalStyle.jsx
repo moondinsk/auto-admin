@@ -5,7 +5,7 @@ import { reset } from "styled-reset";
 export const GlobalStyle = createGlobalStyle`
   ${reset}
 
- *, *::before, *::after {
+  *, *::before, *::after {
     box-sizing: border-box;
   }
   body {
@@ -19,6 +19,8 @@ export const GlobalStyle = createGlobalStyle`
   li::marker {
     content: "";
   }
+
+  
 
   .flex-box {
     display: flex;

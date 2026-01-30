@@ -4,10 +4,12 @@ import { theme } from "@/styles/theme";
 
 const CardSection = ({ title, children }) => {
   return (
-    <Section>
-      <Title>{title}</Title>
-      <Content>{children}</Content>
-    </Section>
+    <>
+      <Section>
+        <Title>{title}</Title>
+        <Content>{children}</Content>
+      </Section>
+    </>
   );
 };
 
@@ -15,10 +17,6 @@ export default CardSection;
 
 const Section = styled.section`
   /* border: 1px solid ${theme.colors.gray[100]}; */
-  padding: 32px 40px;
-  box-shadow: 0 0 10px 0 rgba(98, 120, 233, 0.1);
-  background: ${theme.colors.gray.white};
-  border-radius: 10px;
 `;
 
 const Title = styled.h2`
@@ -29,7 +27,8 @@ const Title = styled.h2`
 `;
 
 const Content = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  padding: 32px 40px;
+  box-shadow: 0 0 10px 0 rgba(98, 120, 233, 0.1);
+  background: ${theme.colors.gray.white};
+  border-radius: 10px;
 `;
