@@ -78,7 +78,7 @@ export const StyledButton = styled.button`
       if (!outlined && bgColor) {
         return `
         background-color: ${theme.colors.gray.white};
-        color: ${theme.colors.text.base};
+        color: ${bgColor};
         border: 1px solid ${bgColor};
       `;
       }

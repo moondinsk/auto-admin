@@ -7,7 +7,7 @@ const Components = () => {
   return (
     <CardSection title="Button 컴포넌트 예시">
       <Button bgColor={theme.colors.gray.black}>Filled</Button>
-      <Button outlined color={theme.colors.primary[500]} radius="half">
+      <Button outlined color={theme.colors.primary.main} radius="half">
         Outlined
       </Button>
       <Button disabled>Filled (Disabled)</Button>
