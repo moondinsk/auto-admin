@@ -1,4 +1,5 @@
 import { createGlobalStyle } from "styled-components";
+import { theme } from "./theme";
 
 export const GlobalStyle = createGlobalStyle`
   *, *::before, *::after {
@@ -7,9 +8,10 @@ export const GlobalStyle = createGlobalStyle`
 
   body {
     margin: 0;
+    font-size: ${theme.fontSizes.base};
     font-family: Pretendard, -apple-system, BlinkMacSystemFont;
-    color: ${({ theme }) => theme.colors.black};
-    background-color: ${({ theme }) => theme.colors.white};
+    color: ${theme.colors.text.base};
+    background: ${theme.colors.layout.body};
   }
 
   a {

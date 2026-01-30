@@ -12,6 +12,7 @@ import PrivateRoute from "./PrivateRoute";
 import Login from "@/pages/Login/Login";
 import Forbidden from "../pages/Error/Forbidden";
 import Users from "@/pages/User/Users";
+import Components from "@/pages/Components/Components";
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: SEGMENT.COMPONENTS,
+        element: <Components />,
       },
       {
         path: SEGMENT.PRODUCT,

@@ -1,9 +1,10 @@
+import { theme } from "@/styles/theme";
 import styled from "styled-components";
 
 const SIZE_MAP = {
-  sm: { height: 32, padding: "0 12px", fontSize: 12 },
-  md: { height: 40, padding: "0 16px", fontSize: 14 },
-  lg: { height: 48, padding: "0 20px", fontSize: 16 },
+  sm: { height: 32, padding: "0 20px", fontSize: 14, fontWeight: 400 },
+  md: { height: 40, padding: "0 32px", fontSize: 15, fontWeight: 700 },
+  lg: { height: 48, padding: "0 40px", fontSize: 16, fontWeight: 700 },
 };
 
 const RADIUS_MAP = {
@@ -39,4 +40,29 @@ export const StyledButton = styled.button`
 
     return `${RADIUS_MAP[radius]}px`;
   }};
+
+  font-weight: ${({ fontWeight, size }) => fontWeight || SIZE_MAP[size].fontWeight};
+  /* =======================
+     BORDER
+  ======================= */
+  border: 1px solid
+    ${({ outlined, disabled, color }) => {
+      if (disabled && outlined) return theme.colors.gray[300];
+      if (outlined) return color;
+      return "transparent";
+    }};
+
+  background-color: ${({ outlined, disabled, bgColor }) => {
+    if (disabled) return theme.colors.gray[100];
+    if (!outlined) return bgColor;
+    return "transparent";
+  }};
+
+  color: ${({ outlined, disabled, color }) => {
+    if (disabled) return theme.colors.gray[500];
+    if (!outlined) return theme.colors.gray.white;
+    return color;
+  }};
+
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
