@@ -14,7 +14,7 @@ const CardSection = ({ title, children }) => {
 export default CardSection;
 
 const Section = styled.section`
-  border: 1px solid ${theme.colors.gray[100]};
+  /* border: 1px solid ${theme.colors.gray[100]}; */
   padding: 32px 40px;
   box-shadow: 0 0 10px 0 rgba(98, 120, 233, 0.1);
   background: ${theme.colors.gray.white};
