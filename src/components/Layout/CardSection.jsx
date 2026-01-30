@@ -22,14 +22,8 @@ const Section = styled.section`
 `;
 
 const Title = styled.h2`
-  color: var(--black-282-b-39, #282b39);
-
-  font-family: "Noto Sans KR";
+  color: ${theme.colors.gray.black};
   font-size: 20px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 28px; /* 140% */
-  letter-spacing: -0.2px;
   margin-bottom: 20px;
   font-weight: 700;
 `;
