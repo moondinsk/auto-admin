@@ -8,6 +8,7 @@ import Footer from "@/components/Footer/Footer";
 import ConfirmModal from "@/components/Modal/ConfirmModal";
 import Modal from "@/components/Modal/Modal";
 import SideNav from "@/components/SideNav/SideNav";
+import { MainContent, RootContainer } from "./Root.style";
 
 function Root() {
   return (
@@ -15,16 +16,14 @@ function Root() {
       {/* 공통 헤더 */}
       <Header />
 
-      {/* 사이드 네비게이션 */}
-      <SideNav />
-
-      {/* 페이지 영역 */}
-      <main className="page-content">
-        <Outlet />
-      </main>
-
-      {/* 공통 푸터 */}
-      <Footer />
+      <RootContainer className="layout-container flex-box">
+        {/* 사이드 네비게이션 */}
+        <SideNav />
+        {/* 페이지 영역 */}
+        <MainContent className="page-content">
+          <Outlet />
+        </MainContent>
+      </RootContainer>
 
       {/* 전역 Modal */}
       {modalStore.isOpen && <Modal onClose={() => modalStore.close()}>{modalStore.content}</Modal>}

@@ -30,6 +30,8 @@ const Title = styled.h2`
   font-weight: 500;
   line-height: 28px; /* 140% */
   letter-spacing: -0.2px;
+  margin-bottom: 20px;
+  font-weight: 700;
 `;
 
 const Content = styled.div`

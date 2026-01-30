@@ -1,26 +1,33 @@
 import { createGlobalStyle } from "styled-components";
 import { theme } from "./theme";
+import { reset } from "styled-reset";
 
 export const GlobalStyle = createGlobalStyle`
-  *, *::before, *::after {
+  ${reset}
+
+ *, *::before, *::after {
     box-sizing: border-box;
   }
-
   body {
     margin: 0;
-    font-size: ${theme.fontSizes.base};
-    font-family: Pretendard, -apple-system, BlinkMacSystemFont;
-    color: ${theme.colors.text.base};
-    background: ${theme.colors.layout.body};
+    font-family: ${theme.fonts.family};
+    font-size: ${theme.fonts.size};
+    color: ${theme.fonts.color};
+    background: ${theme.colors.layout.bodyBG};
   }
 
-  a {
-    text-decoration: none;
-    color: inherit;
+  li::marker {
+    content: "";
   }
 
-  button {
-    font-family: inherit;
-    cursor: pointer;
+  .flex-box {
+    display: flex;
+
+    &.ac { align-items: center; }
+    &.jc { justify-content: center; }
+    &.jb { justify-content: space-between; }
+    &.col { flex-direction: column; }
   }
+
+
 `;

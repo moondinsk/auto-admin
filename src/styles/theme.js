@@ -1,66 +1,79 @@
+// theme.js
 const TEXT_BASE = "#282B39";
+
+const palette = {
+  blue500: "#7386E8",
+  gray900: "#282B39",
+  gray800: "#44475C",
+  gray700: "#434659",
+  gray400: "#9B9FAF",
+  gray100: "#EFF1FA",
+  white: "#FFFFFF",
+  red500: "#FF0038",
+
+  // layout
+  layoutDark: "#2c2f42",
+  layoutBody: "#f9f9fa",
+};
+
 export const theme = {
   colors: {
+    palette,
+
     primary: {
-      main: "#7386E8",
-      50: "#F9F9FD",
-      100: "#EFF1FA",
-      200: "#E8EAFB",
-      300: "#C5CAF5",
-      400: "#9DA9EE",
-      600: "#515CDA",
-      700: "#3947A7",
-      800: "#242F86",
-      900: "#161F66",
-      950: "#0E1248",
+      main: palette.blue500,
     },
 
     gray: {
-      white: "#FFFFFF",
-      main: "#9B9FAF",
-      black: TEXT_BASE,
-      50: "#F9FAFA",
-      100: "#E9EDED",
-      200: "#DFE0E6",
-      300: "#CBCDD7",
-      400: "#AFB2C1",
-      600: "#8A8E9C",
-      700: "#696C77",
-      800: "#5D5E67",
-      900: "#3E3F45",
+      white: palette.white,
+      main: palette.gray400,
+      black: palette.gray900,
     },
 
     error: {
-      main: "#FF0038",
-      50: "#FFEEEE",
-      100: "#FFC8D2",
-      200: "#F29099",
-      300: "#E96272",
-      400: "#F4324F",
-      600: "#E90035",
-      700: "#D7002F",
-      800: "#CA0027",
-      900: "#BB001C",
+      main: palette.red500,
     },
 
     layout: {
-      header: "#2c2f42",
-      sidebar: "#2c2f42",
-      body: "#f9f9fa",
+      headerBG: palette.layoutDark,
+      sidebarBG: palette.layoutDark,
+      bodyBG: palette.layoutBody,
     },
 
+    // 의미 기반 컬러(여기저기 재사용하기 )
     text: {
-      base: TEXT_BASE,
+      primary: palette.gray900,
+      secondary: palette.gray700,
+      muted: palette.gray400,
+      inverse: palette.white,
+    },
+
+    bg: {
+      default: palette.layoutBody,
+      subtle: palette.gray100,
+      dark: palette.gray900,
+    },
+
+    action: {
+      primary: palette.blue500,
+      danger: palette.red500,
+      disabled: palette.gray100,
+    },
+
+    border: {
+      default: palette.gray100,
+      strong: palette.gray700,
     },
   },
 
-  fontSizes: {
-    base: "14px",
+  fonts: {
+    family: `"Pretendard", "Noto Sans KR", sans-serif`,
+    size: "14px",
+    color: TEXT_BASE,
   },
 
-  // radius: {
-  //   sm: "4px",
-  //   md: "8px",
-  //   lg: "12px",
-  // },
+  size: {
+    headerHeight: "80px",
+    sidebarWidth: "250px",
+  },
 };
