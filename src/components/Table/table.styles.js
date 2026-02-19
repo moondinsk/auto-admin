@@ -1,4 +1,5 @@
 import { theme } from "@/styles/theme";
+import Select from "react-select";
 import styled, { css } from "styled-components";
 
 export const TableWrap = styled.div``;
@@ -32,13 +33,16 @@ export const StyledTable = styled.table`
   ${({ $variant }) =>
     $variant === "form" &&
     css`
+      th,
+      td {
+        padding: 12px 24px;
+        border-bottom: 1px solid #dedcec;
+      }
       th {
         width: 220px;
-        text-align: left;
         background: ${({ theme }) => theme.colors.bg?.subtle || theme.colors.palette.gray100};
         font-weight: 600;
       }
-
       td {
         text-align: left;
         background: ${({ theme }) => theme.colors.gray.white};
@@ -49,4 +53,122 @@ export const StyledTable = styled.table`
 export const Required = styled.span`
   margin-left: 4px;
   color: ${({ theme }) => theme.colors.error.main};
+`;
+
+export const SelectInputWrapper = styled.div`
+  display: flex;
+  gap: 10px;
+  .react-select__control {
+    width: 150px;
+  }
+
+  .custom-select {
+    flex: none;
+  }
+`;
+
+export const ChoiceInput = styled.div`
+  display: flex;
+  gap: 20px;
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: ${({ theme }) => theme.colors.text.primary};
+    input {
+      margin: 0;
+    }
+  }
+`;
+
+export const DateRangeWrapper = styled.div`
+  display: flex;
+  gap: 10px;
+
+  .date-inputs {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    .separator {
+      color: #999;
+      font-weight: 500;
+    }
+  }
+
+  .date-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    button {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+
+      &:hover {
+        border-color: ${({ theme }) => theme.colors.primary.main};
+        color: ${({ theme }) => theme.colors.primary.main};
+      }
+
+      &.is-active {
+        background: ${({ theme }) => theme.colors.primary.main};
+        color: #fff;
+        border-color: ${({ theme }) => theme.colors.primary.main};
+      }
+    }
+  }
+`;
+
+export const DateInputWrapper = styled.div`
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+
+  .react-datepicker__tab-loop {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .react-datepicker {
+    position: absolute;
+    transform: translateX(-50%);
+  }
+
+  .date-picker-input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: ${({ theme }) => theme.colors.primary.main};
+      box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary.main}22;
+    }
+
+    &::placeholder {
+      color: #999;
+    }
+  }
+
+  .calendar-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 16px;
+    color: #666;
+    pointer-events: none;
+  }
 `;

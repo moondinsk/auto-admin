@@ -1,14 +1,18 @@
+import React, { useState } from "react";
+import { IoIosArrowForward, IoIosRefresh } from "react-icons/io";
+
 import Button from "@/components/Button/Button";
 import CardSection from "@/components/Layout/CardSection";
-import { theme } from "@/styles/theme";
-import React, { useState } from "react";
-import { IoIosArrowForward } from "react-icons/io";
-import { StyledComponents, Buttons } from "./Components.styles";
 import { FormTable, ListTable } from "@/components/Table/Table";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 
+import { theme } from "@/styles/theme";
+import { StyledComponents, Buttons } from "./Components.styles";
+
 const Components = () => {
-  // ListTable (예: 상품 목록)
+  /* ========================================================
+      1️⃣ LIST TABLE STATE (배너 목록 데이터)
+  ======================================================== */
 
   const [listTableRows, setListTableRows] = useState([
     {
@@ -35,15 +39,23 @@ const Components = () => {
 
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
 
+  /* ========================================================
+      2️⃣ LIST TABLE 체크 로직
+  ======================================================== */
+
   const toggleOne = (id) => {
     setListTableCheckedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const toggleAll = (checked) => {
-    setListTableCheckedIds(checked ? listTableRows.map((r) => r.id) : []);
+    setListTableCheckedIds(checked ? listTableRows.map((row) => row.id) : []);
   };
 
   const allChecked = listTableRows.length > 0 && listTableCheckedIds.length === listTableRows.length;
+
+  /* ========================================================
+      3️⃣ LIST TABLE 컬럼 정의
+  ======================================================== */
 
   const listTableColumns = [
     {
@@ -61,13 +73,35 @@ const Components = () => {
     { key: "manage", header: "관리", width: 120 },
   ];
 
+  /* ========================================================
+      4️⃣ LIST TABLE 액션
+  ======================================================== */
+
   const toggleExposureStatus = (id) => {
     setListTableRows((prev) =>
       prev.map((row) => (row.id === id ? { ...row, exposureStatus: !row.exposureStatus } : row)),
     );
   };
 
-  // FormTable (예: 배너 그룹 정보)
+  /* ========================================================
+      5️⃣ FORM TABLE 필드 정의
+  ======================================================== */
+
+  const getDateRange = (days) => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - days);
+    return {
+      start: start.toISOString().split("T")[0],
+      end: end.toISOString().split("T")[0],
+    };
+  };
+
+  const getToday = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
   const formFields = [
     {
       key: "name",
@@ -83,40 +117,169 @@ const Components = () => {
       name: "bannerGroupDesc",
       type: "textarea",
       placeholder: "설명을 입력하세요",
-      rows: 4,
+    },
+    {
+      key: "searchKeyword",
+      label: "배너 키워드",
+      name: "searchKeyword",
+      type: "select",
+      placeholder: "배너 키워드 선택",
+      options: [
+        { value: "new", label: "신상품" },
+        { value: "sale", label: "세일" },
+        { value: "best", label: "베스트" },
+      ],
+    },
+    {
+      key: "searchFilter",
+      label: "검색 필터",
+      type: "select-input",
+      selectName: "searchCategory",
+      selectPlaceholder: "카테고리 선택",
+      selectOptions: [
+        { value: "name", label: "배너명" },
+        { value: "code", label: "배너코드" },
+      ],
+      inputName: "searchValue",
+      inputPlaceholder: "검색어를 입력하세요",
+    },
+    {
+      key: "exposure",
+      label: "노출 여부",
+      name: "exposureStatus",
+      type: "radio",
+      options: [
+        { value: true, label: "노출" },
+        { value: false, label: "비노출" },
+      ],
+    },
+    {
+      key: "features",
+      label: "배너 특징",
+      name: "features",
+      type: "checkbox",
+      options: [
+        { value: "new", label: "신상품" },
+        { value: "sale", label: "세일" },
+        { value: "best", label: "베스트" },
+      ],
+    },
+    {
+      key: "dateSearch",
+      label: "조회 기간",
+      type: "date-range",
+      startName: "startDate",
+      endName: "endDate",
+      startPlaceholder: "시작 날짜",
+      endPlaceholder: "종료 날짜",
+      dateButtons: [
+        {
+          label: "오늘",
+          value: "today",
+          onClick: (onChange) => {
+            const today = getToday();
+            onChange({ target: { name: "startDate", value: today } });
+            onChange({ target: { name: "endDate", value: today } });
+          },
+        },
+        {
+          label: "7일",
+          value: "7days",
+          onClick: (onChange) => {
+            const { start, end } = getDateRange(7);
+            onChange({ target: { name: "startDate", value: start } });
+            onChange({ target: { name: "endDate", value: end } });
+          },
+        },
+        {
+          label: "15일",
+          value: "15days",
+          onClick: (onChange) => {
+            const { start, end } = getDateRange(15);
+            onChange({ target: { name: "startDate", value: start } });
+            onChange({ target: { name: "endDate", value: end } });
+          },
+        },
+        {
+          label: "1개월",
+          value: "1month",
+          onClick: (onChange) => {
+            const { start, end } = getDateRange(30);
+            onChange({ target: { name: "startDate", value: start } });
+            onChange({ target: { name: "endDate", value: end } });
+          },
+        },
+        {
+          label: "전체",
+          value: "all",
+          onClick: (onChange) => {
+            onChange({ target: { name: "startDate", value: "" } });
+            onChange({ target: { name: "endDate", value: "" } });
+          },
+        },
+      ],
     },
   ];
 
-  const [form, setForm] = useState({
+  /* ========================================================
+      6️⃣ FORM STATE
+  ======================================================== */
+
+  const initialForm = {
     bannerGroupName: "",
     bannerGroupDesc: "",
-  });
+    searchKeyword: "",
+    searchCategory: "",
+    searchValue: "",
+    exposureStatus: "",
+    features: [],
+    startDate: "",
+    endDate: "",
+  };
+
+  const [form, setForm] = useState(initialForm);
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
+  /* ========================================================
+      7️⃣ RENDER
+  ======================================================== */
 
   return (
     <StyledComponents className="flex-box col">
+      {/* ================= BUTTON SECTION ================= */}
       <CardSection title="Button 컴포넌트 예시">
         <Buttons className="flex-box">
           <Button bgColor={theme.colors.gray.black}>Filled</Button>
+
           <Button outlined color={theme.colors.primary.main} radius="half">
             Outlined
             <IoIosArrowForward size={14} />
           </Button>
+
           <Button disabled>Filled (Disabled)</Button>
+
           <Button outlined disabled radius={0}>
             Outlined (Disabled)
           </Button>
+
           <Button size="sm">수정</Button>
+
           <Button size="xsm" radius={3}>
             삭제
           </Button>
+
           <Button fullWidth>Full Width</Button>
         </Buttons>
       </CardSection>
+
+      {/* ================= LIST TABLE SECTION ================= */}
       <CardSection title="Table 컴포넌트 예시 - ListTable">
         <ListTable
           columns={listTableColumns}
@@ -151,8 +314,18 @@ const Components = () => {
           }}
         />
       </CardSection>
+
+      {/* ================= FORM TABLE SECTION ================= */}
       <CardSection title="Table 컴포넌트 예시 - FormTable">
         <FormTable fields={formFields} values={form} onChange={onChange} />
+        <div className="flex-box jc" style={{ marginTop: 20, gap: 10 }}>
+          <Button outlined color={theme.colors.palette.gray800} onClick={() => setForm(initialForm)}>
+            <IoIosRefresh /> 초기화
+          </Button>
+          <Button outlined onClick={() => console.log("검색", form)}>
+            검색
+          </Button>
+        </div>
       </CardSection>
     </StyledComponents>
   );

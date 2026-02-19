@@ -15,9 +15,7 @@ const CardSection = ({ title, children }) => {
 
 export default CardSection;
 
-const Section = styled.section`
-  /* border: 1px solid ${theme.colors.gray[100]}; */
-`;
+const Section = styled.section``;
 
 const Title = styled.h2`
   color: ${theme.colors.gray.black};
