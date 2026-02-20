@@ -2,10 +2,10 @@ import styled from "styled-components";
 
 export const Switch = styled.label`
   position: relative;
-
+  
   cursor: pointer;
 
-  input {
+  input[type="checkbox"] {
     position: absolute;
     opacity: 0;
     pointer-events: none;
@@ -36,6 +36,7 @@ export const Switch = styled.label`
     transition: 0.2s ease;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   }
+
 
   input:checked + span {
     background: ${({ theme }) => theme.colors.primary.main};

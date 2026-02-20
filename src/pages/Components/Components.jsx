@@ -4,6 +4,7 @@ import { IoIosArrowForward, IoIosRefresh } from "react-icons/io";
 import Button from "@/components/Button/Button";
 import CardSection from "@/components/Layout/CardSection";
 import { FormTable, ListTable } from "@/components/Table/Table";
+import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 
 import { theme } from "@/styles/theme";
@@ -39,8 +40,15 @@ const Components = () => {
 
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
 
+  // 드래그 앤 드롭 테이블의 행 데이터 (순서 변경 가능)
+  const [dndRows, setDndRows] = useState([
+    { id: "d1", order: 1, name: "메인 상단 배너", type: "메인" },
+    { id: "d2", order: 2, name: "메인 하단 배너", type: "메인" },
+    { id: "d3", order: 3, name: "이벤트 배너", type: "프로모션" },
+  ]);
+
   /* ========================================================
-      2️⃣ LIST TABLE 체크 로직
+    노출 상태 토글, 체크박스 토글 등의 액션 핸들러 정의
   ======================================================== */
 
   const toggleOne = (id) => {
@@ -54,7 +62,7 @@ const Components = () => {
   const allChecked = listTableRows.length > 0 && listTableCheckedIds.length === listTableRows.length;
 
   /* ========================================================
-      3️⃣ LIST TABLE 컬럼 정의
+    LIST TABLE 컬럼 정의
   ======================================================== */
 
   const listTableColumns = [
@@ -74,7 +82,7 @@ const Components = () => {
   ];
 
   /* ========================================================
-      4️⃣ LIST TABLE 액션
+      LIST TABLE 액션
   ======================================================== */
 
   const toggleExposureStatus = (id) => {
@@ -84,7 +92,7 @@ const Components = () => {
   };
 
   /* ========================================================
-      5️⃣ FORM TABLE 필드 정의
+      FORM TABLE 필드 정의
   ======================================================== */
 
   const getDateRange = (days) => {
@@ -221,10 +229,55 @@ const Components = () => {
     },
   ];
 
+  const column2Fields = [
+    {
+      key: "username",
+      label: "사용자명",
+      name: "username",
+      type: "input",
+      placeholder: "사용자명을 입력하세요",
+    },
+    {
+      key: "role",
+      label: "역할",
+      name: "role",
+      type: "select",
+      placeholder: "역할을 선택하세요",
+      options: [
+        { value: "admin", label: "관리자" },
+        { value: "editor", label: "편집자" },
+        { value: "viewer", label: "뷰어" },
+      ],
+    },
+    {
+      key: "bio",
+      label: "소개",
+      name: "bio",
+      type: "textarea",
+      placeholder: "자기소개를 입력하세요",
+      colSpan: 3,
+    },
+    {
+      key: "searchFilter",
+      label: "검색 필터",
+      type: "select-input",
+      selectName: "searchCategory",
+      selectPlaceholder: "카테고리 선택",
+      selectOptions: [
+        { value: "name", label: "배너명" },
+        { value: "code", label: "배너코드" },
+      ],
+      inputName: "searchValue",
+      inputPlaceholder: "검색어를 입력하세요",
+      colSpan: 3,
+    },
+  ];
+
   /* ========================================================
-      6️⃣ FORM STATE
+      FORM STATE
   ======================================================== */
 
+  // 폼 테이블의 폼 상태 (form 객체로 관리) - FormTable 컴포넌트에 전달
   const initialForm = {
     bannerGroupName: "",
     bannerGroupDesc: "",
@@ -237,8 +290,20 @@ const Components = () => {
     endDate: "",
   };
 
+  // 폼 테이블의 폼 상태 (form 객체로 관리) - FormTable 컴포넌트에 전달
   const [form, setForm] = useState(initialForm);
 
+  // 컬럼 2개인 테이블의 폼 상태 (colSpan 필드도 포함) - FormTable 컴포넌트에 전달
+  const initialColumn2Form = {
+    username: "",
+    role: "",
+    bio: "",
+  };
+
+  // 컬럼 2개인 테이블의 폼 상태 (colSpan 필드도 포함)
+  const [column2Form, setColumn2Form] = useState(initialColumn2Form);
+
+  // 폼 테이블의 onChange 핸들러 (모든 필드 업데이트) - FormTable 컴포넌트에 전달
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -247,8 +312,17 @@ const Components = () => {
     }));
   };
 
+  // 컬럼 2개인 테이블의 onChange 핸들러 (colSpan 필드도 함께 업데이트)
+  const onColumn2Change = (e) => {
+    const { name, value } = e.target;
+    setColumn2Form((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   /* ========================================================
-      7️⃣ RENDER
+      RENDER
   ======================================================== */
 
   return (
@@ -326,6 +400,16 @@ const Components = () => {
             검색
           </Button>
         </div>
+      </CardSection>
+
+      {/* ================= COLUMN 2 TABLE SECTION ================= */}
+      <CardSection title="컬럼 2개인 Table 컴포넌트 예시">
+        <FormTable columns={2} fields={column2Fields} values={column2Form} onChange={onColumn2Change} />
+      </CardSection>
+
+      {/* ================= DRAG & DROP LIST SECTION ================= */}
+      <CardSection title="드래그 앤 드롭이 가능한 리스트 예시">
+        <DragDropList items={dndRows} onChange={setDndRows} />
       </CardSection>
     </StyledComponents>
   );

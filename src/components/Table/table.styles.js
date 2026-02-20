@@ -33,6 +33,7 @@ export const StyledTable = styled.table`
   ${({ $variant }) =>
     $variant === "form" &&
     css`
+      border-top: 1px solid #dedcec;
       th,
       td {
         padding: 12px 24px;
@@ -55,6 +56,7 @@ export const Required = styled.span`
   color: ${({ theme }) => theme.colors.error.main};
 `;
 
+// 셀렉트 스타일
 export const SelectInputWrapper = styled.div`
   display: flex;
   gap: 10px;
@@ -67,6 +69,7 @@ export const SelectInputWrapper = styled.div`
   }
 `;
 
+// 체크박스, 라디오 버튼 스타일
 export const ChoiceInput = styled.div`
   display: flex;
   gap: 20px;
@@ -81,6 +84,7 @@ export const ChoiceInput = styled.div`
   }
 `;
 
+// 날짜 범위 선택 스타일
 export const DateRangeWrapper = styled.div`
   display: flex;
   gap: 10px;
@@ -124,6 +128,7 @@ export const DateRangeWrapper = styled.div`
   }
 `;
 
+// 날짜 입력 스타일
 export const DateInputWrapper = styled.div`
   flex: 1;
   position: relative;
