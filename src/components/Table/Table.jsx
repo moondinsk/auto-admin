@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { MdCalendarToday } from "react-icons/md";
+import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from "@/constants/pagination";
 import {
   Required,
   StyledTable,
@@ -11,6 +12,9 @@ import {
   ChoiceInput,
   DateRangeWrapper,
   DateInputWrapper,
+  ListPagination,
+  PerPageControl,
+  PageButtons,
 } from "./table.styles";
 
 /* =========================================================
@@ -32,7 +36,39 @@ const Table = ({ variant = "list", children, className }) => {
  *  - rows: 실제 데이터 배열
  *  - renderCell: 셀 커스텀 렌더링 옵션 (없으면 row[col.key] 출력)
  * ========================================================= */
-export function ListTable({ columns, rows, rowKey = "id", renderCell }) {
+export function ListTable({
+  columns,
+  rows,
+  rowKey = "id",
+  renderCell,
+  pagination = false,
+  pageSizeOptions = PAGE_SIZE_OPTIONS,
+  defaultPageSize = DEFAULT_PAGE_SIZE,
+}) {
+  // 페이지네이션 상태: 선택된 페이지 크기, 현재 페이지
+  const [selectedPageSize, setSelectedPageSize] = useState(
+    pageSizeOptions.find((option) => option.value === defaultPageSize) || pageSizeOptions[0],
+  );
+
+  // 현재 페이지 상태 (1부터 시작)
+  const [currentPage, setCurrentPage] = useState(1);
+
+  /* =====================================================
+      페이지네이션 계산
+  ===================================================== */
+  const pageSize = selectedPageSize?.value || defaultPageSize || 10;
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  // 현재 페이지에 해당하는 데이터 슬라이스 (useMemo로 최적화)
+  const paginatedRows = useMemo(() => {
+    const start = (safeCurrentPage - 1) * pageSize;
+    return rows.slice(start, start + pageSize);
+  }, [rows, safeCurrentPage, pageSize]);
+
+  // pagination이 true일 때는 paginatedRows, 아니면 전체 rows 렌더링
+  const rowsToRender = pagination ? paginatedRows : rows;
+
   const renderRow = (row) => (
     <tr key={row[rowKey]}>
       {columns.map((col) => (
@@ -44,21 +80,89 @@ export function ListTable({ columns, rows, rowKey = "id", renderCell }) {
   );
 
   return (
-    <Table variant="list">
-      {/* ---------- 2-1) 헤더 영역 ---------- */}
-      <thead>
-        <tr>
-          {columns.map((col) => (
-            <th key={col.key} style={{ width: col.width, textAlign: col.align || "center" }}>
-              {col.header}
-            </th>
-          ))}
-        </tr>
-      </thead>
+    <>
+      <Table variant="list">
+        {/* ---------- 2-1) 헤더 영역 ---------- */}
+        <thead>
+          <tr>
+            {columns.map((col) => (
+              <th key={col.key} style={{ width: col.width, textAlign: col.align || "center" }}>
+                {col.header}
+              </th>
+            ))}
+          </tr>
+        </thead>
 
-      {/* ---------- 2-2) 바디(데이터) 영역 ---------- */}
-      <tbody>{rows.map((row) => renderRow(row))}</tbody>
-    </Table>
+        {/* ---------- 2-2) 바디(데이터) 영역 ---------- */}
+        <tbody>
+          {rowsToRender.length > 0 ? (
+            rowsToRender.map((row) => renderRow(row))
+          ) : (
+            <tr>
+              <td colSpan={columns.length} style={{ textAlign: "center" }}>
+                데이터가 없습니다
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </Table>
+      {pagination && (
+        <ListPagination>
+          <PerPageControl>
+            <Select
+              className="custom-select"
+              classNamePrefix="react-select"
+              options={pageSizeOptions}
+              value={selectedPageSize}
+              isSearchable={false}
+              onChange={(option) => {
+                setSelectedPageSize(
+                  option || pageSizeOptions.find((item) => item.value === defaultPageSize) || pageSizeOptions[0],
+                );
+                setCurrentPage(1);
+              }}
+            />
+            <span className="label">개씩 보기</span>
+          </PerPageControl>
+          <PageButtons>
+            <button type="button" onClick={() => setCurrentPage(1)} disabled={safeCurrentPage === 1}>
+              처음
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={safeCurrentPage === 1}>
+              이전
+            </button>
+
+            {Array.from({ length: totalPages }, (_, index) => {
+              const page = index + 1;
+              return (
+                <button
+                  key={page}
+                  type="button"
+                  className={safeCurrentPage === page ? "is-active" : ""}
+                  onClick={() => setCurrentPage(page)}>
+                  {page}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={safeCurrentPage === totalPages}>
+              다음
+            </button>
+
+            <button type="button" onClick={() => setCurrentPage(totalPages)} disabled={safeCurrentPage === totalPages}>
+              마지막
+            </button>
+          </PageButtons>
+        </ListPagination>
+      )}
+    </>
   );
 }
 
@@ -232,6 +336,8 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
 
     /* ---------- 3-5-6) Date Range (시작~종료 + 빠른 버튼) ---------- */
     if (f.type === "date-range") {
+      const isAllDateRange = !values[f.startName] && !values[f.endName];
+
       return (
         <DateRangeWrapper>
           {/* 날짜 입력 2개(시작/종료) */}
@@ -266,7 +372,15 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
             {f.dateButtons?.map((btn) => (
               <button
                 key={btn.value}
-                className={`${activeDateButton === btn.value ? "is-active" : ""}`}
+                className={`${
+                  isAllDateRange
+                    ? btn.value === "all"
+                      ? "is-active"
+                      : ""
+                    : activeDateButton === btn.value
+                      ? "is-active"
+                      : ""
+                }`}
                 type="button"
                 onClick={() => handleDateButtonClick(btn)}>
                 {btn.label}

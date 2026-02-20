@@ -37,6 +37,11 @@ function Root() {
         <ConfirmModal
           title={confirmStore.title}
           message={confirmStore.message}
+          confirmText={confirmStore.confirmText}
+          cancelText={confirmStore.cancelText}
+          successToastMessage={confirmStore.successToastMessage}
+          contentComponent={confirmStore.contentComponent}
+          contentProps={confirmStore.contentProps}
           onConfirm={() => confirmStore.confirm()}
           onCancel={() => confirmStore.cancel()}
         />

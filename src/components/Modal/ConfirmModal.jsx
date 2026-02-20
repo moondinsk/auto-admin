@@ -7,10 +7,13 @@ import { Dim, ModalBody, ModalFooter, ModalHeader, ModalPanel } from "./Modal.st
 const ConfirmModal = ({
   title = "",
   message = "",
+  contentComponent: ContentComponent,
+  contentProps = {},
   onConfirm,
   onCancel,
   confirmText = "확인",
   cancelText = "취소",
+  successToastMessage = "확인되었습니다.",
 }) => {
   const handleCancel = () => {
     onCancel?.();
@@ -18,14 +21,16 @@ const ConfirmModal = ({
 
   const handleConfirm = () => {
     onConfirm?.();
-    toastStore.show("확인되었습니다.");
+    toastStore.show(successToastMessage);
   };
+
+  const renderedContent = ContentComponent ? <ContentComponent {...contentProps} /> : message;
 
   return (
     <Dim onClick={handleCancel}>
       <ModalPanel onClick={(e) => e.stopPropagation()}>
         {title && <ModalHeader>{title}</ModalHeader>}
-        <ModalBody>{message}</ModalBody>
+        <ModalBody>{renderedContent}</ModalBody>
         <ModalFooter>
           <Button outlined color={theme.colors.palette.gray800} onClick={handleCancel}>
             {cancelText}

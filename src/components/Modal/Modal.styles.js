@@ -12,8 +12,18 @@ export const Dim = styled.div`
 `;
 
 export const ModalPanel = styled.div`
-  width: 100%;
-  max-width: 520px;
+  width: ${({ $width }) => {
+    if (!$width) return "100%";
+    return typeof $width === "number" ? `${$width}px` : $width;
+  }};
+  max-width: ${({ $width }) => {
+    if (!$width) return "520px";
+    return typeof $width === "number" ? `${$width}px` : $width;
+  }};
+  max-height: ${({ $height }) => {
+    if (!$height) return "auto";
+    return typeof $height === "number" ? `${$height}px` : $height;
+  }};
   border-radius: 12px;
   background: ${({ theme }) => theme.colors.gray.white};
   border: 1px solid ${({ theme }) => theme.colors.border.default};

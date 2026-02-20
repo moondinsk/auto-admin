@@ -8,11 +8,16 @@ const Modal = ({
   title = "",
   message = "",
   children,
+  contentComponent: ContentComponent,
+  contentProps = {},
+  width,
+  height,
   onClose,
   onConfirm,
   onCancel,
   confirmText = "확인",
-  cancelText = "취소",
+  cancelText = "",
+  successToastMessage = "",
 }) => {
   const handleCancel = () => {
     onCancel?.();
@@ -21,19 +26,27 @@ const Modal = ({
 
   const handleConfirm = () => {
     onConfirm?.();
-    toastStore.show("확인되었습니다.");
+
+    if (successToastMessage) {
+      toastStore.show(successToastMessage);
+    }
+
     onClose?.();
   };
 
+  const renderedContent = children || (ContentComponent ? <ContentComponent {...contentProps} /> : message);
+
   return (
     <Dim onClick={handleCancel}>
-      <ModalPanel onClick={(e) => e.stopPropagation()}>
+      <ModalPanel $width={width} $height={height} onClick={(e) => e.stopPropagation()}>
         {title && <ModalHeader>{title}</ModalHeader>}
-        <ModalBody>{children || message}</ModalBody>
+        <ModalBody>{renderedContent}</ModalBody>
         <ModalFooter>
-          <Button outlined color={theme.colors.palette.gray800} onClick={handleCancel}>
-            {cancelText}
-          </Button>
+          {cancelText && (
+            <Button outlined color={theme.colors.palette.gray800} onClick={handleCancel}>
+              {cancelText}
+            </Button>
+          )}
           <Button onClick={handleConfirm}>{confirmText}</Button>
         </ModalFooter>
       </ModalPanel>

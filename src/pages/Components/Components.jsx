@@ -1,21 +1,82 @@
 import React, { useMemo, useState } from "react";
 import { IoIosArrowForward, IoIosRefresh } from "react-icons/io";
-import Select from "react-select";
+import { useSearchParams } from "react-router-dom";
 
 import Button from "@/components/Button/Button";
 import CardSection from "@/components/Layout/CardSection";
 import { FormTable, ListTable } from "@/components/Table/Table";
 
 import DragDropList from "@/components/DragDropList/DragDropList";
+import GuideExampleContent from "@/components/Modal/GuideExampleContent";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
-import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from "@/constants/pagination";
+import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
 import { confirmStore, modalStore } from "@/store";
 
 import { theme } from "@/styles/theme";
 import { StyledComponents, Buttons } from "./Components.styles";
-import { ListPagination, PerPageControl, PageButtons } from "@/components/Table/table.styles";
+
+const initialForm = {
+  bannerGroupName: "",
+  bannerGroupDesc: "",
+  searchKeyword: "",
+  searchCategory: "",
+  searchValue: "",
+  exposureStatus: "",
+  features: [],
+  startDate: "",
+  endDate: "",
+};
+
+// URLSearchParams에서 폼 상태로 변환하는 함수 - 초기 폼 상태를 URL 파라미터에서 가져올 때 사용
+const parseSearchParamsToForm = (searchParams) => {
+  const exposureStatusParam = searchParams.get("exposureStatus");
+
+  return {
+    ...initialForm,
+    bannerGroupName: searchParams.get("bannerGroupName") || "",
+    bannerGroupDesc: searchParams.get("bannerGroupDesc") || "",
+    searchKeyword: searchParams.get("searchKeyword") || "",
+    searchCategory: searchParams.get("searchCategory") || "",
+    searchValue: searchParams.get("searchValue") || "",
+    exposureStatus: exposureStatusParam === "true" ? true : exposureStatusParam === "false" ? false : "",
+    features: searchParams.get("features")?.split(",").filter(Boolean) || [],
+    startDate: searchParams.get("startDate") || "",
+    endDate: searchParams.get("endDate") || "",
+  };
+};
+
+// 폼 상태에서 URLSearchParams 객체를 생성하는 함수 - 검색 버튼 클릭 시 URL 업데이트할 때 사용
+const createSearchParamsFromForm = (form) => {
+  const params = new URLSearchParams();
+  [
+    "bannerGroupName",
+    "bannerGroupDesc",
+    "searchKeyword",
+    "searchCategory",
+    "searchValue",
+    "startDate",
+    "endDate",
+  ].forEach((key) => {
+    if (form[key]) {
+      params.set(key, form[key]);
+    }
+  });
+
+  if (form.exposureStatus !== "") {
+    params.set("exposureStatus", String(form.exposureStatus));
+  }
+
+  if (Array.isArray(form.features) && form.features.length > 0) {
+    params.set("features", form.features.join(","));
+  }
+
+  return params;
+};
 
 const Components = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSearchForm = useMemo(() => parseSearchParamsToForm(searchParams), [searchParams]);
+
   /* ========================================================
       1️⃣ LIST TABLE STATE (배너 목록 데이터)
   ======================================================== */
@@ -29,18 +90,13 @@ const Components = () => {
       exposureStatus: index % 2 === 0,
       imageCount: (index % 5) + 1,
       effect: index % 2 === 0 ? "슬라이드" : "페이드",
-      clickCount: Math.floor(Math.random() * 200),
+      clickCount: (index + 3) * 11,
       bannerCode: `B${String(index + 3).padStart(7, "0")}`,
     })),
   ]);
 
+  // 체크된 행의 ID 목록 상태 - 체크박스 토글 시 업데이트되어 선택된 행 관리
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
-
-  const [selectedPageSize, setSelectedPageSize] = useState(
-    PAGE_SIZE_OPTIONS.find((option) => option.value === DEFAULT_PAGE_SIZE) || PAGE_SIZE_OPTIONS[0],
-  );
-
-  const [currentPage, setCurrentPage] = useState(1);
 
   // 드래그 앤 드롭 테이블의 행 데이터 (순서 변경 가능)
   const [dndRows, setDndRows] = useState([
@@ -62,15 +118,6 @@ const Components = () => {
   };
 
   const allChecked = listTableRows.length > 0 && listTableCheckedIds.length === listTableRows.length;
-
-  const pageSize = selectedPageSize?.value || DEFAULT_PAGE_SIZE;
-  const totalPages = Math.max(1, Math.ceil(listTableRows.length / pageSize));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-
-  const paginatedRows = useMemo(() => {
-    const start = (safeCurrentPage - 1) * pageSize;
-    return listTableRows.slice(start, start + pageSize);
-  }, [listTableRows, safeCurrentPage, pageSize]);
 
   /* ========================================================
     LIST TABLE 컬럼 정의
@@ -289,20 +336,7 @@ const Components = () => {
   ======================================================== */
 
   // 폼 테이블의 폼 상태 (form 객체로 관리) - FormTable 컴포넌트에 전달
-  const initialForm = {
-    bannerGroupName: "",
-    bannerGroupDesc: "",
-    searchKeyword: "",
-    searchCategory: "",
-    searchValue: "",
-    exposureStatus: "",
-    features: [],
-    startDate: "",
-    endDate: "",
-  };
-
-  // 폼 테이블의 폼 상태 (form 객체로 관리) - FormTable 컴포넌트에 전달
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(initialSearchForm);
 
   // 컬럼 2개인 테이블의 폼 상태 (colSpan 필드도 포함) - FormTable 컴포넌트에 전달
   const initialColumn2Form = {
@@ -332,45 +366,83 @@ const Components = () => {
     }));
   };
 
-  // 데이터 전달이 필요한 모달 열기 예시
-  const openDataModal = () => {
-    modalStore.open(
-      <div>
-        <p>저장된 설정이 배너 운영 화면에 즉시 반영됩니다.</p>
-        <p>계속 진행하시겠습니까?</p>
-      </div>,
-      {
-        title: "배너 설정 저장",
-        confirmText: "확인",
-        cancelText: "취소",
-        onConfirm: () => console.log("모달 확인"),
-        onCancel: () => console.log("모달 취소"),
-      },
+  const handleSearch = () => {
+    setSearchParams(createSearchParamsFromForm(form));
+    setListTableCheckedIds([]);
+  };
+
+  const handleResetSearch = () => {
+    setForm(initialForm);
+    setSearchParams(new URLSearchParams());
+    setListTableCheckedIds([]);
+  };
+
+  // 관리 버튼/등록 버튼에서 공통으로 사용하는 등록 모달 열기
+  const openRegisterModal = (row) => {
+    const normalizeEffect = (effect) => {
+      const normalized = String(effect || "")
+        .trim()
+        .toLowerCase();
+
+      if (normalized === "슬라이드" || normalized === "slide" || normalized === "main") {
+        return "slide";
+      }
+
+      if (normalized === "페이드" || normalized === "fade" || normalized === "event") {
+        return "fade";
+      }
+
+      return "slide";
+    };
+
+    const source = row || {
+      groupName: "신규 배너",
+      effect: "slide",
+      bannerCode: "",
+    };
+
+    const modalData = {
+      ...source,
+      effect: normalizeEffect(source.effect),
+    };
+
+    modalStore.openByPayload(MODAL_PAYLOAD.REGISTER_MODAL(modalData));
+  };
+
+  const openGuideModal = () => {
+    modalStore.openByPayload(
+      MODAL_PAYLOAD.GUIDE_MODAL({
+        component: GuideExampleContent,
+        data: {
+          title: "배너 운영 가이드",
+          description: "배너 등록 전 노출 효과와 기간을 먼저 확인하세요.",
+          items: ["노출 기간 확인", "배너 효과 확인", "저장 후 미리보기 점검"],
+        },
+      }),
     );
   };
 
-  // 확인 모달 열기 예시 (Promise 기반으로 결과 받기)
-  const openConfirmModal = async () => {
-    const confirmed = await confirmStore.open({
-      title: "삭제 확인",
-      message: "선택한 항목을 삭제하시겠습니까?",
-    });
+  // 삭제 모달 예시
+  const openDeleteModal = async () => {
+    const confirmed = await confirmStore.openByPayload(
+      CONFIRM_PAYLOAD.DELETE_CONFIRM(
+        {
+          type: "BANNER_DELETE",
+          selectedIds: listTableCheckedIds,
+        },
+        "선택한 항목을 삭제하시겠습니까?",
+      ),
+    );
 
     console.log(confirmed ? "확인 선택" : "취소 선택");
   };
 
-  // 알림 모달 열기 예시 (확인 버튼만 있는 모달)
+  // 알림 모달 열기 예시
   const openAlertModal = () => {
-    modalStore.open(
-      <div>
-        <p>요청하신 작업이 정상적으로 처리되었습니다.</p>
-      </div>,
-      {
-        title: "알림",
-        confirmText: "확인",
-        cancelText: "닫기",
-        onConfirm: () => console.log("알림 확인"),
-      },
+    modalStore.openByPayload(
+      MODAL_PAYLOAD.ALERT_MODAL({
+        message: "요청하신 작업이 정상적으로 처리되었습니다.",
+      }),
     );
   };
 
@@ -409,8 +481,9 @@ const Components = () => {
       {/* ================= LIST TABLE SECTION ================= */}
       <CardSection title="Table 컴포넌트 예시 - ListTable">
         <ListTable
+          pagination
           columns={listTableColumns}
-          rows={paginatedRows}
+          rows={listTableRows}
           rowKey="id"
           renderCell={(row, col) => {
             if (col.key === "check") {
@@ -435,7 +508,7 @@ const Components = () => {
 
             if (col.key === "manage") {
               return (
-                <Button size="xsm" radius={3} onClick={() => console.log("관리", row.id)}>
+                <Button size="xsm" radius={3} onClick={() => openRegisterModal(row)}>
                   관리
                 </Button>
               );
@@ -444,63 +517,16 @@ const Components = () => {
             return row[col.key];
           }}
         />
-        {/* 페이징  */}
-        <ListPagination>
-          <PerPageControl>
-            <Select
-              className="custom-select"
-              classNamePrefix="react-select"
-              options={PAGE_SIZE_OPTIONS}
-              value={selectedPageSize}
-              isSearchable={false}
-              onChange={(option) => {
-                setSelectedPageSize(
-                  option || PAGE_SIZE_OPTIONS.find((item) => item.value === DEFAULT_PAGE_SIZE) || PAGE_SIZE_OPTIONS[0],
-                );
-                setCurrentPage(1);
-              }}
-            />
-            <span className="label">개씩 보기</span>
-          </PerPageControl>
-          <PageButtons>
-            <button
-              type="button"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={safeCurrentPage === 1}>
-              이전
-            </button>
-
-            {Array.from({ length: totalPages }, (_, index) => {
-              const page = index + 1;
-              return (
-                <button
-                  key={page}
-                  type="button"
-                  className={safeCurrentPage === page ? "is-active" : ""}
-                  onClick={() => setCurrentPage(page)}>
-                  {page}
-                </button>
-              );
-            })}
-
-            <button
-              type="button"
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={safeCurrentPage === totalPages}>
-              다음
-            </button>
-          </PageButtons>
-        </ListPagination>
       </CardSection>
 
       {/* ================= FORM TABLE SECTION ================= */}
       <CardSection title="Table 컴포넌트 예시 - FormTable">
         <FormTable fields={formFields} values={form} onChange={onChange} />
         <div className="flex-box jc" style={{ marginTop: 20, gap: 10 }}>
-          <Button outlined color={theme.colors.palette.gray800} onClick={() => setForm(initialForm)}>
+          <Button outlined color={theme.colors.palette.gray800} onClick={handleResetSearch}>
             <IoIosRefresh /> 초기화
           </Button>
-          <Button outlined onClick={() => console.log("검색", form)}>
+          <Button outlined onClick={handleSearch}>
             검색
           </Button>
         </div>
@@ -518,15 +544,20 @@ const Components = () => {
 
       {/* ================= MODAL SECTION ================= */}
       <CardSection title="모달 예시">
-        <Button outlined onClick={openDataModal}>
-          데이터 전달 모달 열기
-        </Button>
+        <div className="flex-box" style={{ gap: 10 }}>
+          <Button outlined onClick={() => openRegisterModal()}>
+            등록 모달 열기
+          </Button>
+          <Button outlined onClick={openGuideModal}>
+            가이드 모달 열기
+          </Button>
+        </div>
       </CardSection>
 
       {/* CONFIRM MODAL SECTION */}
-      <CardSection title="확인 모달 예시">
-        <Button outlined onClick={openConfirmModal}>
-          확인 모달 열기
+      <CardSection title="삭제 모달 예시">
+        <Button outlined onClick={openDeleteModal}>
+          삭제 모달 열기
         </Button>
       </CardSection>
 

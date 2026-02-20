@@ -22,6 +22,25 @@ class ModalStore {
     this.props = props;
   }
 
+  openByPayload(payload) {
+    if (!payload) {
+      return;
+    }
+
+    const { component: ContentComponent, modalProps = {} } = payload;
+    const { contentProps = {}, data, depths, ...restModalProps } = modalProps;
+
+    this.open(null, {
+      ...restModalProps,
+      contentComponent: ContentComponent,
+      contentProps: {
+        ...contentProps,
+        data,
+        depths,
+      },
+    });
+  }
+
   close() {
     this.isOpen = false;
     this.content = null;
