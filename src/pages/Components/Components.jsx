@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { IoIosArrowForward, IoIosRefresh } from "react-icons/io";
+import Select from "react-select";
 
 import Button from "@/components/Button/Button";
 import CardSection from "@/components/Layout/CardSection";
 import { FormTable, ListTable } from "@/components/Table/Table";
+
 import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
+import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from "@/constants/pagination";
 import { confirmStore, modalStore } from "@/store";
 
 import { theme } from "@/styles/theme";
 import { StyledComponents, Buttons } from "./Components.styles";
+import { ListPagination, PerPageControl, PageButtons } from "@/components/Table/table.styles";
 
 const Components = () => {
   /* ========================================================
@@ -17,29 +21,26 @@ const Components = () => {
   ======================================================== */
 
   const [listTableRows, setListTableRows] = useState([
-    {
-      id: "b1",
-      no: 1,
-      groupName: "메인 상단 배너",
-      exposureStatus: true,
-      imageCount: 3,
-      effect: "슬라이드",
-      clickCount: 120,
-      bannerCode: "B0000001",
-    },
-    {
-      id: "b2",
-      no: 2,
-      groupName: "메인 하단 배너",
-      exposureStatus: false,
-      imageCount: 1,
-      effect: "페이드",
-      clickCount: 32,
-      bannerCode: "B0000002",
-    },
+    // 데이터 20개 추가
+    ...Array.from({ length: 15 }, (_, index) => ({
+      id: `b${index + 3}`,
+      no: index + 3,
+      groupName: `배너 그룹 ${index + 3}`,
+      exposureStatus: index % 2 === 0,
+      imageCount: (index % 5) + 1,
+      effect: index % 2 === 0 ? "슬라이드" : "페이드",
+      clickCount: Math.floor(Math.random() * 200),
+      bannerCode: `B${String(index + 3).padStart(7, "0")}`,
+    })),
   ]);
 
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
+
+  const [selectedPageSize, setSelectedPageSize] = useState(
+    PAGE_SIZE_OPTIONS.find((option) => option.value === DEFAULT_PAGE_SIZE) || PAGE_SIZE_OPTIONS[0],
+  );
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   // 드래그 앤 드롭 테이블의 행 데이터 (순서 변경 가능)
   const [dndRows, setDndRows] = useState([
@@ -61,6 +62,15 @@ const Components = () => {
   };
 
   const allChecked = listTableRows.length > 0 && listTableCheckedIds.length === listTableRows.length;
+
+  const pageSize = selectedPageSize?.value || DEFAULT_PAGE_SIZE;
+  const totalPages = Math.max(1, Math.ceil(listTableRows.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  const paginatedRows = useMemo(() => {
+    const start = (safeCurrentPage - 1) * pageSize;
+    return listTableRows.slice(start, start + pageSize);
+  }, [listTableRows, safeCurrentPage, pageSize]);
 
   /* ========================================================
     LIST TABLE 컬럼 정의
@@ -400,7 +410,7 @@ const Components = () => {
       <CardSection title="Table 컴포넌트 예시 - ListTable">
         <ListTable
           columns={listTableColumns}
-          rows={listTableRows}
+          rows={paginatedRows}
           rowKey="id"
           renderCell={(row, col) => {
             if (col.key === "check") {
@@ -424,12 +434,63 @@ const Components = () => {
             }
 
             if (col.key === "manage") {
-              return <Button size="xsm" radius={3} onClick={() => console.log("관리", row.id)}>관리</Button>;
+              return (
+                <Button size="xsm" radius={3} onClick={() => console.log("관리", row.id)}>
+                  관리
+                </Button>
+              );
             }
 
             return row[col.key];
           }}
         />
+        {/* 페이징  */}
+        <ListPagination>
+          <PerPageControl>
+            <Select
+              className="custom-select"
+              classNamePrefix="react-select"
+              options={PAGE_SIZE_OPTIONS}
+              value={selectedPageSize}
+              isSearchable={false}
+              onChange={(option) => {
+                setSelectedPageSize(
+                  option || PAGE_SIZE_OPTIONS.find((item) => item.value === DEFAULT_PAGE_SIZE) || PAGE_SIZE_OPTIONS[0],
+                );
+                setCurrentPage(1);
+              }}
+            />
+            <span className="label">개씩 보기</span>
+          </PerPageControl>
+          <PageButtons>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={safeCurrentPage === 1}>
+              이전
+            </button>
+
+            {Array.from({ length: totalPages }, (_, index) => {
+              const page = index + 1;
+              return (
+                <button
+                  key={page}
+                  type="button"
+                  className={safeCurrentPage === page ? "is-active" : ""}
+                  onClick={() => setCurrentPage(page)}>
+                  {page}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={safeCurrentPage === totalPages}>
+              다음
+            </button>
+          </PageButtons>
+        </ListPagination>
       </CardSection>
 
       {/* ================= FORM TABLE SECTION ================= */}

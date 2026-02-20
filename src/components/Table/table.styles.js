@@ -28,7 +28,7 @@ export const StyledTable = styled.table`
         border-bottom: 1px solid ${theme.colors.palette.gray100};
       }
       button {
-        margin:0 auto;
+        margin: 0 auto;
       }
     `}
 
@@ -54,6 +54,7 @@ export const StyledTable = styled.table`
     `}
 `;
 
+// 필수 입력 표시 스타일
 export const Required = styled.span`
   margin-left: 4px;
   color: ${({ theme }) => theme.colors.error.main};
@@ -179,5 +180,61 @@ export const DateInputWrapper = styled.div`
     font-size: 16px;
     color: #666;
     pointer-events: none;
+  }
+`;
+
+// 페이지네이션 스타일
+export const ListPagination = styled.div`
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+`;
+
+// 페이지당 항목 수 선택 스타일
+export const PerPageControl = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .custom-select {
+    width: 120px;
+  }
+
+  .label {
+    color: ${({ theme }) => theme.colors.text.secondary};
+    font-size: 13px;
+  }
+`;
+
+// 페이지네이션 버튼 스타일
+export const PageButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  button {
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: 6px;
+    background: ${({ theme }) => theme.colors.gray.white};
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0 10px;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    &.is-active {
+      border-color: ${({ theme }) => theme.colors.primary.main};
+      background: ${({ theme }) => theme.colors.primary.main};
+      color: ${({ theme }) => theme.colors.text.inverse};
+    }
   }
 `;

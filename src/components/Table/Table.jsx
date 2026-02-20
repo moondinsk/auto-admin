@@ -49,10 +49,7 @@ export function ListTable({ columns, rows, rowKey = "id", renderCell }) {
       <thead>
         <tr>
           {columns.map((col) => (
-            <th
-              key={col.key}
-              style={{ width: col.width, textAlign: col.align || "center" }}
-            >
+            <th key={col.key} style={{ width: col.width, textAlign: col.align || "center" }}>
               {col.header}
             </th>
           ))}
@@ -139,10 +136,7 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
             name={f.selectName}
             options={f.selectOptions}
             placeholder={f.selectPlaceholder}
-            value={
-              f.selectOptions?.find((opt) => opt.value === values[f.selectName]) ||
-              null
-            }
+            value={f.selectOptions?.find((opt) => opt.value === values[f.selectName]) || null}
             onChange={(selectedOption) =>
               onChange({
                 target: {
@@ -274,8 +268,7 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
                 key={btn.value}
                 className={`${activeDateButton === btn.value ? "is-active" : ""}`}
                 type="button"
-                onClick={() => handleDateButtonClick(btn)}
-              >
+                onClick={() => handleDateButtonClick(btn)}>
                 {btn.label}
               </button>
             ))}
@@ -286,13 +279,7 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
 
     /* ---------- 3-5-7) 기본 Input (text) ---------- */
     return (
-      <input
-        name={f.name}
-        value={values[f.name] || ""}
-        onChange={onChange}
-        placeholder={f.placeholder}
-        type="text"
-      />
+      <input name={f.name} value={values[f.name] || ""} onChange={onChange} placeholder={f.placeholder} type="text" />
     );
   };
 
@@ -345,9 +332,7 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
         {formRows.map((rowFields, rowIndex) => (
           <tr key={`row-${rowIndex}`}>
             {rowFields.map(({ field, tdColSpan }, fieldIndex) => (
-              <React.Fragment
-                key={field.key || field.name || `${rowIndex}-${fieldIndex}`}
-              >
+              <React.Fragment key={field.key || field.name || `${rowIndex}-${fieldIndex}`}>
                 <th>
                   {field.label}
                   {field.required && <Required>*</Required>}
