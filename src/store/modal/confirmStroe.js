@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 
 class ConfirmStore {
   isOpen = false;
@@ -7,7 +7,13 @@ class ConfirmStore {
   resolve = null;
 
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(
+      this,
+      {
+        resolve: observable.ref,
+      },
+      { autoBind: true },
+    );
   }
 
   open({ title = "", message = "" }) {

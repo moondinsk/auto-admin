@@ -1,5 +1,5 @@
 import React from "react";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { DndItem, DndList, DndMainText, DndSubText } from "./DragDropList.styles";
 
 const reorderItems = (items, sourceIndex, destinationIndex) => {
@@ -27,11 +27,20 @@ const DragDropList = ({ items = [], onChange }) => {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="drag-drop-list-ul" direction="vertical">
+      <Droppable
+        droppableId="drag-drop-list-ul"
+        direction="vertical"
+        isDropDisabled={false}
+        isCombineEnabled={false}
+        ignoreContainerClipping={false}>
         {(dropProvided) => (
           <DndList ref={dropProvided.innerRef} {...dropProvided.droppableProps}>
             {items.map((item, index) => (
-              <Draggable key={String(item.id)} draggableId={String(item.id)} index={index}>
+              <Draggable
+                key={String(item.id)}
+                draggableId={String(item.id)}
+                index={index}
+                isDragDisabled={false}>
                 {(dragProvided) => (
                   <DndItem
                     ref={dragProvided.innerRef}

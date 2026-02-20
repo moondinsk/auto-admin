@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 
 class ModalStore {
   isOpen = false;
@@ -6,7 +6,14 @@ class ModalStore {
   props = {};
 
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(
+      this,
+      {
+        content: observable.ref,
+        props: observable.ref,
+      },
+      { autoBind: true },
+    );
   }
 
   open(content, props = {}) {

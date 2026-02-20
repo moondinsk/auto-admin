@@ -6,6 +6,7 @@ import CardSection from "@/components/Layout/CardSection";
 import { FormTable, ListTable } from "@/components/Table/Table";
 import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
+import { confirmStore, modalStore } from "@/store";
 
 import { theme } from "@/styles/theme";
 import { StyledComponents, Buttons } from "./Components.styles";
@@ -321,6 +322,48 @@ const Components = () => {
     }));
   };
 
+  // 데이터 전달이 필요한 모달 열기 예시
+  const openDataModal = () => {
+    modalStore.open(
+      <div>
+        <p>저장된 설정이 배너 운영 화면에 즉시 반영됩니다.</p>
+        <p>계속 진행하시겠습니까?</p>
+      </div>,
+      {
+        title: "배너 설정 저장",
+        confirmText: "확인",
+        cancelText: "취소",
+        onConfirm: () => console.log("모달 확인"),
+        onCancel: () => console.log("모달 취소"),
+      },
+    );
+  };
+
+  // 확인 모달 열기 예시 (Promise 기반으로 결과 받기)
+  const openConfirmModal = async () => {
+    const confirmed = await confirmStore.open({
+      title: "삭제 확인",
+      message: "선택한 항목을 삭제하시겠습니까?",
+    });
+
+    console.log(confirmed ? "확인 선택" : "취소 선택");
+  };
+
+  // 알림 모달 열기 예시 (확인 버튼만 있는 모달)
+  const openAlertModal = () => {
+    modalStore.open(
+      <div>
+        <p>요청하신 작업이 정상적으로 처리되었습니다.</p>
+      </div>,
+      {
+        title: "알림",
+        confirmText: "확인",
+        cancelText: "닫기",
+        onConfirm: () => console.log("알림 확인"),
+      },
+    );
+  };
+
   /* ========================================================
       RENDER
   ======================================================== */
@@ -410,6 +453,27 @@ const Components = () => {
       {/* ================= DRAG & DROP LIST SECTION ================= */}
       <CardSection title="드래그 앤 드롭이 가능한 리스트 예시">
         <DragDropList items={dndRows} onChange={setDndRows} />
+      </CardSection>
+
+      {/* ================= MODAL SECTION ================= */}
+      <CardSection title="모달 예시">
+        <Button outlined onClick={openDataModal}>
+          데이터 전달 모달 열기
+        </Button>
+      </CardSection>
+
+      {/* CONFIRM MODAL SECTION */}
+      <CardSection title="확인 모달 예시">
+        <Button outlined onClick={openConfirmModal}>
+          확인 모달 열기
+        </Button>
+      </CardSection>
+
+      {/* ALERT MODAL SECTION */}
+      <CardSection title="알림 모달 예시">
+        <Button outlined onClick={openAlertModal}>
+          알림 모달 열기
+        </Button>
       </CardSection>
     </StyledComponents>
   );

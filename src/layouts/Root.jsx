@@ -8,6 +8,7 @@ import Footer from "@/components/Footer/Footer";
 import ConfirmModal from "@/components/Modal/ConfirmModal";
 import Modal from "@/components/Modal/Modal";
 import SideNav from "@/components/SideNav/SideNav";
+import Toast from "@/components/Toast/Toast";
 import { MainContent, RootContainer } from "./Root.style";
 
 function Root() {
@@ -26,7 +27,11 @@ function Root() {
       </RootContainer>
 
       {/* 전역 Modal */}
-      {modalStore.isOpen && <Modal onClose={() => modalStore.close()}>{modalStore.content}</Modal>}
+      {modalStore.isOpen && (
+        <Modal onClose={() => modalStore.close()} {...modalStore.props}>
+          {modalStore.content}
+        </Modal>
+      )}
       {/* 전역 Confirm Modal */}
       {confirmStore.isOpen && (
         <ConfirmModal
@@ -36,8 +41,12 @@ function Root() {
           onCancel={() => confirmStore.cancel()}
         />
       )}
+
+      <Toast />
     </>
   );
 }
 
-export default observer(Root);
+const ObservedRoot = observer(Root);
+
+export default ObservedRoot;
