@@ -76,6 +76,7 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     appearance: none;
     position: relative;
+    cursor: pointer;
   }
 
   /* ================================

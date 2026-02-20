@@ -80,6 +80,7 @@ export const ChoiceInput = styled.div`
     display: flex;
     align-items: center;
     gap: 6px;
+    cursor: pointer;
     color: ${({ theme }) => theme.colors.text.primary};
     input {
       margin: 0;
