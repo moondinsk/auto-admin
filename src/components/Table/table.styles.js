@@ -27,6 +27,9 @@ export const StyledTable = styled.table`
         padding: 20px 0;
         border-bottom: 1px solid ${theme.colors.palette.gray100};
       }
+      button {
+        margin:0 auto;
+      }
     `}
 
   /* 폼 테이블 */

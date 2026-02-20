@@ -424,7 +424,7 @@ const Components = () => {
             }
 
             if (col.key === "manage") {
-              return <button onClick={() => console.log("관리", row.id)}>관리</button>;
+              return <Button size="xsm" radius={3} onClick={() => console.log("관리", row.id)}>관리</Button>;
             }
 
             return row[col.key];

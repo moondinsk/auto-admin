@@ -16,9 +16,9 @@ const RADIUS_MAP = {
 
 export const StyledButton = styled.button`
   display: flex;
-  gap: ${({ $gap }) => `${$gap}px`};
   align-items: center;
   justify-content: center;
+  gap: ${({ $gap }) => `${$gap}px`};
 
   width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "auto")};
 

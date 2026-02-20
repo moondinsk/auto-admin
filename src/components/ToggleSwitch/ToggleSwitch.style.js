@@ -16,8 +16,7 @@ export const Switch = styled.label`
     width: 44px;
     height: 24px;
     border-radius: 999px;
-    background: ${({ theme }) => theme.colors.palette.gray100};
-    border: 1px solid ${({ theme }) => theme.colors.palette.gray400};
+    background: ${({ theme }) => theme.colors.palette.gray300};
     position: relative;
     transition: 0.2s ease;
   }
