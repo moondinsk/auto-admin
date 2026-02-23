@@ -49,8 +49,3 @@ class ModalStore {
 }
 
 export const modalStore = new ModalStore();
-
-//  사용 예시
-// import { modalStore } from "../store";
-// modalStore.open(<YourComponent />, { someProp: value });
-// modalStore.close();

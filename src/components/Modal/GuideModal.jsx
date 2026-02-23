@@ -1,6 +1,6 @@
 import React from "react";
 
-const ReturnGuideModal = ({ data }) => {
+const GuideModal = ({ data }) => {
   const guideType = data?.guideType || "";
   const description = data?.description || "";
 
@@ -16,4 +16,4 @@ const ReturnGuideModal = ({ data }) => {
   );
 };
 
-export default ReturnGuideModal;
+export default GuideModal;

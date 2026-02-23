@@ -7,13 +7,16 @@ import CardSection from "@/components/Layout/CardSection";
 import { FormTable, ListTable } from "@/components/Table/Table";
 
 import DragDropList from "@/components/DragDropList/DragDropList";
-import GuideExampleContent from "@/components/Modal/GuideExampleContent";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
 import { confirmStore, modalStore } from "@/store";
 
 import { theme } from "@/styles/theme";
 import { StyledComponents, Buttons } from "./Components.styles";
+import GuideModal from "@/components/Modal/GuideModal";
+import RegisterModalContent from "@/components/Modal/RegisterModalContent";
+import DeleteConfirmContent from "@/components/Modal/DeleteConfirmContent";
+import AlertModalContent from "@/components/Modal/AlertModalContent";
 
 const initialForm = {
   bannerGroupName: "",
@@ -378,70 +381,50 @@ const Components = () => {
   };
 
   // 관리 버튼/등록 버튼에서 공통으로 사용하는 등록 모달 열기
-  const openRegisterModal = (row) => {
-    const normalizeEffect = (effect) => {
-      const normalized = String(effect || "")
-        .trim()
-        .toLowerCase();
-
-      if (normalized === "슬라이드" || normalized === "slide" || normalized === "main") {
-        return "slide";
-      }
-
-      if (normalized === "페이드" || normalized === "fade" || normalized === "event") {
-        return "fade";
-      }
-
-      return "slide";
-    };
-
-    const source = row || {
-      groupName: "신규 배너",
-      effect: "slide",
-      bannerCode: "",
-    };
-
-    const modalData = {
-      ...source,
-      effect: normalizeEffect(source.effect),
-    };
-
-    modalStore.openByPayload(MODAL_PAYLOAD.REGISTER_MODAL(modalData));
-  };
-
-  const openGuideModal = () => {
+  const openRegisterModal = () => {
     modalStore.openByPayload(
-      MODAL_PAYLOAD.GUIDE_MODAL({
-        component: GuideExampleContent,
+      MODAL_PAYLOAD.REGISTER_MODAL({
+        component: RegisterModalContent,
         data: {
-          title: "배너 운영 가이드",
-          description: "배너 등록 전 노출 효과와 기간을 먼저 확인하세요.",
-          items: ["노출 기간 확인", "배너 효과 확인", "저장 후 미리보기 점검"],
+          title: "등록 모달",
+          description: "새 항목을 등록하세요.",
         },
       }),
     );
   };
 
-  // 삭제 모달 예시
-  const openDeleteModal = async () => {
-    const confirmed = await confirmStore.openByPayload(
-      CONFIRM_PAYLOAD.DELETE_CONFIRM(
-        {
-          type: "BANNER_DELETE",
-          selectedIds: listTableCheckedIds,
+  // 가이드 모달 열기 예시
+  const openGuideModal = () => {
+    modalStore.openByPayload(
+      MODAL_PAYLOAD.GUIDE_MODAL({
+        component: GuideModal,
+        data: {
+          title: "배너 운영 가이드",
+          description: "배너 등록 전 노출 효과와 기간을 먼저 확인하세요.",
         },
-        "선택한 항목을 삭제하시겠습니까?",
-      ),
+      }),
     );
-
-    console.log(confirmed ? "확인 선택" : "취소 선택");
   };
 
   // 알림 모달 열기 예시
   const openAlertModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.ALERT_MODAL({
+        component: AlertModalContent,
         message: "요청하신 작업이 정상적으로 처리되었습니다.",
+      }),
+    );
+  };
+
+  // 삭제 모달 예시
+  const openDeleteModal = async () => {
+    confirmStore.openByPayload(
+      CONFIRM_PAYLOAD.DELETE_CONFIRM({
+        component: DeleteConfirmContent,
+        data: {
+          selectedIds: listTableCheckedIds,
+        },
+        message: "선택한 항목을 삭제하시겠습니까?",
       }),
     );
   };

@@ -5,11 +5,11 @@ import { observer } from "mobx-react-lite";
 import { modalStore, confirmStore } from "../store";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
-import ConfirmModal from "@/components/Modal/ConfirmModal";
 import Modal from "@/components/Modal/Modal";
 import SideNav from "@/components/SideNav/SideNav";
 import Toast from "@/components/Toast/Toast";
 import { MainContent, RootContainer } from "./Root.style";
+import ConfirmModalContent from "@/components/Modal/ConfirmModalContent";
 
 function Root() {
   return (
@@ -34,7 +34,7 @@ function Root() {
       )}
       {/* 전역 Confirm Modal */}
       {confirmStore.isOpen && (
-        <ConfirmModal
+        <ConfirmModalContent
           title={confirmStore.title}
           message={confirmStore.message}
           confirmText={confirmStore.confirmText}

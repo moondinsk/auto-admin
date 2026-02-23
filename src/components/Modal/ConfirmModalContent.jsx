@@ -4,7 +4,7 @@ import { toastStore } from "@/store";
 import { theme } from "@/styles/theme";
 import { Dim, ModalBody, ModalFooter, ModalHeader, ModalPanel } from "./Modal.styles";
 
-const ConfirmModal = ({
+const ConfirmModalContent = ({
   title = "",
   message = "",
   contentComponent: ContentComponent,
@@ -42,4 +42,4 @@ const ConfirmModal = ({
   );
 };
 
-export default ConfirmModal;
+export default ConfirmModalContent;
