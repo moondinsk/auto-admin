@@ -12,6 +12,11 @@ import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
 import { confirmStore, formTableStore, modalStore } from "@/store";
+import {
+  createSearchParamsFromForm,
+  parseSearchParamsToForm,
+  SEARCH_PARAM_TYPE,
+} from "@/utils/searchParams";
 
 import { theme } from "@/styles/theme";
 import { StyledComponents, Buttons } from "./Components.styles";
@@ -34,55 +39,29 @@ const initialForm = {
   endDate: "",
 };
 
-// URLSearchParams에서 폼 상태로 변환하는 함수 - 초기 폼 상태를 URL 파라미터에서 가져올 때 사용
-const parseSearchParamsToForm = (searchParams) => {
-  const exposureStatusParam = searchParams.get("exposureStatus");
-
-  return {
-    ...initialForm,
-    bannerGroupName: searchParams.get("bannerGroupName") || "",
-    bannerGroupDesc: searchParams.get("bannerGroupDesc") || "",
-    searchKeyword: searchParams.get("searchKeyword") || "",
-    searchCategory: searchParams.get("searchCategory") || "",
-    searchValue: searchParams.get("searchValue") || "",
-    exposureStatus: exposureStatusParam === "true" ? true : exposureStatusParam === "false" ? false : "",
-    features: searchParams.get("features")?.split(",").filter(Boolean) || [],
-    startDate: searchParams.get("startDate") || "",
-    endDate: searchParams.get("endDate") || "",
-  };
-};
-
-// 폼 상태에서 URLSearchParams 객체를 생성하는 함수 - 검색 버튼 클릭 시 URL 업데이트할 때 사용
-const createSearchParamsFromForm = (form) => {
-  const params = new URLSearchParams();
-  [
-    "bannerGroupName",
-    "bannerGroupDesc",
-    "searchKeyword",
-    "searchCategory",
-    "searchValue",
-    "startDate",
-    "endDate",
-  ].forEach((key) => {
-    if (form[key]) {
-      params.set(key, form[key]);
-    }
-  });
-
-  if (form.exposureStatus !== "") {
-    params.set("exposureStatus", String(form.exposureStatus));
-  }
-
-  if (Array.isArray(form.features) && form.features.length > 0) {
-    params.set("features", form.features.join(","));
-  }
-
-  return params;
-};
+const searchFormFields = [
+  "bannerGroupName",
+  "bannerGroupDesc",
+  "searchKeyword",
+  "searchCategory",
+  "searchValue",
+  "startDate",
+  "endDate",
+  { key: "exposureStatus", type: SEARCH_PARAM_TYPE.BOOLEAN }, 
+  { key: "features", type: SEARCH_PARAM_TYPE.ARRAY },
+];
 
 const Components = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialSearchForm = useMemo(() => parseSearchParamsToForm(searchParams), [searchParams]);
+  const initialSearchForm = useMemo(
+    () =>
+      parseSearchParamsToForm({
+        searchParams,
+        initialForm,
+        fields: searchFormFields,
+      }),
+    [searchParams],
+  );
 
   /* ========================================================
       1️⃣ LIST TABLE STATE (배너 목록 데이터)
@@ -447,7 +426,12 @@ const Components = () => {
   };
 
   const handleSearch = () => {
-    setSearchParams(createSearchParamsFromForm(form));
+    setSearchParams(
+      createSearchParamsFromForm({
+        form,
+        fields: searchFormFields,
+      }),
+    );
     setListTableCheckedIds([]);
   };
 

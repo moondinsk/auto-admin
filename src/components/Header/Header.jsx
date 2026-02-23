@@ -7,11 +7,13 @@ import { IoCodeSlash, IoLogoWebComponent } from "react-icons/io5";
 import { FiDownload } from "react-icons/fi";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+import { PATH, SEGMENT } from "@/routes/paths";
 const Header = () => {
 
    const navigate = useNavigate();
   const ACTIONS = [
-    { label: "컴포넌트", icon: IoLogoWebComponent, link: "/components" },
+    { label: "검색 테스트", icon: IoLogoWebComponent, link: `${PATH.HOME}${SEGMENT.SEARCH}` },
+    { label: "컴포넌트", icon: IoLogoWebComponent, link: `${PATH.HOME}${SEGMENT.COMPONENTS}` },
     { label: "스크립트 설치", icon: IoCodeSlash },
     { label: "매뉴얼 다운로드", icon: FiDownload },
     { label: "사용 FAQ", icon: AiOutlineQuestionCircle },

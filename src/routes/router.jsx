@@ -13,6 +13,7 @@ import Login from "@/pages/Login/Login";
 import Forbidden from "../pages/Error/Forbidden";
 import Users from "@/pages/User/Users";
 import Components from "@/pages/Components/Components";
+import SearchTest from "@/pages/Search/SearchTest";
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
       {
         path: SEGMENT.COMPONENTS,
         element: <Components />,
+      },
+      {
+        path: SEGMENT.SEARCH,
+        element: <SearchTest />,
       },
       {
         path: SEGMENT.PRODUCT,
