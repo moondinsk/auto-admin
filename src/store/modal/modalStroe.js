@@ -43,6 +43,10 @@ class ModalStore {
 
   close() {
     this.isOpen = false;
+  }
+
+  reset() {
+    this.isOpen = false;
     this.content = null;
     this.props = {};
   }

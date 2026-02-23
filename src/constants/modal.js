@@ -46,4 +46,14 @@ export const CONFIRM_PAYLOAD = {
     },
     component: ContentComponent,
   }),
+
+  INPUT_CONFIRM: ({ component: ContentComponent, data, message = "입력 내용을 확인해주세요." }) => ({
+    confirmProps: {
+      title: "입력 모달",
+      message,
+      successToastMessage: "저장되었습니다.",
+      data,
+    },
+    component: ContentComponent,
+  }),
 };

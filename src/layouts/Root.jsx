@@ -1,6 +1,8 @@
 // src/layouts/Root.jsx
+import { useRef } from "react";
 import { Outlet } from "react-router-dom";
 import { observer } from "mobx-react-lite";
+import { CSSTransition } from "react-transition-group";
 
 import { modalStore, confirmStore } from "../store";
 import Header from "@/components/Header/Header";
@@ -9,9 +11,12 @@ import Modal from "@/components/Modal/Modal";
 import SideNav from "@/components/SideNav/SideNav";
 import Toast from "@/components/Toast/Toast";
 import { MainContent, RootContainer } from "./Root.style";
-import ConfirmModalContent from "@/components/Modal/ConfirmModalContent";
+import ConfirmModal from "@/components/Modal/ConfirmModal";
 
 function Root() {
+  const modalNodeRef = useRef(null);
+  const confirmNodeRef = useRef(null);
+
   return (
     <>
       {/* 공통 헤더 */}
@@ -27,25 +32,42 @@ function Root() {
       </RootContainer>
 
       {/* 전역 Modal */}
-      {modalStore.isOpen && (
-        <Modal onClose={() => modalStore.close()} {...modalStore.props}>
-          {modalStore.content}
-        </Modal>
-      )}
+      <CSSTransition
+        in={modalStore.isOpen}
+        timeout={500}
+        classNames="modal-transition"
+        unmountOnExit
+        onExited={() => modalStore.reset()}
+        nodeRef={modalNodeRef}>
+        <div ref={modalNodeRef}>
+          <Modal onClose={() => modalStore.close()} {...modalStore.props}>
+            {modalStore.content}
+          </Modal>
+        </div>
+      </CSSTransition>
+
       {/* 전역 Confirm Modal */}
-      {confirmStore.isOpen && (
-        <ConfirmModalContent
-          title={confirmStore.title}
-          message={confirmStore.message}
-          confirmText={confirmStore.confirmText}
-          cancelText={confirmStore.cancelText}
-          successToastMessage={confirmStore.successToastMessage}
-          contentComponent={confirmStore.contentComponent}
-          contentProps={confirmStore.contentProps}
-          onConfirm={() => confirmStore.confirm()}
-          onCancel={() => confirmStore.cancel()}
-        />
-      )}
+      <CSSTransition
+        in={confirmStore.isOpen}
+        timeout={500}
+        classNames="confirm-transition"
+        unmountOnExit
+        onExited={() => confirmStore.reset()}
+        nodeRef={confirmNodeRef}>
+        <div ref={confirmNodeRef}>
+          <ConfirmModal
+            title={confirmStore.title}
+            message={confirmStore.message}
+            confirmText={confirmStore.confirmText}
+            cancelText={confirmStore.cancelText}
+            successToastMessage={confirmStore.successToastMessage}
+            contentComponent={confirmStore.contentComponent}
+            contentProps={confirmStore.contentProps}
+            onConfirm={() => confirmStore.confirm()}
+            onCancel={() => confirmStore.cancel()}
+          />
+        </div>
+      </CSSTransition>
 
       <Toast />
     </>

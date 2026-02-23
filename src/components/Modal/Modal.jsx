@@ -37,8 +37,8 @@ const Modal = ({
   const renderedContent = children || (ContentComponent ? <ContentComponent {...contentProps} /> : message);
 
   return (
-    <Dim onClick={handleCancel}>
-      <ModalPanel $width={width} $height={height} onClick={(e) => e.stopPropagation()}>
+    <Dim className="modal-dim" onClick={handleCancel}>
+      <ModalPanel className="modal-panel" $width={width} $height={height} onClick={(e) => e.stopPropagation()}>
         {title && <ModalHeader>{title}</ModalHeader>}
         <ModalBody>{renderedContent}</ModalBody>
         <ModalFooter>

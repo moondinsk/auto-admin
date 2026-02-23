@@ -67,12 +67,16 @@ class ConfirmStore {
 
   confirm() {
     this.resolve?.(true);
-    this.reset();
+    this.close();
   }
 
   cancel() {
     this.resolve?.(false);
-    this.reset();
+    this.close();
+  }
+
+  close() {
+    this.isOpen = false;
   }
 
   reset() {
@@ -89,12 +93,3 @@ class ConfirmStore {
 }
 
 export const confirmStore = new ConfirmStore();
-
-// 사용예시
-// import { confirmStore } from "../store";
-// const result = await confirmStore.open({ title: "Confirm", message: "Are you sure?" });
-// if (result) {
-//   // 사용자가 확인을 눌렀을 때의 처리
-// } else {
-//   // 사용자가 취소를 눌렀을 때의 처리
-// }

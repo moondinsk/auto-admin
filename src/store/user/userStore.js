@@ -1,4 +1,3 @@
-// src/store/user/userStore.js
 import { makeAutoObservable } from "mobx";
 
 class UserStore {
@@ -8,7 +7,7 @@ class UserStore {
   isHydrated = false; //  초기 복구 완료 여부
 
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {}, { autoBind: true });
 
     // 🔥 새로고침 / 주소 직접 입력 대응
     const savedUser = localStorage.getItem("user");

@@ -18,6 +18,7 @@ export const GlobalStyle = createGlobalStyle`
     font-size: ${theme.fonts.size};
     color: ${theme.fonts.color};
     background: ${theme.colors.layout.bodyBG};
+    scrollbar-gutter: stable;
   }
 
   li::marker {
@@ -181,5 +182,53 @@ export const GlobalStyle = createGlobalStyle`
     .react-select__option--is-focused {
       background: ${({ theme }) => theme.colors.primary.light};
     }
+  }
+
+  .modal-transition-enter .modal-dim,
+  .confirm-transition-enter .modal-dim {
+    opacity: 0;
+  }
+
+  .modal-transition-enter .modal-panel,
+  .confirm-transition-enter .modal-panel {
+    opacity: 0;
+    transform: none;
+  }
+
+  .modal-transition-enter-active .modal-dim,
+  .confirm-transition-enter-active .modal-dim {
+    opacity: 1;
+    transition: opacity 0.5s;
+  }
+
+  .modal-transition-enter-active .modal-panel,
+  .confirm-transition-enter-active .modal-panel {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.5s;
+  }
+
+  .modal-transition-exit .modal-dim,
+  .confirm-transition-exit .modal-dim {
+    opacity: 1;
+  }
+
+  .modal-transition-exit .modal-panel,
+  .confirm-transition-exit .modal-panel {
+    opacity: 1;
+    transform: none;
+  }
+
+  .modal-transition-exit-active .modal-dim,
+  .confirm-transition-exit-active .modal-dim {
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+
+  .modal-transition-exit-active .modal-panel,
+  .confirm-transition-exit-active .modal-panel {
+    opacity: 0;
+    transform: none;
+    transition: opacity 0.5s;
   }
 `;

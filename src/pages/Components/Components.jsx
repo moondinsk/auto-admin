@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { IoIosArrowForward, IoIosRefresh } from "react-icons/io";
 import { useSearchParams } from "react-router-dom";
 
@@ -9,7 +10,7 @@ import { FormTable, ListTable } from "@/components/Table/Table";
 import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
-import { confirmStore, modalStore } from "@/store";
+import { confirmStore, formTableStore, modalStore } from "@/store";
 
 import { theme } from "@/styles/theme";
 import { StyledComponents, Buttons } from "./Components.styles";
@@ -17,6 +18,31 @@ import GuideModal from "@/components/Modal/GuideModal";
 import RegisterModalContent from "@/components/Modal/RegisterModalContent";
 import DeleteConfirmContent from "@/components/Modal/DeleteConfirmContent";
 import AlertModalContent from "@/components/Modal/AlertModalContent";
+import SearchStepModalContent from "@/components/Modal/SearchStepModalContent";
+
+// 2중 모달에서 사용할 2차 모달 콘텐츠 컴포넌트
+const NestedModalContent = ({ data }) => {
+  const handleOpenSecondModal = () => {
+    confirmStore.openByPayload(
+      CONFIRM_PAYLOAD.DELETE_CONFIRM({
+        component: DeleteConfirmContent,
+        data: {},
+        message: "2차 모달입니다. 계속 진행하시겠습니까?",
+      }),
+    );
+  };
+
+  return (
+    <div className="flex-box col" style={{ gap: 12 }}>
+      <p>{data?.description || "1차 모달입니다."}</p>
+      <div>
+        <Button outlined onClick={handleOpenSecondModal}>
+          2차 모달 열기
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 const initialForm = {
   bannerGroupName: "",
@@ -352,6 +378,47 @@ const Components = () => {
     },
   ];
 
+  const storeFormFields = [
+    {
+      key: "managerName",
+      label: "담당자명",
+      name: "managerName",
+      type: "input",
+      placeholder: "담당자명을 입력하세요",
+    },
+    {
+      key: "managerRole",
+      label: "담당자 권한",
+      name: "managerRole",
+      type: "select",
+      placeholder: "권한을 선택하세요",
+      options: [
+        { value: "admin", label: "관리자" },
+        { value: "editor", label: "편집자" },
+        { value: "viewer", label: "조회자" },
+      ],
+    },
+    {
+      key: "managerStatus",
+      label: "활성 상태",
+      name: "managerStatus",
+      type: "radio",
+      options: [
+        { value: "active", label: "활성" },
+        { value: "inactive", label: "비활성" },
+      ],
+    },
+    {
+      key: "managerMemo",
+      label: "메모",
+      name: "managerMemo",
+      type: "textarea",
+      placeholder: "메모를 입력하세요",
+      rows: 3,
+      colSpan: 3,
+    },
+  ];
+
   /* ========================================================
       FORM STATE
   ======================================================== */
@@ -385,6 +452,19 @@ const Components = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const onStoreFormChange = (e) => {
+    const { name, value } = e.target;
+    if (!name) {
+      return;
+    }
+
+    formTableStore.setField(name, value);
+  };
+
+  const handleStoreFormSave = () => {
+    console.log("[FormTable Store Save]", formTableStore.values);
   };
 
   const handleSearch = () => {
@@ -430,6 +510,28 @@ const Components = () => {
       MODAL_PAYLOAD.ALERT_MODAL({
         component: AlertModalContent,
         message: "요청하신 작업이 정상적으로 처리되었습니다.",
+      }),
+    );
+  };
+
+  // 2중 모달 열기 예시 - 가이드 모달에서 버튼 클릭 시 NestedModalContent로 2차 모달 열림
+  const openNestedModal = () => {
+    modalStore.openByPayload(
+      MODAL_PAYLOAD.GUIDE_MODAL({
+        component: NestedModalContent,
+        data: {
+          description: "1차 모달에서 버튼을 눌러 2차 모달을 열 수 있습니다.",
+        },
+      }),
+    );
+  };
+
+  // 2중 모달 예시 - SearchStepModalContent에서 버튼 클릭 시 SearchResultFormContent로 2차 모달 열림, 2차 모달에서 입력한 값이 다시 1차 모달에 반영되는 형태
+  const openNestedSearchModal = () => {
+    modalStore.openByPayload(
+      MODAL_PAYLOAD.GUIDE_MODAL({
+        component: SearchStepModalContent,
+        data: {},
       }),
     );
   };
@@ -538,6 +640,18 @@ const Components = () => {
         <FormTable columns={2} fields={column2Fields} values={column2Form} onChange={onColumn2Change} />
       </CardSection>
 
+      <CardSection title="Table 컴포넌트 예시 - FormTable (Store 관리)">
+        <FormTable columns={2} fields={storeFormFields} values={formTableStore.values} onChange={onStoreFormChange} />
+        <div className="flex-box jc" style={{ marginTop: 20, gap: 10 }}>
+          <Button outlined color={theme.colors.palette.gray800} onClick={() => formTableStore.reset()}>
+            <IoIosRefresh /> 초기화
+          </Button>
+          <Button outlined onClick={handleStoreFormSave}>
+            저장
+          </Button>
+        </div>
+      </CardSection>
+
       {/* ================= DRAG & DROP LIST SECTION ================= */}
       <CardSection title="드래그 앤 드롭이 가능한 리스트 예시">
         <DragDropList items={dndRows} onChange={setDndRows} />
@@ -568,8 +682,21 @@ const Components = () => {
           알림 모달 열기
         </Button>
       </CardSection>
+
+      <CardSection title="2중 모달 예시">
+        <div className="flex-box" style={{ gap: 10 }}>
+          <Button outlined onClick={openNestedModal}>
+            기본 2중 모달 열기
+          </Button>
+          <Button outlined onClick={openNestedSearchModal}>
+            찾기/검색형 2중 모달 열기
+          </Button>
+        </div>
+      </CardSection>
     </StyledComponents>
   );
 };
 
-export default Components;
+const ObservedComponents = observer(Components);
+
+export default ObservedComponents;

@@ -4,7 +4,7 @@ import { toastStore } from "@/store";
 import { theme } from "@/styles/theme";
 import { Dim, ModalBody, ModalFooter, ModalHeader, ModalPanel } from "./Modal.styles";
 
-const ConfirmModalContent = ({
+const ConfirmModal = ({
   title = "",
   message = "",
   contentComponent: ContentComponent,
@@ -27,8 +27,8 @@ const ConfirmModalContent = ({
   const renderedContent = ContentComponent ? <ContentComponent {...contentProps} /> : message;
 
   return (
-    <Dim onClick={handleCancel}>
-      <ModalPanel onClick={(e) => e.stopPropagation()}>
+    <Dim className="modal-dim" onClick={handleCancel}>
+      <ModalPanel className="modal-panel" onClick={(e) => e.stopPropagation()}>
         {title && <ModalHeader>{title}</ModalHeader>}
         <ModalBody>{renderedContent}</ModalBody>
         <ModalFooter>
@@ -42,4 +42,4 @@ const ConfirmModalContent = ({
   );
 };
 
-export default ConfirmModalContent;
+export default ConfirmModal;
