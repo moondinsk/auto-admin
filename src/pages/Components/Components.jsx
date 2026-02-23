@@ -14,40 +14,12 @@ import { confirmStore, formTableStore, modalStore } from "@/store";
 
 import { theme } from "@/styles/theme";
 import { StyledComponents, Buttons } from "./Components.styles";
-import GuideModal from "@/components/Modal/GuideModal";
+import GuideContent from "@/components/Modal/GuideContent";
 import RegisterModalContent from "@/components/Modal/RegisterModalContent";
 import DeleteConfirmContent from "@/components/Modal/DeleteConfirmContent";
 import AlertModalContent from "@/components/Modal/AlertModalContent";
 import SearchStepModalContent from "@/components/Modal/SearchStepModalContent";
-import GuideExampleContent from "@/components/Modal/GuideExampleContent";
-
-// 2중 모달에서 사용할 2차 모달 콘텐츠 컴포넌트
-const NestedModalContent = ({ data }) => {
-  const handleOpenSecondModal = () => {
-    confirmStore.openByPayload(
-      CONFIRM_PAYLOAD.INPUT_CONFIRM({
-        component: GuideExampleContent,
-        data: {
-          title: "2차 안내 모달",
-          description: "이 모달은 삭제가 아닌 안내/입력 확인 예시입니다.",
-        },
-        message: "2차 모달 내용을 확인해주세요.",
-        successToastMessage: "2차 모달에서 확인을 눌렀습니다.",
-      }),
-    );
-  };
-
-  return (
-    <div className="flex-box col" style={{ gap: 12 }}>
-      <p>{data?.description || "1차 모달입니다."}</p>
-      <div>
-        <Button outlined onClick={handleOpenSecondModal}>
-          2차 모달 열기
-        </Button>
-      </div>
-    </div>
-  );
-};
+import NestedModalContent from "@/components/Modal/NestedModalContent";
 
 const initialForm = {
   bannerGroupName: "",
@@ -500,7 +472,7 @@ const Components = () => {
   const openGuideModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.GUIDE_MODAL({
-        component: GuideModal,
+        component: GuideContent,
         data: {
           title: "배너 운영 가이드",
           description: "배너 등록 전 노출 효과와 기간을 먼저 확인하세요.",
@@ -531,8 +503,8 @@ const Components = () => {
     );
   };
 
-  // 2중 모달 예시 - SearchStepModalContent에서 버튼 클릭 시 SearchResultFormContent로 2차 모달 열림, 2차 모달에서 입력한 값이 다시 1차 모달에 반영되는 형태
-  const openNestedSearchModal = () => {
+  // 2중 모달 예시 - 입력형(1차/2차) 모달
+  const openNestedInputModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: SearchStepModalContent,
@@ -693,8 +665,8 @@ const Components = () => {
           <Button outlined onClick={openNestedModal}>
             기본 2중 모달 열기
           </Button>
-          <Button outlined onClick={openNestedSearchModal}>
-            찾기/검색형 2중 모달 열기
+          <Button outlined onClick={openNestedInputModal}>
+            입력형 2중 모달 열기
           </Button>
         </div>
       </CardSection>

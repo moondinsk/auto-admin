@@ -1,6 +1,6 @@
 import React from "react";
 
-const GuideExampleContent = ({ data }) => {
+const GuideContent = ({ data }) => {
   const title = data?.title || "가이드 제목";
   const description = data?.description || "가이드 설명";
 
@@ -12,4 +12,4 @@ const GuideExampleContent = ({ data }) => {
   );
 };
 
-export default GuideExampleContent;
+export default GuideContent;

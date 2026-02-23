@@ -1,17 +1,23 @@
+const BASE_MODAL_PROPS = {
+  width: 600,
+  title: "가이드 모달",
+  height: "50vh",
+};
+
+const BASE_CONFIRM_PROPS = {
+  title: "확인 모달",
+};
+
 export const MODAL_PAYLOAD = {
-  GUIDE_MODAL: ({ component: ContentComponent, data = {}, successToastMessage = "", ...modalProps } = {}) => {
-    return {
-      modalProps: {
-        ...modalProps,
-        width: 600,
-        title: "가이드 모달",
-        height: "50vh",
-        data,
-        successToastMessage,
-      },
-      component: ContentComponent,
-    };
-  },
+  GUIDE_MODAL: ({ component: ContentComponent, data = {}, successToastMessage = "", ...modalProps } = {}) => ({
+    modalProps: {
+      ...BASE_MODAL_PROPS,
+      ...modalProps,
+      data,
+      successToastMessage,
+    },
+    component: ContentComponent,
+  }),
 
   REGISTER_MODAL: ({
     component: ContentComponent,
@@ -20,10 +26,10 @@ export const MODAL_PAYLOAD = {
     ...modalProps
   } = {}) => ({
     modalProps: {
+      ...BASE_MODAL_PROPS,
       ...modalProps,
       width: 400,
       title: "등록 모달",
-      height: "50vh",
       data,
       cancelText: "취소",
       successToastMessage,
@@ -51,6 +57,7 @@ export const CONFIRM_PAYLOAD = {
     successToastMessage = "삭제했습니다.",
   }) => ({
     confirmProps: {
+      ...BASE_CONFIRM_PROPS,
       title: "삭제 모달",
       message,
       successToastMessage,
@@ -66,6 +73,7 @@ export const CONFIRM_PAYLOAD = {
     successToastMessage = "저장되었습니다.",
   }) => ({
     confirmProps: {
+      ...BASE_CONFIRM_PROPS,
       title: "입력 모달",
       message,
       successToastMessage,
