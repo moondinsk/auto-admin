@@ -6,6 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import Button from "@/components/Button/Button";
 import CardSection from "@/components/Layout/CardSection";
 import { FormTable, ListTable } from "@/components/Table/Table";
+import TableActionButtons from "@/components/Table/TableActionButtons";
 
 import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
@@ -384,6 +385,7 @@ const Components = () => {
         { value: "active", label: "활성" },
         { value: "inactive", label: "비활성" },
       ],
+      colSpan: 3,
     },
     {
       key: "managerMemo",
@@ -602,14 +604,20 @@ const Components = () => {
       {/* ================= FORM TABLE SECTION ================= */}
       <CardSection title="Table 컴포넌트 예시 - FormTable">
         <FormTable fields={formFields} values={form} onChange={onChange} />
-        <div className="flex-box jc" style={{ marginTop: 20, gap: 10 }}>
-          <Button outlined color={theme.colors.palette.gray800} onClick={handleResetSearch}>
-            <IoIosRefresh /> 초기화
-          </Button>
-          <Button outlined onClick={handleSearch}>
-            검색
-          </Button>
-        </div>
+        <TableActionButtons
+          buttons={[
+            {
+              label: "초기화",
+              onClick: handleResetSearch,
+              color: theme.colors.palette.gray800,
+              icon: <IoIosRefresh />,
+            },
+            {
+              label: "검색",
+              onClick: handleSearch,
+            },
+          ]}
+        />
       </CardSection>
 
       {/* ================= COLUMN 2 TABLE SECTION ================= */}
@@ -619,14 +627,20 @@ const Components = () => {
 
       <CardSection title="Table 컴포넌트 예시 - FormTable (Store 관리)">
         <FormTable columns={2} fields={storeFormFields} values={formTableStore.values} onChange={onStoreFormChange} />
-        <div className="flex-box jc" style={{ marginTop: 20, gap: 10 }}>
-          <Button outlined color={theme.colors.palette.gray800} onClick={() => formTableStore.reset()}>
-            <IoIosRefresh /> 초기화
-          </Button>
-          <Button outlined onClick={handleStoreFormSave}>
-            저장
-          </Button>
-        </div>
+        <TableActionButtons
+          buttons={[
+            {
+              label: "초기화",
+              onClick: () => formTableStore.reset(),
+              color: theme.colors.palette.gray800,
+              icon: <IoIosRefresh />,
+            },
+            {
+              label: "저장",
+              onClick: handleStoreFormSave,
+            },
+          ]}
+        />
       </CardSection>
 
       {/* ================= DRAG & DROP LIST SECTION ================= */}
