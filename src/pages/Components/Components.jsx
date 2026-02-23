@@ -542,7 +542,7 @@ const Components = () => {
   };
 
   // 삭제 모달 예시
-  const openDeleteModal = async () => {
+  const openDeleteModal = () => {
     confirmStore.openByPayload(
       CONFIRM_PAYLOAD.DELETE_CONFIRM({
         component: DeleteConfirmContent,

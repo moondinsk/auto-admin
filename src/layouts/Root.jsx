@@ -6,7 +6,6 @@ import { CSSTransition } from "react-transition-group";
 
 import { modalStore, confirmStore } from "../store";
 import Header from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
 import Modal from "@/components/Modal/Modal";
 import SideNav from "@/components/SideNav/SideNav";
 import Toast from "@/components/Toast/Toast";
