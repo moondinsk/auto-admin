@@ -19,15 +19,20 @@ import RegisterModalContent from "@/components/Modal/RegisterModalContent";
 import DeleteConfirmContent from "@/components/Modal/DeleteConfirmContent";
 import AlertModalContent from "@/components/Modal/AlertModalContent";
 import SearchStepModalContent from "@/components/Modal/SearchStepModalContent";
+import GuideExampleContent from "@/components/Modal/GuideExampleContent";
 
 // 2중 모달에서 사용할 2차 모달 콘텐츠 컴포넌트
 const NestedModalContent = ({ data }) => {
   const handleOpenSecondModal = () => {
     confirmStore.openByPayload(
-      CONFIRM_PAYLOAD.DELETE_CONFIRM({
-        component: DeleteConfirmContent,
-        data: {},
-        message: "2차 모달입니다. 계속 진행하시겠습니까?",
+      CONFIRM_PAYLOAD.INPUT_CONFIRM({
+        component: GuideExampleContent,
+        data: {
+          title: "2차 안내 모달",
+          description: "이 모달은 삭제가 아닌 안내/입력 확인 예시입니다.",
+        },
+        message: "2차 모달 내용을 확인해주세요.",
+        successToastMessage: "2차 모달에서 확인을 눌렀습니다.",
       }),
     );
   };

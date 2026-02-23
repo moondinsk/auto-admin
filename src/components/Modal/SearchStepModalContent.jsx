@@ -32,8 +32,8 @@ const SearchStepModalContent = ({ data }) => {
             }));
           },
         },
-
         message: "입력값을 수정해주세요.",
+        successToastMessage: "값이 수정되었습니다.",
       }),
     );
   };

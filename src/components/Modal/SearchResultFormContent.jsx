@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Button from "@/components/Button/Button";
 
 /**
  * 2차 입력 모달 컴포넌트
