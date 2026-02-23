@@ -103,9 +103,27 @@ const Components = () => {
 
   // 드래그 앤 드롭 테이블의 행 데이터 (순서 변경 가능)
   const [dndRows, setDndRows] = useState([
-    { id: "d1", order: 1, name: "메인 상단 배너", type: "메인" },
-    { id: "d2", order: 2, name: "메인 하단 배너", type: "메인" },
-    { id: "d3", order: 3, name: "이벤트 배너", type: "프로모션" },
+    {
+      id: "1",
+      order: 1,
+      name: "메뉴 1",
+      type: "부모",
+      children: [
+        { id: "1-1", order: 1, name: "메뉴 1-1", type: "자식" },
+        { id: "1-2", order: 2, name: "메뉴 1-2", type: "자식" },
+      ],
+    },
+    {
+      id: "2",
+      order: 2,
+      name: "메뉴 2",
+      type: "부모",
+      children: [
+        { id: "2-1", order: 1, name: "메뉴 2-1", type: "자식" },
+        { id: "2-2", order: 2, name: "메뉴 2-2", type: "자식" },
+        { id: "2-3", order: 3, name: "메뉴 2-3", type: "자식" },
+      ],
+    },
   ]);
 
   /* ========================================================
