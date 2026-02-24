@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite";
 import { userStore } from "@/store";
 
 function PrivateRoute({ children }) {
-  console.log("userStore", userStore);
   if (!userStore.isLogin) {
     return <Navigate to="/login" replace />;
   }

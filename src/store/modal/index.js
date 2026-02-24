@@ -1,2 +1,2 @@
-export { confirmStore } from "./confirmStroe";
-export { modalStore } from "./modalStroe";
+export { confirmStore } from "./confirmStore";
+export { modalStore } from "./modalStore";
