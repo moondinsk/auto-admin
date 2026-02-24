@@ -11,6 +11,7 @@ import TableActionButtons from "@/components/Table/TableActionButtons";
 import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
+import { getProductsApi } from "@/api";
 import { confirmStore, formTableStore, modalStore } from "@/store";
 import {
   createSearchParamsFromForm,
@@ -512,6 +513,32 @@ const Components = () => {
     );
   };
 
+  const handleGetProductsExample = async () => {
+    try {
+      const data = await getProductsApi({
+        page: 1,
+        size: 10,
+      });
+
+      const products = Array.isArray(data) ? data : data?.items ?? data?.list ?? [];
+      console.log("[getProductsApi result]", products);
+
+      modalStore.openByPayload(
+        MODAL_PAYLOAD.ALERT_MODAL({
+          component: AlertModalContent,
+          message: `상품 조회 성공 (${products.length}건) - 콘솔에서 상세 결과를 확인하세요.`,
+        }),
+      );
+    } catch (error) {
+      modalStore.openByPayload(
+        MODAL_PAYLOAD.ALERT_MODAL({
+          component: AlertModalContent,
+          message: error?.response?.data?.message || "상품 조회에 실패했습니다.",
+        }),
+      );
+    }
+  };
+
   /* ========================================================
       RENDER
   ======================================================== */
@@ -630,6 +657,15 @@ const Components = () => {
       {/* ================= DRAG & DROP LIST SECTION ================= */}
       <CardSection title="드래그 앤 드롭이 가능한 리스트 예시">
         <DragDropList items={dndRows} onChange={setDndRows} />
+      </CardSection>
+
+      <CardSection title="Axios API 호출 예시 - getProductsApi">
+        <div className="flex-box col" style={{ gap: 12 }}>
+          <Button outlined onClick={handleGetProductsExample}>
+            상품 목록 조회
+          </Button>
+          <div>조회 결과는 콘솔과 알림 모달에서 확인할 수 있습니다.</div>
+        </div>
       </CardSection>
 
       {/* ================= MODAL SECTION ================= */}
