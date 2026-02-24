@@ -5,32 +5,26 @@
 - 어떻게 사용하는지
 - 내부 로직이 어떻게 흐르는지
 - 리뷰 관점에서 어떤 점이 좋은지/보완이 필요한지
-를 한 번에 볼 수 있도록 정리한 문서입니다.
-
----
-
 ## 1) 빠른 실행 방법
 
-### 설치
 ```bash
-npm install
+yarn
 ```
 
 ### 개발 서버 실행
 ```bash
-npm run dev
+yarn dev
 ```
 
 ### 빌드
 ```bash
-npm run build
+yarn build
 ```
 
 ### 린트
 ```bash
-npm run lint
+yarn lint
 ```
-
 ---
 
 ## 2) 전체 아키텍처 요약
@@ -40,216 +34,119 @@ npm run lint
 1. `src/main.jsx`에서 React 앱 마운트
 2. `src/App.jsx`에서 전역 Provider, Theme, Router 연결
 3. `src/routes/router.jsx`에서 페이지 라우팅 구성
-4. `src/layouts/Root.jsx`에서 공통 레이아웃(헤더/사이드바/콘텐츠) + 전역 모달/토스트 렌더링
 5. 페이지/컴포넌트에서 MobX Store와 API 모듈을 사용해 상태와 비즈니스 로직 처리
 
 ---
 
 ## 3) 영역별 코드 리뷰 + 사용법 + 로직 설명
 
-## A. 엔트리/부트스트랩 영역
-
-### A-1. `src/main.jsx`
 - **역할**: 앱 시작점, `#root`에 앱 렌더링.
 - **사용법**: 일반적으로 수정할 일은 거의 없고, 글로벌 CSS import 위치를 관리할 때만 수정.
-- **리뷰**: 단순/명확해서 좋음.
-
 ### A-2. `src/App.jsx`
 - **역할**: 전역 의존성 결합 레이어.
-  - `AppProviders` (Cookies + Store)
-  - `ThemeProvider`
   - `GlobalStyle`
   - `RouterProvider`
-- **로직 포인트**: 전역 기능을 앱 진입점에서 일관되게 감싸는 구조라 확장에 유리.
-- **리뷰**: 책임 분리가 깔끔함.
 
----
 
 ## B. 라우팅/권한 영역
 
 ### B-1. `src/routes/paths.js`
-- **역할**:
-  - `PATH`: 실제 URL 기준
-  - `SEGMENT`: children route의 상대 경로
 - **사용법**: 라우트 추가 시 문자열 하드코딩 대신 상수 확장.
 
-### B-2. `src/routes/router.jsx`
-- **역할**: 전체 라우팅 트리 선언.
-- **핵심 로직**:
   - 루트 레이아웃은 `Root`
   - `users` 경로는 `PrivateRoute`로 보호
-- **리뷰**:
-  - 선언형 구조가 좋음.
-  - 에러 페이지와 `Forbidden` import가 중복 의미를 가지므로 정리 여지 있음.
 
 ### B-3. `src/routes/PrivateRoute.jsx`
-- **역할**: 인증 + 권한 가드.
 - **로직**:
   1. `userStore.isLogin` false면 `/login` 이동
-  2. 로그인은 했지만 `isAdmin` false면 `/403` 이동
   3. 둘 다 통과하면 자식 렌더링
-- **사용법**:
   - 보호할 route element를 `<PrivateRoute>...</PrivateRoute>`로 감싸면 됨.
 - **리뷰**:
   - 의도가 명확.
   - `console.log`는 배포 전 제거 권장.
-
----
-
-## C. 레이아웃/전역 UI 영역
-
 ### C-1. `src/layouts/Root.jsx`
 - **역할**: 공통 쉘(UI 프레임)
-  - Header / SideNav / Outlet
-  - 전역 Modal, ConfirmModal, Toast
 - **핵심 로직**:
   - `modalStore.isOpen`, `confirmStore.isOpen`을 기준으로 `CSSTransition` 제어
-  - 애니메이션 종료 후 `reset()`으로 상태 정리
-- **사용법**:
-  - 페이지 컴포넌트에서는 레이아웃을 직접 신경 쓰지 않고 콘텐츠만 구현하면 됨.
 - **리뷰**:
   - 전역 오버레이 관리 지점이 단일화되어 유지보수에 유리.
 
----
-
-## D. 상태관리(MobX Store) 영역
 
 ### D-1. `src/store/StoreProvider.jsx`
 - **역할**: store DI(Dependency Injection) 컨테이너.
 - **제공 store**: `modalStore`, `confirmStore`, `toastStore`, `formTableStore`
-- **리뷰**:
-  - 컴포넌트에서 전역 스토어 접근 구조가 통일됨.
-
-### D-2. `src/store/user/userStore.js`
-- **역할**: 사용자/인증 상태.
-- **핵심 로직**:
   - 생성자에서 `localStorage.user` 복구 (새로고침 대응)
   - `login()`/`logout()`으로 상태 + localStorage 동기화
-  - `isAdmin` 계산 프로퍼티 제공
 - **사용법**:
   - 로그인 성공 시 `userStore.login(user)`
-  - 로그아웃 시 `userStore.logout()`
 - **리뷰**:
   - 최소 인증 흐름으로 합리적.
-  - 만료 토큰/세션 갱신 정책은 추후 확장 필요.
 
-### D-3. `src/store/modal/modalStore.js` / `confirmStore.js`
 - **역할**: 전역 모달 상태 머신.
 - **핵심 로직**:
-  - Modal: `open`, `close`, `reset`, `openByPayload`
   - Confirm: `open()`이 Promise를 반환하고 confirm/cancel 결과를 resolve
 - **사용법(패턴)**:
   - `payload` 기반으로 콘텐츠 컴포넌트와 props를 주입해 재사용성 확보.
-- **리뷰**:
-  - payload 패턴이 매우 실용적.
   - 파일명 오타(`Store` 오타)는 가독성/검색성을 떨어뜨려 정리 권장.
 
 ### D-4. `src/store/toast/toastStore.js`
 - **역할**: 전역 토스트 알림.
-- **로직**:
   - `show(message, duration)` 호출 시 기존 타이머 정리 후 재설정
   - 자동 hide 처리
 - **리뷰**: 안전한 타이머 처리 방식.
 
-### D-5. `src/store/form/formTableStore.js`
-- **역할**: 폼 샘플 데이터 전역 상태.
-- **로직**:
-  - 허용된 필드만 `setField`로 업데이트
-  - `values` getter로 현재 상태 추출
 - **리뷰**:
   - 방어적 필드 체크가 있어 의도치 않은 key 주입을 막음.
 
----
-
 ## E. API/통신 영역
-
 ### E-1. `src/api/axios.js`
 - **역할**: 공통 Axios 인스턴스.
 - **핵심 로직**:
   - 요청 인터셉터: `userStore.user?.token`을 Authorization 헤더에 부착
   - 응답 인터셉터: 401 시 `logout()` 후 `/login` 강제 이동
   - 성공 응답은 `response.data`만 반환
-- **사용법**:
-  - API 함수는 이 인스턴스를 사용해 공통 인증/에러 정책 공유.
-- **리뷰**:
   - 중앙집중형 인증 처리로 중복 감소.
   - `window.location.href` 리다이렉션은 명시적이지만 SPA 흐름 측면에서 Router 기반 처리로 개선 여지.
 
 ### E-2. `src/api/auth.api.js`, `src/api/users.api.js`, `src/api/index.js`
-- **역할**: 기능별 API 모듈 분리 + 배럴 export.
 - **사용법**:
   - `import { loginApi, getUsersApi } from "@/api"`
 - **리뷰**: 구조가 간결하고 확장 쉬움.
 
----
-
-## F. 페이지/컴포넌트 사용 영역
-
-### F-1. `src/pages/Login/Login.jsx`
-- **현재 상태**: `handleLogin` 로직이 주석 처리되어 실제 로그인 동작 없음.
 - **원래 의도 로직**:
   1. `loginApi` 호출
-  2. `userStore.login(user)` 반영
   3. 홈으로 이동
 - **리뷰**:
-  - 샘플 단계로 보이며, 실제 서비스 전에는 복구 필요.
-
 ### F-2. `src/pages/Components/Components.jsx`
 - **역할**: 디자인 시스템/공용 컴포넌트의 데모 + 패턴 레퍼런스 페이지.
-- **핵심 로직**:
-  - 리스트 테이블 행 선택/전체선택/토글
   - 드래그앤드롭 데이터 상태 관리
-  - `searchParams` 유틸을 이용해 폼 상태 ↔ URL 동기화
   - modal/confirm payload를 통한 오버레이 호출
 - **사용법**:
   - 새로운 화면 구현 시 이 페이지의 패턴(테이블, 액션 버튼, 모달 트리거)을 복사해 시작하면 생산성이 높음.
 - **리뷰**:
-  - 실전에서 바로 재사용 가능한 예제가 많아 팀 온보딩에 매우 유리.
-
----
-
-## G. 유틸/상수 영역
-
 ### G-1. `src/utils/searchParams.js`
 - **역할**: 폼과 URLSearchParams 간 양방향 변환.
-- **지원 타입**:
   - `string`
   - `boolean`
-  - `array`
-- **사용법**:
-  - `parseSearchParamsToForm(...)`로 초기 폼 구성
   - `createSearchParamsFromForm(...)`로 URL 업데이트
 - **리뷰**:
-  - 타입별 직렬화/역직렬화가 명확해서 재사용성이 높음.
-
 ### G-2. `src/constants/modal.js`
-- **역할**: 모달/컨펌 payload 빌더 팩토리.
 - **사용법**:
   - 화면에서 필요한 content component와 메시지/data를 전달해 표준화된 payload 생성.
 - **리뷰**:
   - 모달 호출 시 중복 파라미터를 줄이는 좋은 패턴.
 
----
-
-## 4) 실제 사용 시 추천 흐름 (개발자 관점)
-
 1. 새 페이지 생성 (`src/pages/...`)
-2. `routes/paths.js` + `routes/router.jsx`에 경로 추가
 3. 필요 시 API 함수(`src/api`) 추가
 4. 페이지에서 store 사용(모달/토스트/폼)
-5. 공통 컴포넌트(`components`) 조합
 6. 쿼리 동기화가 필요하면 `utils/searchParams` 적용
 
----
 
 ## 5) 코드 리뷰 요약 (핵심)
 
-### 장점
 - Provider/Router/Store 계층 분리가 명확함
 - 전역 오버레이(Modal/Confirm/Toast) 설계가 일관됨
-- API 인터셉터로 인증 정책 중앙화
 - 데모 페이지가 실사용 레퍼런스로 유용함
-
 ### 보완 포인트
 - `Login.jsx` 로그인 로직 주석 해제/정상화 필요
 - `*Store.js` 파일명 오타 정리 권장
@@ -259,7 +156,6 @@ npm run lint
 ---
 
 ## 6) 빠른 참고 코드 패턴
-
 ### 6-1. Confirm 모달 사용
 ```jsx
 const ok = await confirmStore.openByPayload(
@@ -293,6 +189,5 @@ toastStore.show("저장되었습니다.");
 ---
 
 ## 7) 결론
-
 현재 구조는 **관리자 어드민 보일러플레이트로서 확장성이 좋은 기반**입니다.
 특히 전역 상태/모달/라우팅 설계가 일관적이라, 로그인 로직 정상화와 네이밍 정리만 진행하면 실무 사용성이 더 높아집니다.
