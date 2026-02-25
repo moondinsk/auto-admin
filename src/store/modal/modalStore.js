@@ -28,7 +28,7 @@ class ModalStore {
     }
 
     const { component: ContentComponent, modalProps = {} } = payload;
-    const { contentProps = {}, data, depths, ...restModalProps } = modalProps;
+    const { contentProps = {}, data, ...restModalProps } = modalProps;
 
     this.open(null, {
       ...restModalProps,
@@ -36,7 +36,6 @@ class ModalStore {
       contentProps: {
         ...contentProps,
         data,
-        depths,
       },
     });
   }
