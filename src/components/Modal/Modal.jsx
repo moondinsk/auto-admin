@@ -33,7 +33,6 @@ const Modal = ({
 
     onClose?.();
   };
-
   const renderedContent = children || (ContentComponent ? <ContentComponent {...contentProps} /> : message);
 
   return (

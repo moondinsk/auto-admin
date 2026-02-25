@@ -27,10 +27,10 @@ class ModalStore {
       return;
     }
 
-    const { component: ContentComponent, modalProps = {} } = payload;
+    const { component: ContentComponent, modalProps = {}, content = null } = payload;
     const { contentProps = {}, data, ...restModalProps } = modalProps;
 
-    this.open(null, {
+    this.open(content, {
       ...restModalProps,
       contentComponent: ContentComponent,
       contentProps: {
