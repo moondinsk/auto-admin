@@ -1,5 +1,7 @@
 import axios from "axios";
 import { userStore } from "@/store";
+import { router } from "@/routes/router";
+import { SEGMENT } from "@/routes/paths";
 
 // Axios 인스턴스 생성
 const instance = axios.create({
@@ -32,7 +34,7 @@ instance.interceptors.response.use(
 
     if (status === 401) {
       userStore.logout();
-      window.location.href = "/login";
+      router.navigate(`/${SEGMENT.LOGIN}`, { replace: true });
     }
 
     return Promise.reject(error);

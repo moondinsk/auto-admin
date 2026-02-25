@@ -521,7 +521,6 @@ const Components = () => {
       });
 
       const products = Array.isArray(data) ? data : data?.items ?? data?.list ?? [];
-      console.log("[getProductsApi result]", products);
 
       modalStore.openByPayload(
         MODAL_PAYLOAD.ALERT_MODAL({
