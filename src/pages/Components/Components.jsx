@@ -12,7 +12,7 @@ import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
 import { getProductsApi } from "@/api";
-import { confirmStore, formTableStore, modalStore } from "@/store";
+import { confirmStore, modalStore } from "@/store";
 import {
   createSearchParamsFromForm,
   parseSearchParamsToForm,
@@ -336,48 +336,6 @@ const Components = () => {
     },
   ];
 
-  const storeFormFields = [
-    {
-      key: "managerName",
-      label: "담당자명",
-      name: "managerName",
-      type: "input",
-      placeholder: "담당자명을 입력하세요",
-    },
-    {
-      key: "managerRole",
-      label: "담당자 권한",
-      name: "managerRole",
-      type: "select",
-      placeholder: "권한을 선택하세요",
-      options: [
-        { value: "admin", label: "관리자" },
-        { value: "editor", label: "편집자" },
-        { value: "viewer", label: "조회자" },
-      ],
-    },
-    {
-      key: "managerStatus",
-      label: "활성 상태",
-      name: "managerStatus",
-      type: "radio",
-      options: [
-        { value: "active", label: "활성" },
-        { value: "inactive", label: "비활성" },
-      ],
-      colSpan: 3,
-    },
-    {
-      key: "managerMemo",
-      label: "메모",
-      name: "managerMemo",
-      type: "textarea",
-      placeholder: "메모를 입력하세요",
-      rows: 3,
-      colSpan: 3,
-    },
-  ];
-
   /* ========================================================
       FORM STATE
   ======================================================== */
@@ -411,19 +369,6 @@ const Components = () => {
       ...prev,
       [name]: value,
     }));
-  };
-
-  const onStoreFormChange = (e) => {
-    const { name, value } = e.target;
-    if (!name) {
-      return;
-    }
-
-    formTableStore.setField(name, value);
-  };
-
-  const handleStoreFormSave = () => {
-    console.log("[FormTable Store Save]", formTableStore.values);
   };
 
   const handleSearch = () => {
@@ -633,24 +578,6 @@ const Components = () => {
       {/* ================= COLUMN 2 TABLE SECTION ================= */}
       <CardSection title="컬럼 2개인 Table 컴포넌트 예시">
         <FormTable columns={2} fields={column2Fields} values={column2Form} onChange={onColumn2Change} />
-      </CardSection>
-
-      <CardSection title="Table 컴포넌트 예시 - FormTable (Store 관리)">
-        <FormTable columns={2} fields={storeFormFields} values={formTableStore.values} onChange={onStoreFormChange} />
-        <TableActionButtons
-          buttons={[
-            {
-              label: "초기화",
-              onClick: () => formTableStore.reset(),
-              color: theme.colors.palette.gray800,
-              icon: <IoIosRefresh />,
-            },
-            {
-              label: "저장",
-              onClick: handleStoreFormSave,
-            },
-          ]}
-        />
       </CardSection>
 
       {/* ================= DRAG & DROP LIST SECTION ================= */}
