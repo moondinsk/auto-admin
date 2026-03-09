@@ -3,11 +3,12 @@ import styled from "styled-components";
 export const Dim = styled.div`
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: ${({ $zIndex = 1000 }) => $zIndex};
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  pointer-events: ${({ $isTop = true }) => ($isTop ? "auto" : "none")};
   background: ${({ theme }) => `${theme.colors.palette.gray900}66`};
 `;
 

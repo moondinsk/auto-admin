@@ -1,12 +1,15 @@
 # Modal 가이드
 
 ## 위치
+
 `src/components/Modal/Modal.jsx`
 
 ## 목적
-`modalStore` 기반 전역 모달 렌더링에 사용하는 공용 모달 컴포넌트입니다.
+
+`modalStore.modals` 스택 기반 전역 렌더링에 사용하는 공용 모달 컴포넌트입니다.
 
 ## 기본 사용법 (직접 렌더링)
+
 ```jsx
 import Modal from "@/components/Modal/Modal";
 
@@ -18,27 +21,37 @@ import Modal from "@/components/Modal/Modal";
   onConfirm={handleConfirm}
   onCancel={handleCancel}
   onClose={handleClose}
-/>
+/>;
 ```
 
 ## 권장 사용법 (스토어 페이로드)
+
 ```jsx
-import { modalStore } from "@/store";
+import { useStore } from "@/store";
 import { MODAL_PAYLOAD } from "@/constants/modal";
 import GuideContent from "@/components/Modal/GuideContent";
 
-modalStore.openByPayload(
-  MODAL_PAYLOAD.GUIDE_MODAL({
-    component: GuideContent,
-    data: {
-      title: "운영 가이드",
-      description: "저장 전 설정을 확인하세요.",
-    },
-  }),
-);
+function Example() {
+  const { modalStore } = useStore();
+
+  const openGuideModal = () => {
+    modalStore.openByPayload(
+      MODAL_PAYLOAD.GUIDE_MODAL({
+        component: GuideContent,
+        data: {
+          title: "운영 가이드",
+          description: "저장 전 설정을 확인하세요.",
+        },
+      }),
+    );
+  };
+
+  return <button onClick={openGuideModal}>열기</button>;
+}
 ```
 
 ## 주요 Props
+
 - `title`: 헤더 제목 텍스트.
 - `message`: 바디 기본 텍스트.
 - `children`: 커스텀 바디 콘텐츠(우선순위 가장 높음).
@@ -54,11 +67,14 @@ modalStore.openByPayload(
 - `successToastMessage`: 확인 후 표시할 토스트 메시지(비어 있지 않을 때).
 
 ## 렌더링 우선순위
+
 1. `children`
 2. `contentComponent`와 `contentProps`
 3. `message`
 
 ## 참고
+
 - 배경 클릭 시 취소 흐름(`onCancel` -> `onClose`)이 실행됩니다.
-- 확인 흐름은 `onConfirm` 호출 후(필요 시 토스트) `onClose`로 마무리됩니다.
+- 확인 흐름은 `onConfirm` 호출 후(필요 시 `react-toastify` 토스트) `onClose`로 마무리됩니다.
 - 전역 마운트 위치는 `src/layouts/Root.jsx`입니다.
+- 다중 모달(2중/3중/n중)은 `src/store/modal/modalStore.js`의 `modals` 배열로 관리됩니다.

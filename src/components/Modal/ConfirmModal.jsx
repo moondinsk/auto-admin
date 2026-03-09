@@ -1,6 +1,7 @@
 import React from "react";
 import Button from "@/components/Button/Button";
-import { toastStore } from "@/store";
+import { showToast } from "@/utils/toast";
+
 import { theme } from "@/styles/theme";
 import { Dim, ModalBody, ModalFooter, ModalHeader, ModalPanel } from "./Modal.styles";
 
@@ -21,7 +22,9 @@ const ConfirmModal = ({
 
   const handleConfirm = () => {
     onConfirm?.();
-    toastStore.show(successToastMessage);
+    if (successToastMessage) {
+      showToast(successToastMessage);
+    }
   };
 
   const renderedContent = ContentComponent ? <ContentComponent {...contentProps} /> : message;

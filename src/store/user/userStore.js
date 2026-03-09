@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
+import { getStore, useStore } from "../index.js";
 
-class UserStore {
+export class UserStore {
   user = null; // 사용자 정보
   isLogin = false; // 로그인 여부
   role = null; // 권한 (admin, manager, user 등)
@@ -42,4 +43,10 @@ class UserStore {
   }
 }
 
-export const userStore = new UserStore();
+export const useUserStore = () => {
+  return useStore().userStore;
+};
+
+export const getUserStore = () => {
+  return getStore().userStore;
+};

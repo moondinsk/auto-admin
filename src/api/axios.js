@@ -1,7 +1,9 @@
 import axios from "axios";
-import { userStore } from "@/store";
 import { router } from "@/routes/router";
 import { SEGMENT } from "@/routes/paths";
+import { getStore } from "@/store";
+
+const { userStore } = getStore();
 
 // Axios 인스턴스 생성
 const instance = axios.create({

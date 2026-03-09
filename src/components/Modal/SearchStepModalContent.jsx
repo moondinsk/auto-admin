@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import Button from "@/components/Button/Button";
 import { CONFIRM_PAYLOAD } from "@/constants/modal";
-import { confirmStore } from "@/store";
+
 import SearchResultFormContent from "@/components/Modal/SearchResultFormContent";
+import { useStore } from "@/store";
 
 // 1차 입력 모달: 2차 입력 모달에서 수정된 값을 반영
 const SearchStepModalContent = ({ data }) => {
+  const { confirmStore } = useStore();
+
   const [searchedItem, setSearchedItem] = useState({
     itemName: data?.itemName || "",
   });

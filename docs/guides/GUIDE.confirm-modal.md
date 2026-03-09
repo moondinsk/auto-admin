@@ -1,27 +1,39 @@
 # ConfirmModal 가이드
 
 ## 위치
+
 `src/components/Modal/ConfirmModal.jsx`
 
 ## 목적
+
 삭제 확인, 입력 확인 같은 액션에 사용하는 `confirmStore` 기반 확인 모달입니다.
 
 ## 기본 사용법 (스토어 페이로드)
+
 ```jsx
-import { confirmStore } from "@/store";
+import { useStore } from "@/store";
 import { CONFIRM_PAYLOAD } from "@/constants/modal";
 import DeleteConfirmContent from "@/components/Modal/DeleteConfirmContent";
 
-confirmStore.openByPayload(
-  CONFIRM_PAYLOAD.DELETE_CONFIRM({
-    component: DeleteConfirmContent,
-    message: "선택한 항목을 삭제할까요?",
-    data: { selectedIds: ["a1", "a2"] },
-  }),
-);
+function Example() {
+  const { confirmStore } = useStore();
+
+  const openDeleteConfirm = () => {
+    confirmStore.openByPayload(
+      CONFIRM_PAYLOAD.DELETE_CONFIRM({
+        component: DeleteConfirmContent,
+        message: "선택한 항목을 삭제할까요?",
+        data: { selectedIds: ["a1", "a2"] },
+      }),
+    );
+  };
+
+  return <button onClick={openDeleteConfirm}>열기</button>;
+}
 ```
 
 ## 주요 Props
+
 - `title`: 헤더 제목.
 - `message`: 바디 기본 메시지.
 - `contentComponent`: 선택적 콘텐츠 컴포넌트.
@@ -33,6 +45,8 @@ confirmStore.openByPayload(
 - `successToastMessage`: 확인 시 노출할 토스트 메시지.
 
 ## 참고
+
 - `Modal`과 달리 `children`을 직접 받지 않습니다.
 - `confirmStore.openByPayload`는 확인/취소 결과로 resolve되는 Promise를 반환합니다.
 - 전역 마운트 위치는 `src/layouts/Root.jsx`입니다.
+- 확인 시 토스트는 `react-toastify` 기반으로 노출됩니다.

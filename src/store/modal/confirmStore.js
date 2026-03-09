@@ -1,6 +1,9 @@
 import { makeAutoObservable, observable } from "mobx";
+import { getStore, useStore } from "../index.js";
 
-class ConfirmStore {
+const SHOULD_DEBUG_CONFIRM_MODAL = import.meta.env.DEV;
+
+export class ConfirmStore {
   isOpen = false;
   title = "";
   message = "";
@@ -21,6 +24,26 @@ class ConfirmStore {
     );
   }
 
+  debugConfirm(action, meta = {}) {
+    if (!SHOULD_DEBUG_CONFIRM_MODAL) {
+      return;
+    }
+
+    const snapshot = {
+      isOpen: this.isOpen,
+      title: this.title || "(no-title)",
+      message: this.message || "(no-message)",
+      component: this.contentComponent?.name || "(unknown)",
+    };
+
+    console.groupCollapsed(`[ConfirmModal] ${action} (isOpen: ${this.isOpen})`);
+    if (Object.keys(meta).length > 0) {
+      console.log("meta:", meta);
+    }
+    console.table([snapshot]);
+    console.groupEnd();
+  }
+
   open({
     title = "",
     message = "",
@@ -38,6 +61,7 @@ class ConfirmStore {
     this.successToastMessage = successToastMessage;
     this.contentComponent = contentComponent;
     this.contentProps = contentProps;
+    this.debugConfirm("open", { title, message });
 
     return new Promise((resolve) => {
       this.resolve = resolve;
@@ -67,19 +91,28 @@ class ConfirmStore {
 
   confirm() {
     this.resolve?.(true);
-    this.close();
+    this.debugConfirm("confirm");
+    this.close("confirm");
   }
 
   cancel() {
     this.resolve?.(false);
-    this.close();
+    this.debugConfirm("cancel");
+    this.close("cancel");
   }
 
-  close() {
+  close(reason = "manual") {
     this.isOpen = false;
+    this.debugConfirm("close", { reason });
   }
 
   reset() {
+    const beforeState = {
+      title: this.title,
+      message: this.message,
+      component: this.contentComponent?.name || "(unknown)",
+    };
+
     this.isOpen = false;
     this.title = "";
     this.message = "";
@@ -89,7 +122,14 @@ class ConfirmStore {
     this.contentComponent = null;
     this.contentProps = {};
     this.resolve = null;
+    this.debugConfirm("reset", beforeState);
   }
 }
 
-export const confirmStore = new ConfirmStore();
+export const useConfirmStore = () => {
+  return useStore().confirmStore;
+};
+
+export const getConfirmStore = () => {
+  return getStore().confirmStore;
+};

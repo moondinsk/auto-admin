@@ -9,4 +9,5 @@ export const StyledAside = styled.aside`
   top: ${theme.size.headerHeight};
   background: ${theme.colors.layout.sidebarBG};
   flex-shrink: 0;
+  z-index: 10;
 `;

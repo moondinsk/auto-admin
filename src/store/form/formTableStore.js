@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
+import { getStore, useStore } from "../index.js";
 
-class FormTableStore {
+export class FormTableStore {
   managerName = "";
   managerRole = "";
   managerMemo = "";
@@ -35,4 +36,10 @@ class FormTableStore {
   }
 }
 
-export const formTableStore = new FormTableStore();
+export const useFormTableStore = () => {
+  return useStore().formTableStore;
+};
+
+export const getFormTableStore = () => {
+  return getStore().formTableStore;
+};

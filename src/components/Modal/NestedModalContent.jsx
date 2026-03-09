@@ -2,9 +2,10 @@ import React from "react";
 import Button from "@/components/Button/Button";
 import GuideContent from "@/components/Modal/GuideContent";
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
-import { modalStore } from "@/store";
+import { useStore } from "@/store";
 
 const NestedModalContent = ({ data }) => {
+  const { modalStore } = useStore();
   const handleOpenSecondModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.GUIDE_MODAL({

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { IoIosArrowForward, IoIosRefresh } from "react-icons/io";
 import { useSearchParams } from "react-router-dom";
@@ -12,13 +12,7 @@ import DragDropList from "@/components/DragDropList/DragDropList";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
 import { getProductsApi } from "@/api";
-import { confirmStore, modalStore } from "@/store";
-import {
-  createSearchParamsFromForm,
-  parseSearchParamsToForm,
-  SEARCH_PARAM_TYPE,
-} from "@/utils/searchParams";
-
+import { createSearchParamsFromForm, parseSearchParamsToForm, SEARCH_PARAM_TYPE } from "@/utils/searchParams";
 import { theme } from "@/styles/theme";
 import { StyledComponents, Buttons } from "./Components.styles";
 import GuideContent from "@/components/Modal/GuideContent";
@@ -27,6 +21,75 @@ import DeleteConfirmContent from "@/components/Modal/DeleteConfirmContent";
 import AlertModalContent from "@/components/Modal/AlertModalContent";
 import SearchStepModalContent from "@/components/Modal/SearchStepModalContent";
 import NestedModalContent from "@/components/Modal/NestedModalContent";
+import TripleNestedModalContent from "@/components/Modal/TripleNestedModalContent";
+import { useStore } from "@/store";
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 10;
+const LIMIT_OPTIONS = [
+  { value: "5", label: "5" },
+  { value: "10", label: "10" },
+  { value: "20", label: "20" },
+];
+
+const toPositiveInt = (value, fallback) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return Math.floor(parsed);
+};
+
+const includesIgnoreCase = (source, keyword) =>
+  String(source || "")
+    .toLowerCase()
+    .includes(String(keyword || "").toLowerCase());
+
+const filterListRowsByForm = (rows, criteria) => {
+  const keyword = String(criteria.searchValue || "").trim();
+  const searchTargetKey =
+    {
+      name: "bannerGroupName",
+      code: "bannerCode",
+    }[criteria.searchCategory] || criteria.searchCategory;
+
+  return rows.filter((row) => {
+    if (criteria.bannerGroupName && !includesIgnoreCase(row.bannerGroupName, criteria.bannerGroupName)) {
+      return false;
+    }
+
+    if (criteria.bannerGroupDesc && !includesIgnoreCase(row.bannerGroupDesc, criteria.bannerGroupDesc)) {
+      return false;
+    }
+
+    if (criteria.searchKeyword && row.searchKeyword !== criteria.searchKeyword) {
+      return false;
+    }
+
+    if (criteria.searchCategory && keyword) {
+      if (!includesIgnoreCase(row[searchTargetKey], keyword)) {
+        return false;
+      }
+    }
+
+    if (Array.isArray(criteria.features) && criteria.features.length > 0) {
+      const matchesFeatures = criteria.features.every((feature) => row.features.includes(feature));
+      if (!matchesFeatures) {
+        return false;
+      }
+    }
+
+    if (criteria.startDate && row.createdDate < criteria.startDate) {
+      return false;
+    }
+
+    if (criteria.endDate && row.createdDate > criteria.endDate) {
+      return false;
+    }
+
+    return true;
+  });
+};
 
 const initialForm = {
   bannerGroupName: "",
@@ -34,10 +97,11 @@ const initialForm = {
   searchKeyword: "",
   searchCategory: "",
   searchValue: "",
-  exposureStatus: "",
   features: [],
   startDate: "",
   endDate: "",
+  page: DEFAULT_PAGE,
+  limit: DEFAULT_LIMIT,
 };
 
 const searchFormFields = [
@@ -48,39 +112,44 @@ const searchFormFields = [
   "searchValue",
   "startDate",
   "endDate",
-  { key: "exposureStatus", type: SEARCH_PARAM_TYPE.BOOLEAN }, 
+  "page",
+  "limit",
   { key: "features", type: SEARCH_PARAM_TYPE.ARRAY },
 ];
 
-const Components = () => {
+const Components = observer(() => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialSearchForm = useMemo(
-    () =>
-      parseSearchParamsToForm({
-        searchParams,
-        initialForm,
-        fields: searchFormFields,
-      }),
-    [searchParams],
-  );
 
   /* ========================================================
       1️⃣ LIST TABLE STATE (배너 목록 데이터)
   ======================================================== */
 
-  const [listTableRows, setListTableRows] = useState([
-    // 데이터 20개 추가
-    ...Array.from({ length: 15 }, (_, index) => ({
-      id: `b${index + 3}`,
-      no: index + 3,
-      groupName: `배너 그룹 ${index + 3}`,
-      exposureStatus: index % 2 === 0,
-      imageCount: (index % 5) + 1,
-      effect: index % 2 === 0 ? "슬라이드" : "페이드",
-      clickCount: (index + 3) * 11,
-      bannerCode: `B${String(index + 3).padStart(7, "0")}`,
-    })),
-  ]);
+  const [listTableRows, setListTableRows] = useState(() => {
+    const keywordPool = ["new", "sale", "best"];
+
+    return Array.from({ length: 30 }, (_, index) => {
+      const no = index + 1;
+      const keyword = keywordPool[index % keywordPool.length];
+      const subKeyword = keywordPool[(index + 1) % keywordPool.length];
+      const created = new Date();
+      created.setDate(created.getDate() - index * 2);
+
+      return {
+        id: `b${no}`,
+        no,
+        bannerGroupName: `배너 그룹 ${no}`,
+        bannerGroupDesc: `배너 그룹 ${no}에 대한 설명입니다.`,
+        searchKeyword: keyword,
+        features: index % 2 === 0 ? [keyword, subKeyword] : [keyword],
+        createdDate: created.toISOString().split("T")[0],
+        exposureStatus: index % 2 === 0,
+        imageCount: (index % 5) + 1,
+        effect: index % 2 === 0 ? "슬라이드" : "페이드",
+        clickCount: (index + 3) * 11,
+        bannerCode: `B${String(no).padStart(7, "0")}`,
+      };
+    });
+  });
 
   // 체크된 행의 ID 목록 상태 - 체크박스 토글 시 업데이트되어 선택된 행 관리
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
@@ -118,11 +187,38 @@ const Components = () => {
     setListTableCheckedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
+  const initialParsedForm = parseSearchParamsToForm({
+    searchParams,
+    initialForm,
+    fields: searchFormFields,
+  });
+
+  const [appliedForm, setAppliedForm] = useState(initialParsedForm);
+
+  const filteredListTableRows = filterListRowsByForm(listTableRows, appliedForm);
+
+  const page = toPositiveInt(appliedForm.page, DEFAULT_PAGE);
+  const limit = toPositiveInt(appliedForm.limit, DEFAULT_LIMIT);
+  const totalPages = Math.max(1, Math.ceil(filteredListTableRows.length / limit));
+  const safePage = Math.min(page, totalPages);
+
+  const startIndex = (safePage - 1) * limit;
+  const pagedListTableRows = filteredListTableRows.slice(startIndex, startIndex + limit);
+
+  const currentPageRowIds = pagedListTableRows.map((row) => row.id);
+
   const toggleAll = (checked) => {
-    setListTableCheckedIds(checked ? listTableRows.map((row) => row.id) : []);
+    setListTableCheckedIds((prev) => {
+      if (checked) {
+        return Array.from(new Set([...prev, ...currentPageRowIds]));
+      }
+
+      return prev.filter((id) => !currentPageRowIds.includes(id));
+    });
   };
 
-  const allChecked = listTableRows.length > 0 && listTableCheckedIds.length === listTableRows.length;
+  const allChecked =
+    currentPageRowIds.length > 0 && currentPageRowIds.every((rowId) => listTableCheckedIds.includes(rowId));
 
   /* ========================================================
     LIST TABLE 컬럼 정의
@@ -135,13 +231,17 @@ const Components = () => {
       width: 44,
     },
     { key: "no", header: "No", width: 70 },
-    { key: "groupName", header: "그룹명", align: "left" },
+    { key: "bannerGroupName", header: "그룹명", align: "left", width: 150 },
+    { key: "bannerGroupDesc", header: "그룹 설명", align: "left", width: 220 },
+    { key: "searchKeyword", header: "배너 키워드", width: 120 },
+    { key: "features", header: "배너 특징", align: "left", width: 150 },
+    { key: "createdDate", header: "등록일", width: 120 },
     { key: "exposureStatus", header: "노출 상태", width: 120 },
-    { key: "imageCount", header: "이미지 수", width: 110 },
+    { key: "imageCount", header: "이미지 수", width: 50 },
     { key: "effect", header: "배너 효과", width: 120 },
-    { key: "clickCount", header: "클릭 수", width: 110 },
-    { key: "bannerCode", header: "배너 코드", width: 160 },
-    { key: "manage", header: "관리", width: 120 },
+    { key: "clickCount", header: "클릭 수", width: 100 },
+    { key: "bannerCode", header: "배너 코드", width: 100 },
+    { key: "manage", header: "관리", width: 100 },
   ];
 
   /* ========================================================
@@ -208,21 +308,23 @@ const Components = () => {
       selectName: "searchCategory",
       selectPlaceholder: "카테고리 선택",
       selectOptions: [
-        { value: "name", label: "배너명" },
-        { value: "code", label: "배너코드" },
+        { value: "bannerGroupName", label: "배너명" },
+        { value: "bannerCode", label: "배너코드" },
+        { value: "bannerGroupDesc", label: "배너 설명" },
+        { value: "searchKeyword", label: "배너 키워드" },
       ],
       inputName: "searchValue",
       inputPlaceholder: "검색어를 입력하세요",
     },
     {
-      key: "exposure",
-      label: "노출 여부",
-      name: "exposureStatus",
-      type: "radio",
-      options: [
-        { value: true, label: "노출" },
-        { value: false, label: "비노출" },
-      ],
+      key: "pagination",
+      label: "limit / 페이지",
+      type: "select-input",
+      selectName: "limit",
+      selectPlaceholder: "limit 선택",
+      selectOptions: LIMIT_OPTIONS,
+      inputName: "page",
+      inputPlaceholder: "페이지 번호",
     },
     {
       key: "features",
@@ -327,8 +429,10 @@ const Components = () => {
       selectName: "searchCategory",
       selectPlaceholder: "카테고리 선택",
       selectOptions: [
-        { value: "name", label: "배너명" },
-        { value: "code", label: "배너코드" },
+        { value: "bannerGroupName", label: "배너명" },
+        { value: "bannerCode", label: "배너코드" },
+        { value: "bannerGroupDesc", label: "배너 설명" },
+        { value: "searchKeyword", label: "배너 키워드" },
       ],
       inputName: "searchValue",
       inputPlaceholder: "검색어를 입력하세요",
@@ -341,7 +445,8 @@ const Components = () => {
   ======================================================== */
 
   // 폼 테이블의 폼 상태 (form 객체로 관리) - FormTable 컴포넌트에 전달
-  const [form, setForm] = useState(initialSearchForm);
+
+  const [form, setForm] = useState(initialParsedForm);
 
   // 컬럼 2개인 테이블의 폼 상태 (colSpan 필드도 포함) - FormTable 컴포넌트에 전달
   const initialColumn2Form = {
@@ -372,9 +477,30 @@ const Components = () => {
   };
 
   const handleSearch = () => {
+    const nextLimit = toPositiveInt(form.limit, DEFAULT_LIMIT);
+    const nextPage = toPositiveInt(form.page, DEFAULT_PAGE);
+
+    const normalizedForm = {
+      ...form,
+      page: nextPage,
+      limit: nextLimit,
+    };
+
+    const searchedRows = filterListRowsByForm(listTableRows, normalizedForm);
+    const searchedTotalPages = Math.max(1, Math.ceil(searchedRows.length / nextLimit));
+    const safeSearchedPage = Math.min(nextPage, searchedTotalPages);
+
+    const searchForm = {
+      ...normalizedForm,
+      page: safeSearchedPage,
+    };
+
+    setForm(searchForm);
+    setAppliedForm(searchForm);
+
     setSearchParams(
       createSearchParamsFromForm({
-        form,
+        form: searchForm,
         fields: searchFormFields,
       }),
     );
@@ -383,10 +509,16 @@ const Components = () => {
 
   const handleResetSearch = () => {
     setForm(initialForm);
-    setSearchParams(new URLSearchParams());
+    setAppliedForm(initialForm);
+    setSearchParams(
+      createSearchParamsFromForm({
+        form: initialForm,
+        fields: searchFormFields,
+      }),
+    );
     setListTableCheckedIds([]);
   };
-
+  const { modalStore, confirmStore } = useStore();
   // 관리 버튼/등록 버튼에서 공통으로 사용하는 등록 모달 열기
   const openRegisterModal = () => {
     modalStore.openByPayload(
@@ -445,6 +577,17 @@ const Components = () => {
     );
   };
 
+  const openTripleNestedModal = () => {
+    modalStore.openByPayload(
+      MODAL_PAYLOAD.GUIDE_MODAL({
+        component: TripleNestedModalContent,
+        data: {
+          description: "1차 모달에서 2차, 3차까지 순차적으로 열 수 있습니다.",
+        },
+      }),
+    );
+  };
+
   // 삭제 모달 예시
   const openDeleteModal = () => {
     confirmStore.openByPayload(
@@ -465,7 +608,7 @@ const Components = () => {
         size: 10,
       });
 
-      const products = Array.isArray(data) ? data : data?.items ?? data?.list ?? [];
+      const products = Array.isArray(data) ? data : (data?.items ?? data?.list ?? []);
 
       modalStore.openByPayload(
         MODAL_PAYLOAD.ALERT_MODAL({
@@ -515,47 +658,6 @@ const Components = () => {
         </Buttons>
       </CardSection>
 
-      {/* ================= LIST TABLE SECTION ================= */}
-      <CardSection title="Table 컴포넌트 예시 - ListTable">
-        <ListTable
-          pagination
-          columns={listTableColumns}
-          rows={listTableRows}
-          rowKey="id"
-          renderCell={(row, col) => {
-            if (col.key === "check") {
-              return (
-                <input
-                  type="checkbox"
-                  checked={listTableCheckedIds.includes(row.id)}
-                  onChange={() => toggleOne(row.id)}
-                />
-              );
-            }
-
-            if (col.key === "exposureStatus") {
-              return (
-                <ToggleSwitch
-                  checked={!!row.exposureStatus}
-                  onChange={() => toggleExposureStatus(row.id)}
-                  ariaLabel={`${row.groupName} 노출 상태 토글`}
-                />
-              );
-            }
-
-            if (col.key === "manage") {
-              return (
-                <Button size="xsm" radius={3} onClick={() => openRegisterModal(row)}>
-                  관리
-                </Button>
-              );
-            }
-
-            return row[col.key];
-          }}
-        />
-      </CardSection>
-
       {/* ================= FORM TABLE SECTION ================= */}
       <CardSection title="Table 컴포넌트 예시 - FormTable">
         <FormTable fields={formFields} values={form} onChange={onChange} />
@@ -573,6 +675,70 @@ const Components = () => {
             },
           ]}
         />
+      </CardSection>
+
+      {/* ================= LIST TABLE SECTION ================= */}
+      <CardSection title="Table 컴포넌트 예시 - ListTable">
+        <ListTable
+          pagination={false}
+          columns={listTableColumns}
+          rows={pagedListTableRows}
+          rowKey="id"
+          renderCell={(row, col) => {
+            if (col.key === "check") {
+              return (
+                <input
+                  type="checkbox"
+                  checked={listTableCheckedIds.includes(row.id)}
+                  onChange={() => toggleOne(row.id)}
+                />
+              );
+            }
+
+            if (col.key === "exposureStatus") {
+              return (
+                <ToggleSwitch
+                  checked={!!row.exposureStatus}
+                  onChange={() => toggleExposureStatus(row.id)}
+                  ariaLabel={`${row.bannerGroupName} 노출 상태 토글`}
+                />
+              );
+            }
+
+            if (col.key === "searchKeyword") {
+              const keywordLabel = {
+                new: "신상품",
+                sale: "세일",
+                best: "베스트",
+              };
+
+              return keywordLabel[row.searchKeyword] || row.searchKeyword;
+            }
+
+            if (col.key === "features") {
+              const featureLabel = {
+                new: "신상품",
+                sale: "세일",
+                best: "베스트",
+              };
+
+              return row.features.map((feature) => featureLabel[feature] || feature).join(", ");
+            }
+
+            if (col.key === "manage") {
+              return (
+                <Button size="xsm" radius={3} onClick={() => openRegisterModal(row)}>
+                  관리
+                </Button>
+              );
+            }
+
+            return row[col.key];
+          }}
+        />
+        <div style={{ marginTop: 10 }}>
+          총 {filteredListTableRows.length}건 / page {safePage} / limit {limit}
+        </div>
       </CardSection>
 
       {/* ================= COLUMN 2 TABLE SECTION ================= */}
@@ -630,10 +796,16 @@ const Components = () => {
           </Button>
         </div>
       </CardSection>
+
+      <CardSection title="3중 모달 예시">
+        <div className="flex-box" style={{ gap: 10 }}>
+          <Button outlined onClick={openTripleNestedModal}>
+            기본 3중 모달 열기
+          </Button>
+        </div>
+      </CardSection>
     </StyledComponents>
   );
-};
+});
 
-const ObservedComponents = observer(Components);
-
-export default ObservedComponents;
+export default Components;

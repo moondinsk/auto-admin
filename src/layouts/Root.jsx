@@ -2,19 +2,34 @@
 import { useRef } from "react";
 import { Outlet } from "react-router-dom";
 import { observer } from "mobx-react-lite";
-import { CSSTransition } from "react-transition-group";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 
-import { modalStore, confirmStore } from "../store";
 import Header from "@/components/Header/Header";
 import Modal from "@/components/Modal/Modal";
 import SideNav from "@/components/SideNav/SideNav";
 import Toast from "@/components/Toast/Toast";
 import { MainContent, RootContainer } from "./Root.style";
 import ConfirmModal from "@/components/Modal/ConfirmModal";
+import { useStore } from "@/store";
+
+function ModalTransitionItem({ modal, isTop, zIndex, onClose, ...transitionProps }) {
+  const nodeRef = useRef(null);
+
+  return (
+    <CSSTransition timeout={500} classNames="modal-transition" nodeRef={nodeRef} {...transitionProps}>
+      <div ref={nodeRef}>
+        <Modal {...modal.props} isTop={isTop} zIndex={zIndex} onClose={onClose}>
+          {modal.content}
+        </Modal>
+      </div>
+    </CSSTransition>
+  );
+}
 
 function Root() {
-  const modalNodeRef = useRef(null);
   const confirmNodeRef = useRef(null);
+
+  const { modalStore, confirmStore } = useStore();
 
   return (
     <>
@@ -31,19 +46,21 @@ function Root() {
       </RootContainer>
 
       {/* 전역 Modal */}
-      <CSSTransition
-        in={modalStore.isOpen}
-        timeout={500}
-        classNames="modal-transition"
-        unmountOnExit
-        onExited={() => modalStore.reset()}
-        nodeRef={modalNodeRef}>
-        <div ref={modalNodeRef}>
-          <Modal onClose={() => modalStore.close()} {...modalStore.props}>
-            {modalStore.content}
-          </Modal>
-        </div>
-      </CSSTransition>
+      <TransitionGroup component={null}>
+        {modalStore.modals.map((modal, index) => {
+          const isTop = index === modalStore.modals.length - 1;
+
+          return (
+            <ModalTransitionItem
+              key={modal.id}
+              modal={modal}
+              isTop={isTop}
+              zIndex={1000 + index * 10}
+              onClose={() => modalStore.closeById(modal.id)}
+            />
+          );
+        })}
+      </TransitionGroup>
 
       {/* 전역 Confirm Modal */}
       <CSSTransition

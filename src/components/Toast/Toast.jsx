@@ -1,18 +1,10 @@
 import React from "react";
-import { observer } from "mobx-react-lite";
-import { toastStore } from "@/store";
-import { ToastItem, ToastViewport } from "./Toast.styles";
+import { ToastContainer } from "react-toastify";
+import { TOAST_DEFAULT_OPTIONS } from "@/utils/toast";
+import "react-toastify/dist/ReactToastify.css";
 
 function Toast() {
-  if (!toastStore.isOpen) {
-    return null;
-  }
-
-  return (
-    <ToastViewport>
-      <ToastItem>{toastStore.message}</ToastItem>
-    </ToastViewport>
-  );
+  return <ToastContainer {...TOAST_DEFAULT_OPTIONS} />;
 }
 
-export default observer(Toast);
+export default Toast;

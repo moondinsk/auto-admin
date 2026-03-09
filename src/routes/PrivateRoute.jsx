@@ -1,8 +1,9 @@
 import { Navigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
-import { userStore } from "@/store";
+import { useStore } from "@/store";
 
-function PrivateRoute({ children }) {
+const PrivateRoute = observer(({ children }) => {
+  const { userStore } = useStore();
   if (!userStore.isLogin) {
     return <Navigate to="/login" replace />;
   }
@@ -12,6 +13,6 @@ function PrivateRoute({ children }) {
   }
 
   return children;
-}
+});
 
-export default observer(PrivateRoute);
+export default PrivateRoute;
