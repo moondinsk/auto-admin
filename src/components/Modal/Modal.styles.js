@@ -21,10 +21,11 @@ export const ModalPanel = styled.div`
     if (!$width) return "520px";
     return typeof $width === "number" ? `${$width}px` : $width;
   }};
-  max-height: ${({ $height }) => {
-    if (!$height) return "auto";
-    return typeof $height === "number" ? `${$height}px` : $height;
+  max-height: ${({ $maxHeight }) => {
+    if (!$maxHeight) return "auto";
+    return typeof $maxHeight === "number" ? `${$maxHeight}px` : $maxHeight;
   }};
+
   border-radius: 12px;
   background: ${({ theme }) => theme.colors.gray.white};
   border: 1px solid ${({ theme }) => theme.colors.border.default};

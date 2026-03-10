@@ -5,10 +5,10 @@
 import { StoreProvider } from "@/store";
 import { CookiesProvider } from "react-cookie";
 
-export function AppProviders({ children }) {
+export function AppProviders({ children, initialState }) {
   return (
     <CookiesProvider>
-      <StoreProvider>{children}</StoreProvider>
+      <StoreProvider initialState={initialState}>{children}</StoreProvider>
     </CookiesProvider>
   );
 }

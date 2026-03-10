@@ -188,7 +188,7 @@ export const ListPagination = styled.div`
   margin-top: 16px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: ${({ $onlyPageButtons }) => ($onlyPageButtons ? "flex-end" : "space-between")};
   gap: 12px;
   flex-wrap: wrap;
 `;
@@ -237,4 +237,15 @@ export const PageButtons = styled.div`
       color: ${({ theme }) => theme.colors.text.inverse};
     }
   }
+`;
+
+export const TableTop = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+// 총 length
+export const TotalLength = styled.div`
+  color: ${({ theme }) => theme.colors.text.secondary};
 `;

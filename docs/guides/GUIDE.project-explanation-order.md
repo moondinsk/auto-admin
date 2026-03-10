@@ -34,11 +34,13 @@
 
 - `routes/router.jsx`, `PrivateRoute.jsx`, `routes/paths.js`를 기준으로 진입 흐름을 설명합니다.
 - 비로그인/권한 없음/정상 접근 케이스를 분리해서 말합니다.
+- 컴포넌트 데모는 중첩 라우트로 분리되어 있습니다: `/components/table`, `/components/modal`, `/components/etc`.
+- 헤더 버튼(`src/components/Header/Header.jsx`)은 각 데모 라우트로 직접 이동합니다.
 
 6. 상태관리 구조
 
 - 전역 상태(`store`)와 화면 로컬 상태의 경계를 설명합니다.
-- 예: 모달/컨펌/유저 상태는 store에서, 토스트는 `react-toastify` 유틸(`src/utils/toast.js`)에서 관리된다고 설명합니다.
+- 예: 모달/컨펌/유저 상태는 store에서, 토스트는 `src/utils/toast.js`의 `showToast`로 관리된다고 설명합니다.
 
 7. API 통신 구조
 

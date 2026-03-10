@@ -44,6 +44,7 @@ export function ListTable({
   pagination = false,
   pageSizeOptions = PAGE_SIZE_OPTIONS,
   defaultPageSize = DEFAULT_PAGE_SIZE,
+  showPerPageControl = true,
 }) {
   // 페이지네이션 상태: 선택된 페이지 크기, 현재 페이지
   const [selectedPageSize, setSelectedPageSize] = useState(
@@ -107,23 +108,25 @@ export function ListTable({
         </tbody>
       </Table>
       {pagination && (
-        <ListPagination>
-          <PerPageControl>
-            <Select
-              className="custom-select"
-              classNamePrefix="react-select"
-              options={pageSizeOptions}
-              value={selectedPageSize}
-              isSearchable={false}
-              onChange={(option) => {
-                setSelectedPageSize(
-                  option || pageSizeOptions.find((item) => item.value === defaultPageSize) || pageSizeOptions[0],
-                );
-                setCurrentPage(1);
-              }}
-            />
-            <span className="label">개씩 보기</span>
-          </PerPageControl>
+        <ListPagination $onlyPageButtons={!showPerPageControl}>
+          {showPerPageControl && (
+            <PerPageControl>
+              <Select
+                className="custom-select"
+                classNamePrefix="react-select"
+                options={pageSizeOptions}
+                value={selectedPageSize}
+                isSearchable={false}
+                onChange={(option) => {
+                  setSelectedPageSize(
+                    option || pageSizeOptions.find((item) => item.value === defaultPageSize) || pageSizeOptions[0],
+                  );
+                  setCurrentPage(1);
+                }}
+              />
+              <span className="label">개씩 보기</span>
+            </PerPageControl>
+          )}
           <PageButtons>
             <button type="button" onClick={() => setCurrentPage(1)} disabled={safeCurrentPage === 1}>
               처음

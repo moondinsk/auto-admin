@@ -7,7 +7,8 @@ export class FormTableStore {
   managerMemo = "";
   managerStatus = "active";
 
-  constructor() {
+  constructor(store) {
+    this.store = store;
     makeAutoObservable(this, {}, { autoBind: true });
   }
 

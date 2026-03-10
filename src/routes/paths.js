@@ -11,4 +11,7 @@ export const SEGMENT = {
   FORBIDDEN: "403",
   USERS: "users",
   COMPONENTS: "components",
+  COMPONENTS_TABLE: "table",
+  COMPONENTS_MODAL: "modal",
+  COMPONENTS_ETC: "etc",
 };

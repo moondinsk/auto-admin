@@ -11,7 +11,7 @@ const Modal = ({
   contentComponent: ContentComponent,
   contentProps = {},
   width,
-  height,
+  maxHeight,
   onClose,
   onConfirm,
   onCancel,
@@ -64,7 +64,7 @@ const Modal = ({
 
   return (
     <Dim className="modal-dim" $isTop={isTop} $zIndex={zIndex} onClick={handleCancel}>
-      <ModalPanel className="modal-panel" $width={width} $height={height} onClick={(e) => e.stopPropagation()}>
+      <ModalPanel className="modal-panel" $width={width} $maxHeight={maxHeight} onClick={(e) => e.stopPropagation()}>
         {title && <ModalHeader>{title}</ModalHeader>}
         <ModalBody>{renderedContent}</ModalBody>
         <ModalFooter>

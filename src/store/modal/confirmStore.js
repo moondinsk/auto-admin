@@ -14,14 +14,9 @@ export class ConfirmStore {
   contentProps = {};
   resolve = null;
 
-  constructor() {
-    makeAutoObservable(
-      this,
-      {
-        resolve: observable.ref,
-      },
-      { autoBind: true },
-    );
+  constructor(store) {
+    this.store = store;
+    makeAutoObservable(this, {}, { autoBind: true });
   }
 
   debugConfirm(action, meta = {}) {
@@ -69,8 +64,8 @@ export class ConfirmStore {
   }
 
   openByPayload(payload) {
-    if (!payload) {
-      return Promise.resolve(false);
+    if (!payload?.component) {
+      return null;
     }
 
     const { component: ContentComponent, confirmProps = {} } = payload;

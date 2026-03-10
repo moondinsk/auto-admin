@@ -19,9 +19,12 @@ export class Store {
   }
 }
 
-const store = new Store();
+let store = new Store();
 
-export const StoreProvider = ({ children }) => {
+export const StoreProvider = ({ children, initialState }) => {
+  if (!store) {
+    store = new Store(initialState);
+  }
   return createElement(StoreContext.Provider, { value: store }, children);
 };
 
@@ -33,6 +36,8 @@ export const useStore = () => {
 };
 
 export const getStore = () => {
+  if (!store) throw new Error("Store has not been initialized");
+
   return store;
 };
 

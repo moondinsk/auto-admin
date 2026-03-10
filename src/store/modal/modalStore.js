@@ -6,14 +6,9 @@ const SHOULD_DEBUG_MODAL_STACK = import.meta.env.DEV;
 export class ModalStore {
   modals = [];
 
-  constructor() {
-    makeAutoObservable(
-      this,
-      {
-        modals: observable.shallow,
-      },
-      { autoBind: true },
-    );
+  constructor(store) {
+    this.store = store;
+    makeAutoObservable(this, {}, { autoBind: true });
   }
 
   get isOpen() {
@@ -52,12 +47,11 @@ export class ModalStore {
     console.groupEnd();
   }
 
-  open(content, props = {}) {
-    const id = props.id ?? `modal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  open(props = {}) {
+    const id = props.id ?? `modal-${crypto.randomUUID()}`;
 
     this.modals.push({
       id,
-      content,
       props,
     });
 
@@ -66,14 +60,14 @@ export class ModalStore {
   }
 
   openByPayload(payload) {
-    if (!payload) {
+    if (!payload?.component) {
       return null;
     }
 
     const { component: ContentComponent, modalProps = {}, content = null } = payload;
     const { contentProps = {}, data, ...restModalProps } = modalProps;
 
-    return this.open(content, {
+    return this.open({
       ...restModalProps,
       contentComponent: ContentComponent,
       contentProps: {

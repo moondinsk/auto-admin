@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import Root from "../layouts/Root";
 
@@ -13,6 +13,9 @@ import Login from "@/pages/Login/Login";
 import Forbidden from "../pages/Error/Forbidden";
 import Users from "@/pages/User/Users";
 import Components from "@/pages/Components/Components";
+import ComponentsTable from "@/pages/Components/ComponentsTable";
+import ComponentsModal from "@/pages/Components/ComponentsModal";
+import ComponentsEtc from "@/pages/Components/ComponentsEtc";
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +30,24 @@ export const router = createBrowserRouter([
       {
         path: SEGMENT.COMPONENTS,
         element: <Components />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to={SEGMENT.COMPONENTS_TABLE} replace />,
+          },
+          {
+            path: SEGMENT.COMPONENTS_TABLE,
+            element: <ComponentsTable />,
+          },
+          {
+            path: SEGMENT.COMPONENTS_MODAL,
+            element: <ComponentsModal />,
+          },
+          {
+            path: SEGMENT.COMPONENTS_ETC,
+            element: <ComponentsEtc />,
+          },
+        ],
       },
       {
         path: SEGMENT.PRODUCT,

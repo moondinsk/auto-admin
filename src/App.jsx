@@ -7,8 +7,10 @@ import { GlobalStyle } from "./styles/GlobalStyle";
 import { theme } from "./styles/theme";
 
 function App() {
+  const initialState = {};
+
   return (
-    <AppProviders>
+    <AppProviders initialState={initialState}>
       <ThemeProvider theme={theme}>
         <GlobalStyle />
         <RouterProvider router={router} />

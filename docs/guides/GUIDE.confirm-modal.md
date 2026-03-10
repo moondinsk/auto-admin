@@ -49,4 +49,4 @@ function Example() {
 - `Modal`과 달리 `children`을 직접 받지 않습니다.
 - `confirmStore.openByPayload`는 확인/취소 결과로 resolve되는 Promise를 반환합니다.
 - 전역 마운트 위치는 `src/layouts/Root.jsx`입니다.
-- 확인 시 토스트는 `react-toastify` 기반으로 노출됩니다.
+- 확인 시 토스트는 `src/utils/toast.js`의 `showToast`를 통해 노출됩니다.

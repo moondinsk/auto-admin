@@ -58,13 +58,15 @@ function Example() {
 - `contentComponent`: 바디에서 렌더링할 React 컴포넌트.
 - `contentProps`: `contentComponent`로 전달할 props.
 - `width`: 모달 너비(`number` 또는 CSS 문자열).
-- `height`: 모달 최대 높이(`number` 또는 CSS 문자열).
+- `maxHeight`: 모달 최대 높이(`number` 또는 CSS 문자열).
 - `onClose`: 닫힘 흐름에서 호출.
 - `onConfirm`: 확인 시 닫기 전에 호출.
 - `onCancel`: 취소/배경 클릭 시 닫기 전에 호출.
 - `confirmText`: 확인 버튼 라벨(기본값: 로컬라이즈된 확인 라벨).
 - `cancelText`: 취소 버튼 라벨(빈 문자열이면 취소 버튼 숨김).
 - `successToastMessage`: 확인 후 표시할 토스트 메시지(비어 있지 않을 때).
+- `isTop`: 스택에서 최상위 모달인지 여부(기본값: `true`).
+- `zIndex`: 모달 dim/panel의 z-index 기준값(기본값: `1000`).
 
 ## 렌더링 우선순위
 
@@ -75,6 +77,7 @@ function Example() {
 ## 참고
 
 - 배경 클릭 시 취소 흐름(`onCancel` -> `onClose`)이 실행됩니다.
-- 확인 흐름은 `onConfirm` 호출 후(필요 시 `react-toastify` 토스트) `onClose`로 마무리됩니다.
+- 확인 흐름은 `onConfirm` 호출 후(필요 시 `showToast`) `onClose`로 마무리됩니다.
+- `isTop=false`인 모달은 확인/취소/ESC 이벤트를 처리하지 않습니다.
 - 전역 마운트 위치는 `src/layouts/Root.jsx`입니다.
 - 다중 모달(2중/3중/n중)은 `src/store/modal/modalStore.js`의 `modals` 배열로 관리됩니다.

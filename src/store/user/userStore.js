@@ -7,7 +7,8 @@ export class UserStore {
   role = null; // 권한 (admin, manager, user 등)
   isHydrated = false; //  초기 복구 완료 여부
 
-  constructor() {
+  constructor(store) {
+    this.store = store;
     makeAutoObservable(this, {}, { autoBind: true });
 
     // 🔥 새로고침 / 주소 직접 입력 대응

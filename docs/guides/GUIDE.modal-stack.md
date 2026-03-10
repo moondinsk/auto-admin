@@ -25,15 +25,13 @@
   modals: [
     {
       id: "modal-1",
-      content: null,
       props: {
         title: "가이드 모달",
         width: 600,
-        height: "50vh",
+        maxHeight: "50vh",
         contentComponent: GuideContent,
         contentProps: { data: {} },
       },
-      openedAt: 1710000000000,
     },
   ],
 }
@@ -42,19 +40,14 @@
 ## store 설계 예시
 
 ```js
-import { makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 
 export class ModalStore {
   modals = [];
 
-  constructor() {
-    makeAutoObservable(
-      this,
-      {
-        modals: observable.shallow,
-      },
-      { autoBind: true },
-    );
+  constructor(store) {
+    this.store = store;
+    makeAutoObservable(this, {}, { autoBind: true });
   }
 
   get isOpen() {
@@ -65,26 +58,25 @@ export class ModalStore {
     return this.modals[this.modals.length - 1] ?? null;
   }
 
-  open(content, props = {}) {
-    const id = props.id ?? `modal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  open(props = {}) {
+    const id = props.id ?? `modal-${crypto.randomUUID()}`;
 
     this.modals.push({
       id,
-      content,
       props,
-      openedAt: Date.now(),
     });
 
+    this.debugStack("open", { id, title: props?.title || "(no-title)" });
     return id;
   }
 
   openByPayload(payload) {
-    if (!payload) return null;
+    if (!payload?.component) return null;
 
-    const { component: ContentComponent, modalProps = {}, content = null } = payload;
+    const { component: ContentComponent, modalProps = {} } = payload;
     const { contentProps = {}, data, ...restModalProps } = modalProps;
 
-    return this.open(content, {
+    return this.open({
       ...restModalProps,
       contentComponent: ContentComponent,
       contentProps: {
@@ -95,15 +87,21 @@ export class ModalStore {
   }
 
   closeTop() {
+    const removedId = this.topModal?.id;
     this.modals.pop();
+    this.debugStack("closeTop", { removedId });
   }
 
   closeById(id) {
+    const beforeLength = this.modals.length;
     this.modals = this.modals.filter((modal) => modal.id !== id);
+    this.debugStack("closeById", { targetId: id, removedCount: beforeLength - this.modals.length });
   }
 
   closeAll() {
+    const beforeLength = this.modals.length;
     this.modals = [];
+    this.debugStack("closeAll", { beforeLength });
   }
 }
 ```
@@ -116,7 +114,12 @@ export class ModalStore {
     const isTop = index === modalStore.modals.length - 1;
 
     return (
-      <Modal key={modal.id} {...modal.props} onClose={() => modalStore.closeById(modal.id)} isTop={isTop}>
+      <Modal
+        key={modal.id}
+        {...modal.props}
+        isTop={isTop}
+        zIndex={1000 + index * 10}
+        onClose={() => modalStore.closeById(modal.id)}>
         {modal.content}
       </Modal>
     );
@@ -173,9 +176,10 @@ modalStore.openByPayload(
 - `modalStore`는 `modals[]` 스택으로 동작하며 `closeById`, `closeTop`, `closeAll`을 지원합니다.
 - `Root.jsx`는 `TransitionGroup` + `CSSTransition`으로 모달 스택을 렌더링합니다.
 - `Modal.jsx`는 `isTop`과 `zIndex`를 받아 Top 모달만 닫힘 이벤트(배경 클릭/ESC)를 처리합니다.
-- 확인 토스트는 `react-toastify` + `src/utils/toast.js`의 `showToast`를 사용합니다.
+- 확인 토스트는 `src/utils/toast.js`의 `showToast`를 사용합니다.
 
 ## 참고
 
 - Confirm 모달도 동일한 스택 전략이 필요하면 `confirmStore`에 같은 패턴을 적용할 수 있습니다.
 - 특정 모달만 닫아야 하는 흐름이 있다면 `open` 반환값(`id`)을 화면 단에서 보관해 `closeById(id)`를 호출합니다.
+- 현재 프로젝트의 기본 패턴은 `contentComponent/contentProps`이며, `modal.content`(`children`)는 일반적으로 사용하지 않습니다.
