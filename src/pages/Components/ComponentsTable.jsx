@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { IoIosRefresh } from "react-icons/io";
 import Select from "react-select";
@@ -75,6 +75,19 @@ const getDateRange = (days) => {
 
 const getToday = () => new Date().toISOString().split("T")[0];
 
+const getPositiveIntParam = (searchParams, key, fallback) => {
+  const value = Number(searchParams.get(key));
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+};
+
+const isValidLimitParam = (value) => PAGE_SIZE_OPTIONS.some((option) => option.value === value);
+
+const toSearchFormQuery = (form) =>
+  createSearchParamsFromForm({
+    form,
+    fields: searchFormFields,
+  }).toString();
+
 const matchesRow = (row, form) => {
   if (form.bannerGroupName && !includesIgnoreCase(row.bannerGroupName, form.bannerGroupName)) {
     return false;
@@ -143,56 +156,134 @@ const ComponentsTable = () => {
   const { modalStore } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const parsedForm = parseSearchParamsToForm({
+  const page = getPositiveIntParam(searchParams, "page", 1);
+  const rawLimit = getPositiveIntParam(searchParams, "limit", DEFAULT_PAGE_SIZE);
+  const limit = isValidLimitParam(rawLimit) ? rawLimit : DEFAULT_PAGE_SIZE;
+
+  const selectedLimitOption = PAGE_SIZE_OPTIONS.find((option) => option.value === limit) || PAGE_SIZE_OPTIONS[0];
+
+  const parsedFormFromParams = parseSearchParamsToForm({
     searchParams,
     initialForm,
     fields: searchFormFields,
   });
-  const [form, setForm] = useState(parsedForm);
-  const [appliedForm, setAppliedForm] = useState(parsedForm);
+
+  const [form, setForm] = useState(parsedFormFromParams);
+  const [appliedForm, setAppliedForm] = useState(parsedFormFromParams);
   const [listTableRows, setListTableRows] = useState(createMockRows);
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
-  const [selectedLimitOption, setSelectedLimitOption] = useState(
-    PAGE_SIZE_OPTIONS.find((option) => option.value === DEFAULT_PAGE_SIZE) || PAGE_SIZE_OPTIONS[0],
-  );
+
+  const isSearchCriteriaOutOfSync = toSearchFormQuery(parsedFormFromParams) !== toSearchFormQuery(appliedForm);
+  const activeForm = isSearchCriteriaOutOfSync ? parsedFormFromParams : form;
+  const activeAppliedForm = isSearchCriteriaOutOfSync ? parsedFormFromParams : appliedForm;
 
   const filteredListTableRows = useMemo(() => {
-    return listTableRows.filter((row) => matchesRow(row, appliedForm));
-  }, [listTableRows, appliedForm]);
+    return listTableRows.filter((row) => matchesRow(row, activeAppliedForm));
+  }, [listTableRows, activeAppliedForm]);
 
-  const currentPageRowIds = filteredListTableRows.map((row) => row.id);
+  const totalCount = filteredListTableRows.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const safePage = Math.min(page, totalPages);
+  const startIndex = (safePage - 1) * limit;
+  const endIndex = startIndex + limit;
+
+  const paginatedRows = useMemo(() => {
+    return filteredListTableRows.slice(startIndex, endIndex);
+  }, [filteredListTableRows, startIndex, endIndex]);
+
+  const currentPageRowIds = paginatedRows.map((row) => row.id);
 
   const allChecked =
     currentPageRowIds.length > 0 && currentPageRowIds.every((rowId) => listTableCheckedIds.includes(rowId));
 
+  const updateSearchParams = (updates) => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "") {
+        nextParams.delete(key);
+      } else {
+        nextParams.set(key, String(value));
+      }
+    });
+
+    setSearchParams(nextParams);
+  };
+
+  useEffect(() => {
+    const nextUpdates = {};
+
+    if (page !== safePage) {
+      nextUpdates.page = safePage;
+    }
+
+    if (!isValidLimitParam(rawLimit)) {
+      nextUpdates.limit = limit;
+    }
+
+    if (Object.keys(nextUpdates).length > 0) {
+      updateSearchParams(nextUpdates);
+    }
+  }, [page, safePage, rawLimit, limit]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
+
+    setForm({
+      ...activeForm,
       [name]: value,
-    }));
+    });
   };
 
   const handleSearch = () => {
-    setAppliedForm(form);
-    setSearchParams(
-      createSearchParamsFromForm({
-        form,
-        fields: searchFormFields,
-      }),
-    );
+    setAppliedForm(activeForm);
+    setForm(activeForm);
+
+    const nextParams = createSearchParamsFromForm({
+      form: activeForm,
+      fields: searchFormFields,
+    });
+
+    nextParams.set("page", "1");
+    nextParams.set("limit", String(limit));
+
+    setSearchParams(nextParams);
     setListTableCheckedIds([]);
   };
 
   const handleResetSearch = () => {
     setForm(initialForm);
     setAppliedForm(initialForm);
-    setSearchParams(
-      createSearchParamsFromForm({
-        form: initialForm,
-        fields: searchFormFields,
-      }),
-    );
+
+    const nextParams = createSearchParamsFromForm({
+      form: initialForm,
+      fields: searchFormFields,
+    });
+
+    nextParams.set("page", "1");
+    nextParams.set("limit", String(DEFAULT_PAGE_SIZE));
+
+    setSearchParams(nextParams);
+    setListTableCheckedIds([]);
+  };
+
+  const handlePageChange = (nextPage) => {
+    updateSearchParams({
+      page: nextPage,
+      limit,
+    });
+
+    setListTableCheckedIds([]);
+  };
+
+  const handleLimitChange = (option) => {
+    const nextLimit = option?.value || DEFAULT_PAGE_SIZE;
+
+    updateSearchParams({
+      page: 1,
+      limit: nextLimit,
+    });
+
     setListTableCheckedIds([]);
   };
 
@@ -357,7 +448,7 @@ const ComponentsTable = () => {
   return (
     <StyledComponents className="flex-box col">
       <CardSection title="Table 컴포넌트 예시 - FormTable">
-        <FormTable fields={formFields} values={form} onChange={handleFieldChange} />
+        <FormTable fields={formFields} values={activeForm} onChange={handleFieldChange} />
         <TableActionButtons
           buttons={[
             {
@@ -383,18 +474,20 @@ const ComponentsTable = () => {
             options={PAGE_SIZE_OPTIONS}
             value={selectedLimitOption}
             isSearchable={false}
-            onChange={(option) => setSelectedLimitOption(option || PAGE_SIZE_OPTIONS[0])}
+            onChange={handleLimitChange}
           />
         </TableTop>
+
         <ListTable
-          key={`list-limit-${selectedLimitOption?.value}`}
           pagination
           showPerPageControl={false}
           columns={listTableColumns}
           rows={filteredListTableRows}
           rowKey="id"
-          pageSizeOptions={PAGE_SIZE_OPTIONS}
-          defaultPageSize={selectedLimitOption?.value || DEFAULT_PAGE_SIZE}
+          currentPage={safePage}
+          totalCount={totalCount}
+          pageSize={limit}
+          onPageChange={handlePageChange}
           renderCell={(row, col) => {
             if (col.key === "check") {
               return (

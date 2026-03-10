@@ -45,30 +45,56 @@ export function ListTable({
   pageSizeOptions = PAGE_SIZE_OPTIONS,
   defaultPageSize = DEFAULT_PAGE_SIZE,
   showPerPageControl = true,
+  currentPage,
+  totalCount,
+  pageSize,
+  onPageChange,
 }) {
+  const isControlledPagination =
+    pagination && typeof onPageChange === "function" && Number.isFinite(Number(totalCount));
+
   // 페이지네이션 상태: 선택된 페이지 크기, 현재 페이지
   const [selectedPageSize, setSelectedPageSize] = useState(
     pageSizeOptions.find((option) => option.value === defaultPageSize) || pageSizeOptions[0],
   );
 
   // 현재 페이지 상태 (1부터 시작)
-  const [currentPage, setCurrentPage] = useState(1);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
 
   /* =====================================================
       페이지네이션 계산
   ===================================================== */
-  const pageSize = selectedPageSize?.value || defaultPageSize || 10;
-  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const safePageSize = isControlledPagination
+    ? Math.max(1, Number(pageSize) || defaultPageSize || 10)
+    : selectedPageSize?.value || defaultPageSize || 10;
+  const safeTotalCount = isControlledPagination ? Math.max(0, Number(totalCount) || 0) : rows.length;
+  const totalPages = Math.max(1, Math.ceil(safeTotalCount / safePageSize));
+  const safeCurrentPage = Math.min(
+    isControlledPagination ? Math.max(1, Number(currentPage) || 1) : internalCurrentPage,
+    totalPages,
+  );
+
+  const goToPage = (nextPage) => {
+    if (isControlledPagination) {
+      onPageChange(nextPage);
+      return;
+    }
+
+    setInternalCurrentPage(nextPage);
+  };
 
   // 현재 페이지에 해당하는 데이터 슬라이스 (useMemo로 최적화)
   const paginatedRows = useMemo(() => {
-    const start = (safeCurrentPage - 1) * pageSize;
-    return rows.slice(start, start + pageSize);
-  }, [rows, safeCurrentPage, pageSize]);
+    const start = (safeCurrentPage - 1) * safePageSize;
+    return rows.slice(start, start + safePageSize);
+  }, [rows, safeCurrentPage, safePageSize]);
 
-  // pagination이 true일 때는 paginatedRows, 아니면 전체 rows 렌더링
-  const rowsToRender = pagination ? paginatedRows : rows;
+  // 제어형에서 totalCount가 rows.length보다 크고 rows가 pageSize 이하이면 외부 페이징된 rows로 간주
+  const isExternallyPaginatedRows =
+    isControlledPagination && safeTotalCount > rows.length && rows.length <= safePageSize;
+
+  // pagination이 true일 때: 외부 페이징 rows는 그대로, 그 외에는 내부 계산 페이지를 렌더
+  const rowsToRender = pagination ? (isExternallyPaginatedRows ? rows : paginatedRows) : rows;
 
   const renderRow = (row) => (
     <tr key={row[rowKey]}>
@@ -109,7 +135,7 @@ export function ListTable({
       </Table>
       {pagination && (
         <ListPagination $onlyPageButtons={!showPerPageControl}>
-          {showPerPageControl && (
+          {showPerPageControl && !isControlledPagination && (
             <PerPageControl>
               <Select
                 className="custom-select"
@@ -121,20 +147,20 @@ export function ListTable({
                   setSelectedPageSize(
                     option || pageSizeOptions.find((item) => item.value === defaultPageSize) || pageSizeOptions[0],
                   );
-                  setCurrentPage(1);
+                  setInternalCurrentPage(1);
                 }}
               />
               <span className="label">개씩 보기</span>
             </PerPageControl>
           )}
           <PageButtons>
-            <button type="button" onClick={() => setCurrentPage(1)} disabled={safeCurrentPage === 1}>
+            <button type="button" onClick={() => goToPage(1)} disabled={safeCurrentPage === 1}>
               처음
             </button>
 
             <button
               type="button"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              onClick={() => goToPage(Math.max(1, safeCurrentPage - 1))}
               disabled={safeCurrentPage === 1}>
               이전
             </button>
@@ -146,7 +172,7 @@ export function ListTable({
                   key={page}
                   type="button"
                   className={safeCurrentPage === page ? "is-active" : ""}
-                  onClick={() => setCurrentPage(page)}>
+                  onClick={() => goToPage(page)}>
                   {page}
                 </button>
               );
@@ -154,12 +180,12 @@ export function ListTable({
 
             <button
               type="button"
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              onClick={() => goToPage(Math.min(totalPages, safeCurrentPage + 1))}
               disabled={safeCurrentPage === totalPages}>
               다음
             </button>
 
-            <button type="button" onClick={() => setCurrentPage(totalPages)} disabled={safeCurrentPage === totalPages}>
+            <button type="button" onClick={() => goToPage(totalPages)} disabled={safeCurrentPage === totalPages}>
               마지막
             </button>
           </PageButtons>
