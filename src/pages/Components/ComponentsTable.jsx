@@ -139,7 +139,7 @@ const createMockRows = () => {
   });
 };
 
-const ComponentsTable = observer(() => {
+const ComponentsTable = () => {
   const { modalStore } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -438,6 +438,8 @@ const ComponentsTable = observer(() => {
       </CardSection>
     </StyledComponents>
   );
-});
+};
 
-export default ComponentsTable;
+const ObservedComponentsTable = observer(ComponentsTable);
+
+export default ObservedComponentsTable;

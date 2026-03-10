@@ -11,19 +11,21 @@
 ## 기본 사용법 (스토어 페이로드)
 
 ```jsx
+import { useState } from "react";
 import { useStore } from "@/store";
 import { CONFIRM_PAYLOAD } from "@/constants/modal";
 import DeleteConfirmContent from "@/components/Modal/DeleteConfirmContent";
 
 function Example() {
   const { confirmStore } = useStore();
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const openDeleteConfirm = () => {
     confirmStore.openByPayload(
       CONFIRM_PAYLOAD.DELETE_CONFIRM({
         component: DeleteConfirmContent,
         message: "선택한 항목을 삭제할까요?",
-        data: { selectedIds: ["a1", "a2"] },
+        data: { selectedIds },
       }),
     );
   };
@@ -50,3 +52,4 @@ function Example() {
 - `confirmStore.openByPayload`는 확인/취소 결과로 resolve되는 Promise를 반환합니다.
 - 전역 마운트 위치는 `src/layouts/Root.jsx`입니다.
 - 확인 시 토스트는 `src/utils/toast.js`의 `showToast`를 통해 노출됩니다.
+- 현재 데모 페이지(`src/pages/Components/ComponentsModal.jsx`)는 `selectedIds` 기본값을 빈 배열로 두고 체크박스로 선택값을 채운 뒤 확인 모달을 엽니다.

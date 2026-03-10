@@ -14,9 +14,9 @@ import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
 import { useStore } from "@/store";
 import { StyledComponents } from "./Components.styles";
 
-const ComponentsModal = observer(() => {
+const ComponentsModal = () => {
   const { modalStore, confirmStore } = useStore();
-  const [selectedIds, setSelectedIds] = useState(["b1", "b2"]);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const candidates = ["b1", "b2", "b3"];
 
@@ -155,6 +155,8 @@ const ComponentsModal = observer(() => {
       </CardSection>
     </StyledComponents>
   );
-});
+};
 
-export default ComponentsModal;
+const ObservedComponentsModal = observer(ComponentsModal);
+
+export default ObservedComponentsModal;

@@ -51,6 +51,7 @@
 
 - `Button`, `Modal`, `Table`, `Toast` 같은 공통 컴포넌트 설계 원칙을 설명합니다.
 - "props로 확장 가능한 구조"처럼 팀이 가져갈 규칙을 강조합니다.
+- MobX 페이지 컴포넌트는 `const Component = () => {}` 후 `const ObservedComponent = observer(Component)`로 래핑하는 패턴을 사용해 Fast Refresh 안정성을 높입니다.
 
 9. 대표 화면 데모
 

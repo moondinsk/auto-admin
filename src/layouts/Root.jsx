@@ -11,11 +11,15 @@ import Toast from "@/components/Toast/Toast";
 import { MainContent, RootContainer } from "./Root.style";
 import { useStore } from "@/store";
 
-function ModalTransitionItem({ modal, isTop, zIndex, onClose, ...transitionProps }) {
+const TRANSITION_TIMEOUT = 500;
+const MODAL_BASE_Z_INDEX = 1000;
+const MODAL_Z_INDEX_STEP = 10;
+
+const ModalTransitionItem = ({ modal, isTop, zIndex, onClose, ...transitionProps }) => {
   const nodeRef = useRef(null);
 
   return (
-    <CSSTransition timeout={500} classNames="modal-transition" nodeRef={nodeRef} {...transitionProps}>
+    <CSSTransition timeout={TRANSITION_TIMEOUT} classNames="modal-transition" nodeRef={nodeRef} {...transitionProps}>
       <div ref={nodeRef}>
         <Modal {...modal.props} isTop={isTop} zIndex={zIndex} onClose={onClose}>
           {modal.content}
@@ -23,15 +27,15 @@ function ModalTransitionItem({ modal, isTop, zIndex, onClose, ...transitionProps
       </div>
     </CSSTransition>
   );
-}
+};
 
-function ConfirmTransitionItem({ confirmStore }) {
+const ConfirmTransitionItem = observer(({ confirmStore }) => {
   const nodeRef = useRef(null);
 
   return (
     <CSSTransition
       in={confirmStore.isOpen}
-      timeout={500}
+      timeout={TRANSITION_TIMEOUT}
       classNames="confirm-transition"
       unmountOnExit
       onExited={() => confirmStore.reset()}
@@ -51,9 +55,9 @@ function ConfirmTransitionItem({ confirmStore }) {
       </div>
     </CSSTransition>
   );
-}
+});
 
-function Root() {
+const Root = () => {
   const { modalStore, confirmStore } = useStore();
 
   return (
@@ -76,7 +80,7 @@ function Root() {
               key={modal.id}
               modal={modal}
               isTop={isTop}
-              zIndex={1000 + index * 10}
+              zIndex={MODAL_BASE_Z_INDEX + index * MODAL_Z_INDEX_STEP}
               onClose={() => modalStore.closeById(modal.id)}
             />
           );
@@ -88,6 +92,8 @@ function Root() {
       <Toast />
     </>
   );
-}
+};
 
-export default observer(Root);
+const ObservedRoot = observer(Root);
+
+export default ObservedRoot;

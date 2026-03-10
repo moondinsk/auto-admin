@@ -12,7 +12,7 @@ import { theme } from "@/styles/theme";
 import { useStore } from "@/store";
 import { Buttons, StyledComponents } from "./Components.styles";
 
-const ComponentsEtc = observer(() => {
+const ComponentsEtc = () => {
   const { modalStore } = useStore();
 
   const [dndRows, setDndRows] = useState([
@@ -105,6 +105,8 @@ const ComponentsEtc = observer(() => {
       </CardSection>
     </StyledComponents>
   );
-});
+};
 
-export default ComponentsEtc;
+const ObservedComponentsEtc = observer(ComponentsEtc);
+
+export default ObservedComponentsEtc;
