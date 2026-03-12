@@ -6,7 +6,7 @@ import { useSearchParams } from "react-router-dom";
 
 import Button from "@/components/Button/Button";
 import CardSection from "@/components/Layout/CardSection";
-import { FormTable, ListTable } from "@/components/Table/Table";
+import { FormTable, InfoTable, ListTable } from "@/components/Table/Table";
 import TableActionButtons from "@/components/Table/TableActionButtons";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import RegisterModalContent from "@/components/Modal/RegisterModalContent";
@@ -53,6 +53,31 @@ const searchFormFields = [
   { key: "features", type: SEARCH_PARAM_TYPE.ARRAY },
 ];
 
+const infoTableRows = [
+  [
+    { label: "글번호", value: 10 },
+    { label: "날짜", value: "2026-03-11" },
+    { label: "작성자", value: "관리자" },
+    { label: "조회수", value: 124 },
+  ],
+  [
+    { label: "카테고리", value: "운영 공지" },
+    { label: "상태", value: "게시중" },
+  ],
+  [{ label: "제목", value: "사업자 인증 운영 정책 안내" }],
+  [
+    {
+      label: "내용",
+      value:
+        "사업자 인증 요청 검수 기준과 승인 처리 절차가 일부 변경되었습니다. 운영 정책을 확인한 뒤 회원 인증 및 승인 관리 업무를 진행해 주세요.",
+    },
+  ],
+  [
+    { label: "첨부파일", value: "bizauth-notice-guide.pdf" },
+    { label: "다운로드", value: <Button size="xsm">파일 다운로드</Button> },
+  ],
+];
+
 const includesIgnoreCase = (source, keyword) =>
   String(source ?? "")
     .toLowerCase()
@@ -81,12 +106,6 @@ const getPositiveIntParam = (searchParams, key, fallback) => {
 };
 
 const isValidLimitParam = (value) => PAGE_SIZE_OPTIONS.some((option) => option.value === value);
-
-const toSearchFormQuery = (form) =>
-  createSearchParamsFromForm({
-    form,
-    fields: searchFormFields,
-  }).toString();
 
 const matchesRow = (row, form) => {
   if (form.bannerGroupName && !includesIgnoreCase(row.bannerGroupName, form.bannerGroupName)) {
@@ -156,46 +175,86 @@ const ComponentsTable = () => {
   const { modalStore } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // URL 쿼리스트링에서 현재 페이지 번호를 읽어옵니다.
+  // 유효하지 않은 값이면 1페이지를 기본값으로 사용합니다.
   const page = getPositiveIntParam(searchParams, "page", 1);
+
+  // URL 쿼리스트링에서 페이지당 노출 개수를 읽어옵니다.
+  // 값이 없거나 잘못되면 기본 페이지 사이즈를 사용합니다.
   const rawLimit = getPositiveIntParam(searchParams, "limit", DEFAULT_PAGE_SIZE);
+
+  // 허용된 페이지 사이즈 옵션인지 검증합니다.
+  // 허용되지 않은 값이면 기본 페이지 사이즈로 보정합니다.
   const limit = isValidLimitParam(rawLimit) ? rawLimit : DEFAULT_PAGE_SIZE;
 
+  // react-select에 넣을 현재 선택된 페이지 사이즈 옵션입니다.
   const selectedLimitOption = PAGE_SIZE_OPTIONS.find((option) => option.value === limit) || PAGE_SIZE_OPTIONS[0];
 
-  const parsedFormFromParams = parseSearchParamsToForm({
-    searchParams,
-    initialForm,
-    fields: searchFormFields,
-  });
+  // URLSearchParams를 페이지 전용 검색 폼 구조로 변환합니다.
+  // searchParams가 바뀔 때만 다시 계산되도록 memo 처리합니다.
+  const parsedFormFromParams = useMemo(() => {
+    return parseSearchParamsToForm({
+      searchParams,
+      initialForm,
+      fields: searchFormFields,
+    });
+  }, [searchParams]);
 
+  // form: 사용자가 FormTable에서 현재 입력 중인 값
   const [form, setForm] = useState(parsedFormFromParams);
+
+  // appliedForm: 실제 검색 결과 필터링에 적용되는 값
+  // 검색 버튼을 누른 시점의 form이 들어갑니다.
   const [appliedForm, setAppliedForm] = useState(parsedFormFromParams);
-  const [listTableRows, setListTableRows] = useState(createMockRows);
+
+  // 리스트 테이블 원본 데이터
+  const [listTableRows, setListTableRows] = useState(() => createMockRows());
+
+  // 체크박스로 선택된 row id 목록
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
 
-  const isSearchCriteriaOutOfSync = toSearchFormQuery(parsedFormFromParams) !== toSearchFormQuery(appliedForm);
-  const activeForm = isSearchCriteriaOutOfSync ? parsedFormFromParams : form;
-  const activeAppliedForm = isSearchCriteriaOutOfSync ? parsedFormFromParams : appliedForm;
+  // URL이 바뀌면 form / appliedForm을 모두 URL 기준으로 다시 동기화합니다.
+  // 뒤로가기, 앞으로가기, 직접 URL 수정에도 화면 상태가 맞춰지도록 합니다.
+  useEffect(() => {
+    setForm(parsedFormFromParams);
+    setAppliedForm(parsedFormFromParams);
+  }, [parsedFormFromParams]);
 
+  // 실제 리스트 검색은 appliedForm 기준으로만 수행합니다.
+  // 사용자가 입력 중인 form과 검색 적용 상태를 분리해서 관리합니다.
   const filteredListTableRows = useMemo(() => {
-    return listTableRows.filter((row) => matchesRow(row, activeAppliedForm));
-  }, [listTableRows, activeAppliedForm]);
+    return listTableRows.filter((row) => matchesRow(row, appliedForm));
+  }, [listTableRows, appliedForm]);
 
+  // 검색 결과 전체 개수
   const totalCount = filteredListTableRows.length;
+
+  // 전체 페이지 수
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+
+  // 현재 page 값이 전체 페이지 수를 넘지 않도록 보정한 값
   const safePage = Math.min(page, totalPages);
+
+  // 현재 페이지의 시작/끝 인덱스
   const startIndex = (safePage - 1) * limit;
   const endIndex = startIndex + limit;
 
+  // 현재 페이지에 해당하는 row만 잘라낸 값
+  // ListTable이 외부 pagination 방식이면 이 값을 rows로 넘기면 됩니다.
   const paginatedRows = useMemo(() => {
     return filteredListTableRows.slice(startIndex, endIndex);
   }, [filteredListTableRows, startIndex, endIndex]);
 
+  // 현재 페이지에 노출 중인 row id 목록
   const currentPageRowIds = paginatedRows.map((row) => row.id);
 
+  // 현재 페이지의 모든 row가 선택되었는지 여부
+  // 헤더 전체선택 체크박스 상태 계산에 사용합니다.
   const allChecked =
     currentPageRowIds.length > 0 && currentPageRowIds.every((rowId) => listTableCheckedIds.includes(rowId));
 
+  // URLSearchParams 일부만 갱신하는 공통 함수
+  // 빈 값은 삭제하고, 값이 있으면 문자열로 저장합니다.
   const updateSearchParams = (updates) => {
     const nextParams = new URLSearchParams(searchParams);
 
@@ -210,6 +269,8 @@ const ComponentsTable = () => {
     setSearchParams(nextParams);
   };
 
+  // URL의 page / limit 값이 비정상이면 자동 보정합니다.
+  // 예: 검색 결과가 줄어서 현재 페이지가 존재하지 않게 된 경우
   useEffect(() => {
     const nextUpdates = {};
 
@@ -226,24 +287,40 @@ const ComponentsTable = () => {
     }
   }, [page, safePage, rawLimit, limit]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // FormTable 입력 변경 핸들러
+  // 일반 input/select는 단일 값으로 처리하고,
+  // checkbox는 배열 값(features 등)으로 처리합니다.
   const handleFieldChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
-    setForm({
-      ...activeForm,
-      [name]: value,
+    setForm((prev) => {
+      if (type === "checkbox") {
+        const prevValues = Array.isArray(prev[name]) ? prev[name] : [];
+
+        return {
+          ...prev,
+          [name]: checked ? [...prevValues, value] : prevValues.filter((item) => item !== value),
+        };
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      };
     });
   };
 
+  // 검색 버튼 클릭 시 현재 form 값을 appliedForm으로 확정합니다.
+  // 그리고 검색 조건을 URL 파라미터에도 반영합니다.
   const handleSearch = () => {
-    setAppliedForm(activeForm);
-    setForm(activeForm);
+    setAppliedForm(form);
 
     const nextParams = createSearchParamsFromForm({
-      form: activeForm,
+      form,
       fields: searchFormFields,
     });
 
+    // 새 검색 시 1페이지부터 다시 시작
     nextParams.set("page", "1");
     nextParams.set("limit", String(limit));
 
@@ -251,6 +328,8 @@ const ComponentsTable = () => {
     setListTableCheckedIds([]);
   };
 
+  // 검색 조건 초기화
+  // 폼 상태 / 적용 상태 / URL 파라미터 / 체크 상태를 모두 초기화합니다.
   const handleResetSearch = () => {
     setForm(initialForm);
     setAppliedForm(initialForm);
@@ -267,6 +346,7 @@ const ComponentsTable = () => {
     setListTableCheckedIds([]);
   };
 
+  // 페이지 이동 시 URL의 page 값을 갱신합니다.
   const handlePageChange = (nextPage) => {
     updateSearchParams({
       page: nextPage,
@@ -276,6 +356,7 @@ const ComponentsTable = () => {
     setListTableCheckedIds([]);
   };
 
+  // 페이지당 개수 변경 시 1페이지로 이동하고 limit를 갱신합니다.
   const handleLimitChange = (option) => {
     const nextLimit = option?.value || DEFAULT_PAGE_SIZE;
 
@@ -287,12 +368,14 @@ const ComponentsTable = () => {
     setListTableCheckedIds([]);
   };
 
+  // 개별 row 체크/해제
   const toggleOne = (id) => {
     setListTableCheckedIds((prev) =>
       prev.includes(id) ? prev.filter((checkedId) => checkedId !== id) : [...prev, id],
     );
   };
 
+  // 현재 페이지 기준 전체선택 / 전체해제
   const toggleAll = (checked) => {
     setListTableCheckedIds((prev) => {
       if (checked) {
@@ -302,12 +385,15 @@ const ComponentsTable = () => {
     });
   };
 
+  // 노출 상태 토글
   const toggleExposureStatus = (id) => {
     setListTableRows((prev) =>
       prev.map((row) => (row.id === id ? { ...row, exposureStatus: !row.exposureStatus } : row)),
     );
   };
 
+  // 등록/수정 모달 오픈
+  // row가 있으면 수정, 없으면 신규 등록 용도로 사용할 수 있습니다.
   const openRegisterModal = (row) => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.REGISTER_MODAL({
@@ -320,6 +406,8 @@ const ComponentsTable = () => {
     );
   };
 
+  // FormTable 렌더링용 필드 정의
+  // 실제 form state의 key(name)와 연결됩니다.
   const formFields = [
     {
       key: "name",
@@ -425,6 +513,8 @@ const ComponentsTable = () => {
     },
   ];
 
+  // ListTable 컬럼 정의
+  // renderCell에서 key 기준으로 각 셀 UI를 분기합니다.
   const listTableColumns = [
     {
       key: "check",
@@ -448,7 +538,7 @@ const ComponentsTable = () => {
   return (
     <StyledComponents className="flex-box col">
       <CardSection title="Table 컴포넌트 예시 - FormTable">
-        <FormTable fields={formFields} values={activeForm} onChange={handleFieldChange} />
+        <FormTable fields={formFields} values={form} onChange={handleFieldChange} />
         <TableActionButtons
           buttons={[
             {
@@ -480,7 +570,6 @@ const ComponentsTable = () => {
 
         <ListTable
           pagination
-          showPerPageControl={false}
           columns={listTableColumns}
           rows={filteredListTableRows}
           rowKey="id"
@@ -528,6 +617,10 @@ const ComponentsTable = () => {
             return row[col.key];
           }}
         />
+      </CardSection>
+
+      <CardSection title="Table 컴포넌트 예시 - InfoTable">
+        <InfoTable rows={infoTableRows} />
       </CardSection>
     </StyledComponents>
   );

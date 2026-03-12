@@ -196,7 +196,53 @@ export function ListTable({
 }
 
 /* =========================================================
- * 3) FormTable (입력 폼형 테이블)
+ * 3) InfoTable (조회형 정보 테이블)
+ *  - rows: 각 행을 구성하는 label/value 쌍 배열
+ *  - 행마다 쌍 개수가 달라도 되고, 전체 폭 안에서 각 쌍의 너비를 자동 분배
+ * ========================================================= */
+export function InfoTable({ rows = [], emptyMessage = "데이터가 없습니다" }) {
+  const normalizedRows = Array.isArray(rows) ? rows.filter((row) => Array.isArray(row) && row.length > 0) : [];
+
+  const maxPairCount = normalizedRows.reduce((acc, row) => Math.max(acc, row.length), 0);
+  const totalColumns = Math.max(2, maxPairCount * 2);
+
+  return (
+    <Table variant="form">
+      <tbody>
+        {normalizedRows.length > 0 ? (
+          normalizedRows.map((row, rowIndex) => (
+            <tr key={`info-row-${rowIndex}`}>
+              {row.map((cell, cellIndex) => {
+                const rowPairCount = row.length;
+                const basePairWidth = Math.floor(totalColumns / rowPairCount);
+                const extraColumns = totalColumns % rowPairCount;
+                const pairWidth = basePairWidth + (cellIndex < extraColumns ? 1 : 0);
+                const safeColSpan =
+                  cell?.colSpan != null ? Math.max(1, Number(cell.colSpan) || 1) : Math.max(1, pairWidth - 1);
+
+                return (
+                  <React.Fragment key={cell?.key || `${rowIndex}-${cellIndex}`}>
+                    <th>{cell?.label ?? "-"}</th>
+                    <td colSpan={safeColSpan}>{cell?.value ?? "-"}</td>
+                  </React.Fragment>
+                );
+              })}
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={totalColumns} style={{ textAlign: "center" }}>
+              {emptyMessage}
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </Table>
+  );
+}
+
+/* =========================================================
+ * 4) FormTable (입력 폼형 테이블)
  *  - fields: 폼 필드 정의 배열 (type, name, label, options 등)
  *  - values: 현재 폼 값 객체
  *  - onChange: 상위에서 내려주는 공통 변경 핸들러
