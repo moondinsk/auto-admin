@@ -314,8 +314,8 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
             classNamePrefix="react-select"
             name={f.selectName}
             options={f.selectOptions}
-            placeholder={f.selectPlaceholder}
-            value={f.selectOptions?.find((opt) => opt.value === values[f.selectName]) || null}
+            // placeholder={f.selectPlaceholder}
+            value={f.selectOptions?.find((opt) => opt.value === values[f.selectName]) || f.selectOptions?.[0] || null}
             onChange={(selectedOption) =>
               onChange({
                 target: {
@@ -417,6 +417,28 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
         <DateRangeWrapper>
           {/* 날짜 입력 2개(시작/종료) */}
           <div className="flex-box ac gap-10">
+            {f.selectOptions && (
+              <Select
+                className="custom-select"
+                classNamePrefix="react-select"
+                name={f.selectName}
+                options={f.selectOptions}
+                // placeholder={f.selectPlaceholder}
+                value={
+                  f.selectOptions?.find((opt) => opt.value === values[f.selectName]) || f.selectOptions?.[0] || null
+                }
+                onChange={(selectedOption) =>
+                  onChange({
+                    target: {
+                      name: f.selectName,
+                      value: selectedOption ? selectedOption.value : "",
+                    },
+                  })
+                }
+                defaultValue={f.selectOptions?.[0].label}
+                styles={{ container: (base) => ({ ...base, flex: 1 }) }}
+              />
+            )}
             <DateInputWrapper>
               <DatePicker
                 selected={values[f.startName] ? new Date(values[f.startName]) : null}
