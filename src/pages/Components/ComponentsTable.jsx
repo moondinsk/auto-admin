@@ -18,12 +18,16 @@ import { useStore } from "@/store";
 import { StyledComponents } from "./Components.styles";
 import { TableTop, TotalLength } from "@/components/Table/table.styles";
 
+// 화면에 보여줄 배너 키워드 라벨 매핑
+// row.searchKeyword 값이나 features 값을 사용자용 텍스트로 바꿀 때 사용
 const KEYWORD_LABEL = {
   new: "신상품",
   sale: "세일",
   best: "베스트",
 };
 
+// 검색 필터의 카테고리 select 옵션
+// searchCategory 값으로 저장되고, searchValue와 함께 상세 검색에 사용
 const SEARCH_CATEGORY_OPTIONS = [
   { value: "bannerGroupName", label: "배너명" },
   { value: "bannerCode", label: "배너코드" },
@@ -31,6 +35,8 @@ const SEARCH_CATEGORY_OPTIONS = [
   { value: "searchKeyword", label: "배너 키워드" },
 ];
 
+// 검색 폼의 초기값
+// FormTable 입력값과 URL 파라미터 파싱 기본값으로 공통 사용
 const initialForm = {
   bannerGroupName: "",
   bannerGroupDesc: "",
@@ -42,6 +48,8 @@ const initialForm = {
   endDate: "",
 };
 
+// URLSearchParams와 동기화할 검색 필드 정의
+// searchParams.js 유틸이 이 설정을 기준으로 form <-> querystring 변환을 수행
 const searchFormFields = [
   "bannerGroupName",
   "bannerGroupDesc",
@@ -53,6 +61,8 @@ const searchFormFields = [
   { key: "features", type: SEARCH_PARAM_TYPE.ARRAY },
 ];
 
+// InfoTable 예시용 데이터
+// 실제 API 데이터가 아니라 컴포넌트 샘플 화면용 정적 데이터
 const infoTableRows = [
   [
     { label: "글번호", value: 10 },
@@ -78,6 +88,8 @@ const infoTableRows = [
   ],
 ];
 
+// 대소문자 구분 없이 포함 여부를 확인하는 문자열 비교 함수
+// 검색 필터에서 부분 일치 검색에 사용
 const includesIgnoreCase = (source, keyword) =>
   String(source ?? "")
     .toLowerCase()
@@ -87,6 +99,8 @@ const includesIgnoreCase = (source, keyword) =>
         .toLowerCase(),
     );
 
+// 오늘 기준으로 n일 전 ~ 오늘까지의 날짜 범위를 반환
+// 빠른 기간 선택 버튼(7일, 15일, 1개월 등)에 사용
 const getDateRange = (days) => {
   const end = new Date();
   const start = new Date();
@@ -98,34 +112,47 @@ const getDateRange = (days) => {
   };
 };
 
+// 오늘 날짜를 yyyy-mm-dd 형식으로 반환
+// date input 기본값 세팅에 사용
 const getToday = () => new Date().toISOString().split("T")[0];
 
+// URL 파라미터에서 양의 정수 값을 읽는 공통 함수
+// 잘못된 값이면 fallback을 반환
 const getPositiveIntParam = (searchParams, key, fallback) => {
   const value = Number(searchParams.get(key));
   return Number.isInteger(value) && value > 0 ? value : fallback;
 };
 
+// 현재 limit 값이 허용된 페이지 사이즈 옵션인지 검사
 const isValidLimitParam = (value) => PAGE_SIZE_OPTIONS.some((option) => option.value === value);
 
+// row 1건이 현재 검색 조건(form)에 맞는지 검사하는 필터 함수
+// ListTable 검색 결과 계산 시 사용
 const matchesRow = (row, form) => {
+  // 배너 그룹명 부분 일치 검색
   if (form.bannerGroupName && !includesIgnoreCase(row.bannerGroupName, form.bannerGroupName)) {
     return false;
   }
 
+  // 배너 그룹 설명 부분 일치 검색
   if (form.bannerGroupDesc && !includesIgnoreCase(row.bannerGroupDesc, form.bannerGroupDesc)) {
     return false;
   }
 
+  // 배너 키워드 정확히 일치 검색
   if (form.searchKeyword && row.searchKeyword !== form.searchKeyword) {
     return false;
   }
 
+  // 카테고리 + 검색어 조합 검색
+  // 선택한 필드(row[searchCategory]) 안에 searchValue가 포함되는지 확인
   if (form.searchCategory && form.searchValue) {
     if (!includesIgnoreCase(row[form.searchCategory], form.searchValue)) {
       return false;
     }
   }
 
+  // 체크박스로 선택한 features를 row가 모두 포함하는지 검사
   if (Array.isArray(form.features) && form.features.length > 0) {
     const hasAllFeatures = form.features.every((feature) => row.features.includes(feature));
     if (!hasAllFeatures) {
@@ -133,10 +160,12 @@ const matchesRow = (row, form) => {
     }
   }
 
+  // 시작일 이후 데이터만 허용
   if (form.startDate && row.createdDate < form.startDate) {
     return false;
   }
 
+  // 종료일 이전 데이터만 허용
   if (form.endDate && row.createdDate > form.endDate) {
     return false;
   }
@@ -144,6 +173,8 @@ const matchesRow = (row, form) => {
   return true;
 };
 
+// ListTable 예시용 목업 데이터 생성 함수
+// 실제 API 대신 테이블 동작 예제를 보여주기 위한 샘플 데이터
 const createMockRows = () => {
   const keywordPool = ["new", "sale", "best"];
 
