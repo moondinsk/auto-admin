@@ -45,6 +45,32 @@ export const GlobalStyle = createGlobalStyle`
     &.col { flex-direction: column; }
   }
 
+  .gap-2 { gap: 2px; }
+  .gap-4 { gap: 4px; }
+  .gap-6 { gap: 6px; }
+  .gap-8 { gap: 8px; }
+  .gap-10 { gap: 10px; }
+  .gap-12 { gap: 12px; }
+  .gap-14 { gap: 14px; }
+  .gap-16 { gap: 16px; }
+  .gap-18 { gap: 18px; }
+  .gap-20 { gap: 20px; }
+  .gap-22 { gap: 22px; }
+  .gap-24 { gap: 24px; }
+  .gap-26 { gap: 26px; }
+  .gap-28 { gap: 28px; }
+  .gap-30 { gap: 30px; }
+  .gap-32 { gap: 32px; }
+  .gap-34 { gap: 34px; }
+  .gap-36 { gap: 36px; }
+  .gap-38 { gap: 38px; }
+  .gap-40 { gap: 40px; }
+  .gap-42 { gap: 42px; }
+  .gap-44 { gap: 44px; }
+  .gap-46 { gap: 46px; }
+  .gap-48 { gap: 48px; }
+  .gap-50 { gap: 50px; }
+
   /* ================================
       FORM BASE
   ================================= */

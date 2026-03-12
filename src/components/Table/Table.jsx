@@ -416,7 +416,7 @@ export function FormTable({ fields, values, onChange, columns = 1 }) {
       return (
         <DateRangeWrapper>
           {/* 날짜 입력 2개(시작/종료) */}
-          <div className="date-inputs">
+          <div className="flex-box ac gap-10">
             <DateInputWrapper>
               <DatePicker
                 selected={values[f.startName] ? new Date(values[f.startName]) : null}
