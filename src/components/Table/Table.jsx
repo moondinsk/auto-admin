@@ -1,5 +1,4 @@
-import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "@/constants/pagination";
-import React, { useState } from "react";
+import React from "react";
 import {
   ChoiceInput,
   DateInputWrapper,
@@ -10,7 +9,6 @@ import {
   TableWrap,
 } from "./table.styles";
 import Select from "react-select";
-import { toJS } from "mobx";
 import { MdCalendarToday } from "react-icons/md";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";

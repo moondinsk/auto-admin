@@ -148,12 +148,11 @@ const formFields = [
 const ComponentsTable = () => {
   const { exampleStore } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [formData, setFormData] = useState(() => ({
-    ...initialForm,
-    ...parseSearchParams(searchParams),
-  }));
+  const formData = exampleStore.formData;
 
-  console.log("initialForm", initialForm);
+  useEffect(() => {
+    exampleStore.initForm(initialForm, parseSearchParams(searchParams));
+  }, []);
 
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
   const [activeDateButton, setActiveDateButton] = useState("all");
@@ -197,36 +196,15 @@ const ComponentsTable = () => {
     setListTableCheckedIds([]);
   };
 
-  // form의 input, select, checkbox 변경 시 formData 업데이트 함수
+  // 폼 필드 변경 시 formData 업데이트
   const handleFormChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    if (type === "checkbox") {
-      setFormData((prev) => {
-        const list = prev[name] || [];
-
-        return {
-          ...prev,
-          [name]: checked ? [...list, value] : list.filter((v) => v !== value),
-        };
-      });
-
-      return;
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value } = e.target;
+    exampleStore.setField(name, value);
   };
 
   // 날짜 변경 시 formData 업데이트 + activeDateButton 초기화
   const handleDateChange = (name, date) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: date,
-    }));
-
+    exampleStore.setField(name, date);
     setActiveDateButton("");
   };
 
@@ -238,7 +216,7 @@ const ComponentsTable = () => {
 
   // 초기화 버튼 클릭 시 formData 초기화, 날짜 버튼 초기화, searchParams 초기화
   const handleResetSearch = () => {
-    setFormData(initialForm);
+    exampleStore.resetForm(initialForm);
     setActiveDateButton("all");
     setSearchParams({});
   };
@@ -256,7 +234,7 @@ const ComponentsTable = () => {
     exampleStore.getBanners({
       searchParams,
     });
-  }, [searchParams, exampleStore]);
+  }, [searchParams]);
 
   const listTableColumns = [
     {
