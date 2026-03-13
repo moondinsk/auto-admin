@@ -32,8 +32,8 @@ const SEARCH_CATEGORY_OPTIONS = [
 const initialForm = {
   bannerGroupName: "",
   bannerGroupDesc: "",
-  searchKeyword: "",
-  searchCategory: "",
+  searchKeyword: KEYWORD_LABEL.new,
+  searchCategory: SEARCH_CATEGORY_OPTIONS[0].value,
   searchValue: "",
   features: [],
   startDate: "",
@@ -152,6 +152,9 @@ const ComponentsTable = () => {
     ...initialForm,
     ...parseSearchParams(searchParams),
   }));
+
+  console.log("initialForm", initialForm);
+
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
   const [activeDateButton, setActiveDateButton] = useState("all");
 
@@ -292,7 +295,6 @@ const ComponentsTable = () => {
           activeDateButton={activeDateButton}
           handleDateButtonClick={handleDateButtonClick}
         />
-
         <TableActionButtons
           buttons={[
             {
@@ -308,11 +310,9 @@ const ComponentsTable = () => {
           ]}
         />
       </CardSection>
-
       <CardSection title="Table 컴포넌트 예시 - ListTable">
         <TableTop>
           <TotalLength>총 {totalCount}건</TotalLength>
-
           <Select
             className="custom-select"
             classNamePrefix="react-select"
@@ -322,7 +322,6 @@ const ComponentsTable = () => {
             onChange={handleLimitChange}
           />
         </TableTop>
-
         <ListTable
           pagination
           columns={listTableColumns}

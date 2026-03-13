@@ -188,22 +188,6 @@ export const ListPagination = styled.div`
   margin-top: 16px;
 `;
 
-// 페이지당 항목 수 선택 스타일
-export const PerPageControl = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  .custom-select {
-    width: 120px;
-  }
-
-  .label {
-    color: ${({ theme }) => theme.colors.text.secondary};
-    font-size: 13px;
-  }
-`;
-
 // 페이지네이션 버튼 스타일
 export const PageButtons = styled.div`
   display: flex;

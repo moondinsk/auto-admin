@@ -167,6 +167,7 @@ export const GlobalStyle = createGlobalStyle`
       border: 1px solid ${({ theme }) => theme.colors.palette.gray300};
       box-shadow: none;
       font-size: 14px;
+      min-width: 100px;
 
       &:hover {
         border-color: inherit;

@@ -158,7 +158,7 @@ function renderField(
           name={field.name}
           options={field.options ?? []}
           placeholder={field.placeholder ?? "선택하세요"}
-          value={field.options?.find((option) => option.value === formData?.[field.name]) ?? null}
+          value={field.options?.find((option) => option.value === formData?.[field.name]) ?? field.options?.[0]}
           onChange={(selectedOption) => {
             handleChange({
               target: {
@@ -180,7 +180,10 @@ function renderField(
             name={field.selectName}
             options={field.selectOptions ?? []}
             placeholder={field.selectPlaceholder ?? "선택하세요"}
-            value={field.selectOptions?.find((option) => option.value === formData?.[field.selectName]) ?? null}
+            value={
+              field.selectOptions?.find((option) => option.value === formData?.[field.selectName]) ??
+              field.selectOptions?.[0]
+            }
             onChange={(selectedOption) => {
               handleChange({
                 target: {
@@ -188,6 +191,12 @@ function renderField(
                   value: selectedOption?.value ?? "",
                 },
               });
+            }}
+            styles={{
+              container: (base) => ({
+                ...base,
+                width: 200,
+              }),
             }}
           />
 
