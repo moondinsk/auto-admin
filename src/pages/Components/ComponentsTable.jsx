@@ -8,7 +8,13 @@ import CardSection from "@/components/Layout/CardSection";
 import { FormTable, ListTable } from "@/components/Table/Table";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "@/constants/pagination";
-import { buildSearchParams, getKeywordLabel, parseSearchParams } from "@/utils/searchParams";
+import {
+  buildSearchParams,
+  getKeywordLabel,
+  parseSearchParams,
+  setFormField,
+  updateFormData,
+} from "@/utils/searchParams";
 import { useStore } from "@/store";
 import { StyledComponents } from "./Components.styles";
 import { TableTop, TotalLength } from "@/components/Table/table.styles";
@@ -148,11 +154,10 @@ const formFields = [
 const ComponentsTable = () => {
   const { exampleStore } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
-  const formData = exampleStore.formData;
-
-  useEffect(() => {
-    exampleStore.initForm(initialForm, parseSearchParams(searchParams));
-  }, []);
+  const [formData, setFormData] = useState(() => ({
+    ...initialForm,
+    ...parseSearchParams(searchParams),
+  }));
 
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
   const [activeDateButton, setActiveDateButton] = useState("all");
@@ -166,7 +171,6 @@ const ComponentsTable = () => {
   const isAllChecked =
     exampleStore.list.length > 0 && exampleStore.list.every((row) => listTableCheckedIds.includes(row.id));
 
-  // searchParams 업데이트 함수 - 기존 searchParams 유지하면서 필요한 부분만 업데이트
   const updateParams = (updates) => {
     const next = new URLSearchParams(searchParams);
 
@@ -177,51 +181,43 @@ const ComponentsTable = () => {
     setSearchParams(next);
   };
 
-  // 개별 체크박스 토글 함수
   const toggleCheck = (id) => {
     setListTableCheckedIds((prev) =>
       prev.includes(id) ? prev.filter((checkedId) => checkedId !== id) : [...prev, id],
     );
   };
 
-  // 페이지 사이즈 변경 시 searchParams의 page, limit 업데이트 + 체크박스 초기화
   const handleLimitChange = (option) => {
     updateParams({ page: 1, limit: option.value });
     setListTableCheckedIds([]);
   };
 
-  // 페이지 변경 시 searchParams의 page 업데이트 + 체크박스 초기화
   const handlePageChange = (page) => {
     updateParams({ page });
     setListTableCheckedIds([]);
   };
 
-  // 폼 필드 변경 시 formData 업데이트
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    exampleStore.setField(name, value);
+    const { name, value, type, checked } = e.target;
+    setFormData(updateFormData(name, value, type, checked));
   };
 
-  // 날짜 변경 시 formData 업데이트 + activeDateButton 초기화
   const handleDateChange = (name, date) => {
-    exampleStore.setField(name, date);
+    setFormData(setFormField(name, date));
     setActiveDateButton("");
   };
 
-  // 날짜 버튼 클릭 시 해당 날짜로 formData 업데이트 + activeDateButton 업데이트
   const handleDateButtonClick = (btn) => {
     btn.onClick(handleFormChange);
     setActiveDateButton(btn.value);
   };
 
-  // 초기화 버튼 클릭 시 formData 초기화, 날짜 버튼 초기화, searchParams 초기화
   const handleResetSearch = () => {
-    exampleStore.resetForm(initialForm);
+    setFormData(initialForm);
     setActiveDateButton("all");
     setSearchParams({});
   };
 
-  // 검색버튼 클릭 시 formData를 기반으로 searchParams 업데이트
   const handleSearch = () => {
     setSearchParams({
       ...buildSearchParams(formData),
@@ -234,7 +230,7 @@ const ComponentsTable = () => {
     exampleStore.getBanners({
       searchParams,
     });
-  }, [searchParams]);
+  }, [searchParams, exampleStore]);
 
   const listTableColumns = [
     {

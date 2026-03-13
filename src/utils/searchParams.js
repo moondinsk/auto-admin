@@ -36,6 +36,7 @@ export const buildSearchParams = (params) => {
 //    bannerGroupDesc: "",
 //    searchKeyword: ""
 //  }
+
 export const parseSearchParams = (searchParams) => {
   const params = Object.fromEntries(searchParams);
 
@@ -46,4 +47,31 @@ export const parseSearchParams = (searchParams) => {
   });
 
   return params;
+};
+
+export const updateFormData = (name, value, type, checked, setFormData) => {
+  if (type === "checkbox") {
+    setFormData((prev) => {
+      const list = prev[name] || [];
+
+      return {
+        ...prev,
+        [name]: checked ? [...list, value] : list.filter((v) => v !== value),
+      };
+    });
+
+    return;
+  }
+
+  return (prev) => ({
+    ...prev,
+    [name]: value,
+  });
+};
+
+export const setFormField = (name, value) => {
+  return (prev) => ({
+    ...prev,
+    [name]: value,
+  });
 };
