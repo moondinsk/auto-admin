@@ -1,33 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { IoIosRefresh } from "react-icons/io";
 import Select from "react-select";
 import { useSearchParams } from "react-router-dom";
-
 import Button from "@/components/Button/Button";
 import CardSection from "@/components/Layout/CardSection";
-import { FormTable, InfoTable, ListTable } from "@/components/Table/Table";
-import TableActionButtons from "@/components/Table/TableActionButtons";
+import { FormTable, ListTable } from "@/components/Table/Table";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
-import RegisterModalContent from "@/components/Modal/RegisterModalContent";
-import { MODAL_PAYLOAD } from "@/constants/modal";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "@/constants/pagination";
-import { createSearchParamsFromForm, parseSearchParamsToForm, SEARCH_PARAM_TYPE } from "@/utils/searchParams";
-import { theme } from "@/styles/theme";
+import { buildSearchParams, getKeywordLabel, parseSearchParams } from "@/utils/searchParams";
 import { useStore } from "@/store";
 import { StyledComponents } from "./Components.styles";
 import { TableTop, TotalLength } from "@/components/Table/table.styles";
+import { theme } from "@/styles/theme";
+import TableActionButtons from "@/components/Table/TableActionButtons";
+import { getDateRange, getToday, toggleAllCheck } from "@/utils";
 
-// 화면에 보여줄 배너 키워드 라벨 매핑
-// row.searchKeyword 값이나 features 값을 사용자용 텍스트로 바꿀 때 사용
 const KEYWORD_LABEL = {
   new: "신상품",
   sale: "세일",
   best: "베스트",
 };
 
-// 검색 필터의 카테고리 select 옵션
-// searchCategory 값으로 저장되고, searchValue와 함께 상세 검색에 사용
 const SEARCH_CATEGORY_OPTIONS = [
   { value: "bannerGroupName", label: "배너명" },
   { value: "bannerCode", label: "배너코드" },
@@ -35,8 +29,6 @@ const SEARCH_CATEGORY_OPTIONS = [
   { value: "searchKeyword", label: "배너 키워드" },
 ];
 
-// 검색 폼의 초기값
-// FormTable 입력값과 URL 파라미터 파싱 기본값으로 공통 사용
 const initialForm = {
   bannerGroupName: "",
   bannerGroupDesc: "",
@@ -48,508 +40,231 @@ const initialForm = {
   endDate: "",
 };
 
-// URLSearchParams와 동기화할 검색 필드 정의
-// searchParams.js 유틸이 이 설정을 기준으로 form <-> querystring 변환을 수행
-const searchFormFields = [
-  "bannerGroupName",
-  "bannerGroupDesc",
-  "searchKeyword",
-  "searchCategory",
-  "searchValue",
-  "startDate",
-  "endDate",
-  { key: "features", type: SEARCH_PARAM_TYPE.ARRAY },
+const formFields = [
+  {
+    key: "name",
+    label: "배너 그룹명",
+    name: "bannerGroupName",
+    type: "input",
+    placeholder: "배너 그룹명을 입력하세요",
+  },
+  {
+    key: "desc",
+    label: "배너 그룹 설명",
+    name: "bannerGroupDesc",
+    type: "textarea",
+    placeholder: "설명을 입력하세요",
+  },
+  {
+    key: "searchKeyword",
+    label: "배너 키워드",
+    name: "searchKeyword",
+    type: "select",
+    placeholder: "배너 키워드 선택",
+    options: [
+      { value: "new", label: "신상품" },
+      { value: "sale", label: "세일" },
+      { value: "best", label: "베스트" },
+    ],
+  },
+  {
+    key: "searchFilter",
+    label: "검색 필터",
+    type: "select-input",
+    selectName: "searchCategory",
+    selectPlaceholder: "카테고리 선택",
+    selectOptions: SEARCH_CATEGORY_OPTIONS,
+    inputName: "searchValue",
+    inputPlaceholder: "검색어를 입력하세요",
+  },
+  {
+    key: "features",
+    label: "배너 특징",
+    name: "features",
+    type: "checkbox",
+    options: [
+      { value: "new", label: "신상품" },
+      { value: "sale", label: "세일" },
+      { value: "best", label: "베스트" },
+    ],
+  },
+  {
+    key: "dateSearch",
+    label: "조회 기간",
+    type: "date-range",
+    startName: "startDate",
+    endName: "endDate",
+    startPlaceholder: "시작 날짜",
+    endPlaceholder: "종료 날짜",
+    dateButtons: [
+      {
+        label: "오늘",
+        value: "today",
+        onClick: (handleChange) => {
+          const today = getToday();
+          handleChange({ target: { name: "startDate", value: today } });
+          handleChange({ target: { name: "endDate", value: today } });
+        },
+      },
+      {
+        label: "7일",
+        value: "7days",
+        onClick: (handleChange) => {
+          const { start, end } = getDateRange(7);
+          handleChange({ target: { name: "startDate", value: start } });
+          handleChange({ target: { name: "endDate", value: end } });
+        },
+      },
+      {
+        label: "15일",
+        value: "15days",
+        onClick: (handleChange) => {
+          const { start, end } = getDateRange(15);
+          handleChange({ target: { name: "startDate", value: start } });
+          handleChange({ target: { name: "endDate", value: end } });
+        },
+      },
+      {
+        label: "1개월",
+        value: "1month",
+        onClick: (handleChange) => {
+          const { start, end } = getDateRange(30);
+          handleChange({ target: { name: "startDate", value: start } });
+          handleChange({ target: { name: "endDate", value: end } });
+        },
+      },
+      {
+        label: "전체",
+        value: "all",
+        onClick: (handleChange) => {
+          handleChange({ target: { name: "startDate", value: "" } });
+          handleChange({ target: { name: "endDate", value: "" } });
+        },
+      },
+    ],
+  },
 ];
-
-// InfoTable 예시용 데이터
-// 실제 API 데이터가 아니라 컴포넌트 샘플 화면용 정적 데이터
-const infoTableRows = [
-  [
-    { label: "글번호", value: 10 },
-    { label: "날짜", value: "2026-03-11" },
-    { label: "작성자", value: "관리자" },
-    { label: "조회수", value: 124 },
-  ],
-  [
-    { label: "카테고리", value: "운영 공지" },
-    { label: "상태", value: "게시중" },
-  ],
-  [{ label: "제목", value: "사업자 인증 운영 정책 안내" }],
-  [
-    {
-      label: "내용",
-      value:
-        "사업자 인증 요청 검수 기준과 승인 처리 절차가 일부 변경되었습니다. 운영 정책을 확인한 뒤 회원 인증 및 승인 관리 업무를 진행해 주세요.",
-    },
-  ],
-  [
-    { label: "첨부파일", value: "bizauth-notice-guide.pdf" },
-    { label: "다운로드", value: <Button size="xsm">파일 다운로드</Button> },
-  ],
-];
-
-// 대소문자 구분 없이 포함 여부를 확인하는 문자열 비교 함수
-// 검색 필터에서 부분 일치 검색에 사용
-const includesIgnoreCase = (source, keyword) =>
-  String(source ?? "")
-    .toLowerCase()
-    .includes(
-      String(keyword ?? "")
-        .trim()
-        .toLowerCase(),
-    );
-
-// 오늘 기준으로 n일 전 ~ 오늘까지의 날짜 범위를 반환
-// 빠른 기간 선택 버튼(7일, 15일, 1개월 등)에 사용
-const getDateRange = (days) => {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(end.getDate() - days);
-
-  return {
-    start: start.toISOString().split("T")[0],
-    end: end.toISOString().split("T")[0],
-  };
-};
-
-// 오늘 날짜를 yyyy-mm-dd 형식으로 반환
-// date input 기본값 세팅에 사용
-const getToday = () => new Date().toISOString().split("T")[0];
-
-// URL 파라미터에서 양의 정수 값을 읽는 공통 함수
-// 잘못된 값이면 fallback을 반환
-const getPositiveIntParam = (searchParams, key, fallback) => {
-  const value = Number(searchParams.get(key));
-  return Number.isInteger(value) && value > 0 ? value : fallback;
-};
-
-// 현재 limit 값이 허용된 페이지 사이즈 옵션인지 검사
-const isValidLimitParam = (value) => PAGE_SIZE_OPTIONS.some((option) => option.value === value);
-
-// row 1건이 현재 검색 조건(form)에 맞는지 검사하는 필터 함수
-// ListTable 검색 결과 계산 시 사용
-const matchesRow = (row, form) => {
-  // 배너 그룹명 부분 일치 검색
-  if (form.bannerGroupName && !includesIgnoreCase(row.bannerGroupName, form.bannerGroupName)) {
-    return false;
-  }
-
-  // 배너 그룹 설명 부분 일치 검색
-  if (form.bannerGroupDesc && !includesIgnoreCase(row.bannerGroupDesc, form.bannerGroupDesc)) {
-    return false;
-  }
-
-  // 배너 키워드 정확히 일치 검색
-  if (form.searchKeyword && row.searchKeyword !== form.searchKeyword) {
-    return false;
-  }
-
-  // 카테고리 + 검색어 조합 검색
-  // 선택한 필드(row[searchCategory]) 안에 searchValue가 포함되는지 확인
-  if (form.searchCategory && form.searchValue) {
-    if (!includesIgnoreCase(row[form.searchCategory], form.searchValue)) {
-      return false;
-    }
-  }
-
-  // 체크박스로 선택한 features를 row가 모두 포함하는지 검사
-  if (Array.isArray(form.features) && form.features.length > 0) {
-    const hasAllFeatures = form.features.every((feature) => row.features.includes(feature));
-    if (!hasAllFeatures) {
-      return false;
-    }
-  }
-
-  // 시작일 이후 데이터만 허용
-  if (form.startDate && row.createdDate < form.startDate) {
-    return false;
-  }
-
-  // 종료일 이전 데이터만 허용
-  if (form.endDate && row.createdDate > form.endDate) {
-    return false;
-  }
-
-  return true;
-};
-
-// ListTable 예시용 목업 데이터 생성 함수
-// 실제 API 대신 테이블 동작 예제를 보여주기 위한 샘플 데이터
-const createMockRows = () => {
-  const keywordPool = ["new", "sale", "best"];
-
-  return Array.from({ length: 30 }, (_, index) => {
-    const no = index + 1;
-    const keyword = keywordPool[index % keywordPool.length];
-    const subKeyword = keywordPool[(index + 1) % keywordPool.length];
-    const created = new Date();
-    created.setDate(created.getDate() - index * 2);
-
-    return {
-      id: `b${no}`,
-      no,
-      bannerGroupName: `배너 그룹 ${no}`,
-      bannerGroupDesc: `배너 그룹 ${no}에 대한 설명입니다.`,
-      searchKeyword: keyword,
-      features: index % 2 === 0 ? [keyword, subKeyword] : [keyword],
-      createdDate: created.toISOString().split("T")[0],
-      exposureStatus: index % 2 === 0,
-      imageCount: (index % 5) + 1,
-      effect: index % 2 === 0 ? "슬라이드" : "페이드",
-      clickCount: (index + 3) * 11,
-      bannerCode: `B${String(no).padStart(7, "0")}`,
-    };
-  });
-};
 
 const ComponentsTable = () => {
-  const { modalStore } = useStore();
+  const { exampleStore } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // URL 쿼리스트링에서 현재 페이지 번호를 읽어옵니다.
-  // 유효하지 않은 값이면 1페이지를 기본값으로 사용합니다.
-  const page = getPositiveIntParam(searchParams, "page", 1);
-
-  // URL 쿼리스트링에서 페이지당 노출 개수를 읽어옵니다.
-  // 값이 없거나 잘못되면 기본 페이지 사이즈를 사용합니다.
-  const rawLimit = getPositiveIntParam(searchParams, "limit", DEFAULT_PAGE_SIZE);
-
-  // 허용된 페이지 사이즈 옵션인지 검증합니다.
-  // 허용되지 않은 값이면 기본 페이지 사이즈로 보정합니다.
-  const limit = isValidLimitParam(rawLimit) ? rawLimit : DEFAULT_PAGE_SIZE;
-
-  // react-select에 넣을 현재 선택된 페이지 사이즈 옵션입니다.
-  const selectedLimitOption = PAGE_SIZE_OPTIONS.find((option) => option.value === limit) || PAGE_SIZE_OPTIONS[0];
-
-  // URLSearchParams를 페이지 전용 검색 폼 구조로 변환합니다.
-  // searchParams가 바뀔 때만 다시 계산되도록 memo 처리합니다.
-  const parsedFormFromParams = useMemo(() => {
-    return parseSearchParamsToForm({
-      searchParams,
-      initialForm,
-      fields: searchFormFields,
-    });
-  }, [searchParams]);
-
-  // form: 사용자가 FormTable에서 현재 입력 중인 값
-  const [form, setForm] = useState(parsedFormFromParams);
-
-  // appliedForm: 실제 검색 결과 필터링에 적용되는 값
-  // 검색 버튼을 누른 시점의 form이 들어갑니다.
-  const [appliedForm, setAppliedForm] = useState(parsedFormFromParams);
-
-  // 리스트 테이블 원본 데이터
-  const [listTableRows, setListTableRows] = useState(() => createMockRows());
-
-  // 체크박스로 선택된 row id 목록
+  const [formData, setFormData] = useState(() => ({
+    ...initialForm,
+    ...parseSearchParams(searchParams),
+  }));
   const [listTableCheckedIds, setListTableCheckedIds] = useState([]);
+  const [activeDateButton, setActiveDateButton] = useState("all");
 
-  // URL이 바뀌면 form / appliedForm을 모두 URL 기준으로 다시 동기화합니다.
-  // 뒤로가기, 앞으로가기, 직접 URL 수정에도 화면 상태가 맞춰지도록 합니다.
-  useEffect(() => {
-    setForm(parsedFormFromParams);
-    setAppliedForm(parsedFormFromParams);
-  }, [parsedFormFromParams]);
+  const currentPage = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || DEFAULT_PAGE_SIZE;
+  const totalCount = exampleStore.totalCount;
 
-  // 실제 리스트 검색은 appliedForm 기준으로만 수행합니다.
-  // 사용자가 입력 중인 form과 검색 적용 상태를 분리해서 관리합니다.
-  const filteredListTableRows = useMemo(() => {
-    return listTableRows.filter((row) => matchesRow(row, appliedForm));
-  }, [listTableRows, appliedForm]);
+  const selectedLimitOption = PAGE_SIZE_OPTIONS.find((option) => option.value === limit) ?? PAGE_SIZE_OPTIONS[1];
 
-  // 검색 결과 전체 개수
-  const totalCount = filteredListTableRows.length;
+  const isAllChecked =
+    exampleStore.list.length > 0 && exampleStore.list.every((row) => listTableCheckedIds.includes(row.id));
 
-  // 전체 페이지 수
-  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  // searchParams 업데이트 함수 - 기존 searchParams 유지하면서 필요한 부분만 업데이트
+  const updateParams = (updates) => {
+    const next = new URLSearchParams(searchParams);
 
-  // 현재 page 값이 전체 페이지 수를 넘지 않도록 보정한 값
-  const safePage = Math.min(page, totalPages);
-
-  // 현재 페이지의 시작/끝 인덱스
-  const startIndex = (safePage - 1) * limit;
-  const endIndex = startIndex + limit;
-
-  // 현재 페이지에 해당하는 row만 잘라낸 값
-  // ListTable이 외부 pagination 방식이면 이 값을 rows로 넘기면 됩니다.
-  const paginatedRows = useMemo(() => {
-    return filteredListTableRows.slice(startIndex, endIndex);
-  }, [filteredListTableRows, startIndex, endIndex]);
-
-  // 현재 페이지에 노출 중인 row id 목록
-  const currentPageRowIds = paginatedRows.map((row) => row.id);
-
-  // 현재 페이지의 모든 row가 선택되었는지 여부
-  // 헤더 전체선택 체크박스 상태 계산에 사용합니다.
-  const allChecked =
-    currentPageRowIds.length > 0 && currentPageRowIds.every((rowId) => listTableCheckedIds.includes(rowId));
-
-  // URLSearchParams 일부만 갱신하는 공통 함수
-  // 빈 값은 삭제하고, 값이 있으면 문자열로 저장합니다.
-  const updateSearchParams = (updates) => {
-    const nextParams = new URLSearchParams(searchParams);
-
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === "") {
-        nextParams.delete(key);
-      } else {
-        nextParams.set(key, String(value));
-      }
+    Object.entries(updates).forEach(([k, v]) => {
+      next.set(k, v);
     });
 
-    setSearchParams(nextParams);
+    setSearchParams(next);
   };
 
-  // URL의 page / limit 값이 비정상이면 자동 보정합니다.
-  // 예: 검색 결과가 줄어서 현재 페이지가 존재하지 않게 된 경우
-  useEffect(() => {
-    const nextUpdates = {};
-
-    if (page !== safePage) {
-      nextUpdates.page = safePage;
-    }
-
-    if (!isValidLimitParam(rawLimit)) {
-      nextUpdates.limit = limit;
-    }
-
-    if (Object.keys(nextUpdates).length > 0) {
-      updateSearchParams(nextUpdates);
-    }
-  }, [page, safePage, rawLimit, limit]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // FormTable 입력 변경 핸들러
-  // 일반 input/select는 단일 값으로 처리하고,
-  // checkbox는 배열 값(features 등)으로 처리합니다.
-  const handleFieldChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    setForm((prev) => {
-      if (type === "checkbox") {
-        const prevValues = Array.isArray(prev[name]) ? prev[name] : [];
-
-        return {
-          ...prev,
-          [name]: checked ? [...prevValues, value] : prevValues.filter((item) => item !== value),
-        };
-      }
-
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
-
-  // 검색 버튼 클릭 시 현재 form 값을 appliedForm으로 확정합니다.
-  // 그리고 검색 조건을 URL 파라미터에도 반영합니다.
-  const handleSearch = () => {
-    setAppliedForm(form);
-
-    const nextParams = createSearchParamsFromForm({
-      form,
-      fields: searchFormFields,
-    });
-
-    // 새 검색 시 1페이지부터 다시 시작
-    nextParams.set("page", "1");
-    nextParams.set("limit", String(limit));
-
-    setSearchParams(nextParams);
-    setListTableCheckedIds([]);
-  };
-
-  // 검색 조건 초기화
-  // 폼 상태 / 적용 상태 / URL 파라미터 / 체크 상태를 모두 초기화합니다.
-  const handleResetSearch = () => {
-    setForm(initialForm);
-    setAppliedForm(initialForm);
-
-    const nextParams = createSearchParamsFromForm({
-      form: initialForm,
-      fields: searchFormFields,
-    });
-
-    nextParams.set("page", "1");
-    nextParams.set("limit", String(DEFAULT_PAGE_SIZE));
-
-    setSearchParams(nextParams);
-    setListTableCheckedIds([]);
-  };
-
-  // 페이지 이동 시 URL의 page 값을 갱신합니다.
-  const handlePageChange = (nextPage) => {
-    updateSearchParams({
-      page: nextPage,
-      limit,
-    });
-
-    setListTableCheckedIds([]);
-  };
-
-  // 페이지당 개수 변경 시 1페이지로 이동하고 limit를 갱신합니다.
-  const handleLimitChange = (option) => {
-    const nextLimit = option?.value || DEFAULT_PAGE_SIZE;
-
-    updateSearchParams({
-      page: 1,
-      limit: nextLimit,
-    });
-
-    setListTableCheckedIds([]);
-  };
-
-  // 개별 row 체크/해제
-  const toggleOne = (id) => {
+  // 개별 체크박스 토글 함수
+  const toggleCheck = (id) => {
     setListTableCheckedIds((prev) =>
       prev.includes(id) ? prev.filter((checkedId) => checkedId !== id) : [...prev, id],
     );
   };
 
-  // 현재 페이지 기준 전체선택 / 전체해제
-  const toggleAll = (checked) => {
-    setListTableCheckedIds((prev) => {
-      if (checked) {
-        return Array.from(new Set([...prev, ...currentPageRowIds]));
-      }
-      return prev.filter((id) => !currentPageRowIds.includes(id));
+  // 페이지 사이즈 변경 시 searchParams의 page, limit 업데이트 + 체크박스 초기화
+  const handleLimitChange = (option) => {
+    updateParams({ page: 1, limit: option.value });
+    setListTableCheckedIds([]);
+  };
+
+  // 페이지 변경 시 searchParams의 page 업데이트 + 체크박스 초기화
+  const handlePageChange = (page) => {
+    updateParams({ page });
+    setListTableCheckedIds([]);
+  };
+
+  // form의 input, select, checkbox 변경 시 formData 업데이트 함수
+  const handleFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    if (type === "checkbox") {
+      setFormData((prev) => {
+        const list = prev[name] || [];
+
+        return {
+          ...prev,
+          [name]: checked ? [...list, value] : list.filter((v) => v !== value),
+        };
+      });
+
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // 날짜 변경 시 formData 업데이트 + activeDateButton 초기화
+  const handleDateChange = (name, date) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: date,
+    }));
+
+    setActiveDateButton("");
+  };
+
+  // 날짜 버튼 클릭 시 해당 날짜로 formData 업데이트 + activeDateButton 업데이트
+  const handleDateButtonClick = (btn) => {
+    btn.onClick(handleFormChange);
+    setActiveDateButton(btn.value);
+  };
+
+  // 초기화 버튼 클릭 시 formData 초기화, 날짜 버튼 초기화, searchParams 초기화
+  const handleResetSearch = () => {
+    setFormData(initialForm);
+    setActiveDateButton("all");
+    setSearchParams({});
+  };
+
+  // 검색버튼 클릭 시 formData를 기반으로 searchParams 업데이트
+  const handleSearch = () => {
+    setSearchParams({
+      ...buildSearchParams(formData),
+      page: 1,
+      limit,
     });
   };
 
-  // 노출 상태 토글
-  const toggleExposureStatus = (id) => {
-    setListTableRows((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, exposureStatus: !row.exposureStatus } : row)),
-    );
-  };
+  useEffect(() => {
+    exampleStore.getBanners({
+      searchParams,
+    });
+  }, [searchParams, exampleStore]);
 
-  // 등록/수정 모달 오픈
-  // row가 있으면 수정, 없으면 신규 등록 용도로 사용할 수 있습니다.
-  const openRegisterModal = (row) => {
-    modalStore.openByPayload(
-      MODAL_PAYLOAD.REGISTER_MODAL({
-        component: RegisterModalContent,
-        data: {
-          title: "등록 모달",
-          description: row ? `${row.bannerGroupName} 항목을 수정/등록합니다.` : "새 항목을 등록하세요.",
-        },
-      }),
-    );
-  };
-
-  // FormTable 렌더링용 필드 정의
-  // 실제 form state의 key(name)와 연결됩니다.
-  const formFields = [
-    {
-      key: "name",
-      label: "배너 그룹명",
-      name: "bannerGroupName",
-      type: "input",
-      placeholder: "배너 그룹명을 입력하세요",
-    },
-    {
-      key: "desc",
-      label: "배너 그룹 설명",
-      name: "bannerGroupDesc",
-      type: "textarea",
-      placeholder: "설명을 입력하세요",
-    },
-    {
-      key: "searchKeyword",
-      label: "배너 키워드",
-      name: "searchKeyword",
-      type: "select",
-      placeholder: "배너 키워드 선택",
-      options: [
-        { value: "new", label: "신상품" },
-        { value: "sale", label: "세일" },
-        { value: "best", label: "베스트" },
-      ],
-    },
-    {
-      key: "searchFilter",
-      label: "검색 필터",
-      type: "select-input",
-      selectName: "searchCategory",
-      selectPlaceholder: "카테고리 선택",
-      selectOptions: SEARCH_CATEGORY_OPTIONS,
-      inputName: "searchValue",
-      inputPlaceholder: "검색어를 입력하세요",
-    },
-    {
-      key: "features",
-      label: "배너 특징",
-      name: "features",
-      type: "checkbox",
-      options: [
-        { value: "new", label: "신상품" },
-        { value: "sale", label: "세일" },
-        { value: "best", label: "베스트" },
-      ],
-    },
-    {
-      key: "dateSearch",
-      label: "조회 기간",
-      type: "date-range",
-      startName: "startDate",
-      endName: "endDate",
-      startPlaceholder: "시작 날짜",
-      endPlaceholder: "종료 날짜",
-      dateButtons: [
-        {
-          label: "오늘",
-          value: "today",
-          onClick: (handleChange) => {
-            const today = getToday();
-            handleChange({ target: { name: "startDate", value: today } });
-            handleChange({ target: { name: "endDate", value: today } });
-          },
-        },
-        {
-          label: "7일",
-          value: "7days",
-          onClick: (handleChange) => {
-            const { start, end } = getDateRange(7);
-            handleChange({ target: { name: "startDate", value: start } });
-            handleChange({ target: { name: "endDate", value: end } });
-          },
-        },
-        {
-          label: "15일",
-          value: "15days",
-          onClick: (handleChange) => {
-            const { start, end } = getDateRange(15);
-            handleChange({ target: { name: "startDate", value: start } });
-            handleChange({ target: { name: "endDate", value: end } });
-          },
-        },
-        {
-          label: "1개월",
-          value: "1month",
-          onClick: (handleChange) => {
-            const { start, end } = getDateRange(30);
-            handleChange({ target: { name: "startDate", value: start } });
-            handleChange({ target: { name: "endDate", value: end } });
-          },
-        },
-        {
-          label: "전체",
-          value: "all",
-          onClick: (handleChange) => {
-            handleChange({ target: { name: "startDate", value: "" } });
-            handleChange({ target: { name: "endDate", value: "" } });
-          },
-        },
-      ],
-    },
-  ];
-
-  // ListTable 컬럼 정의
-  // renderCell에서 key 기준으로 각 셀 UI를 분기합니다.
   const listTableColumns = [
     {
       key: "check",
-      header: <input type="checkbox" checked={allChecked} onChange={(e) => toggleAll(e.target.checked)} />,
+      header: (
+        <input
+          type="checkbox"
+          checked={isAllChecked}
+          onChange={() => setListTableCheckedIds(toggleAllCheck(exampleStore.list, listTableCheckedIds))}
+        />
+      ),
       width: 44,
     },
     { key: "no", header: "No", width: 70 },
@@ -569,14 +284,22 @@ const ComponentsTable = () => {
   return (
     <StyledComponents className="flex-box col">
       <CardSection title="Table 컴포넌트 예시 - FormTable">
-        <FormTable fields={formFields} values={form} onChange={handleFieldChange} />
+        <FormTable
+          fields={formFields}
+          formData={formData}
+          handleFormChange={handleFormChange}
+          handleDateChange={handleDateChange}
+          activeDateButton={activeDateButton}
+          handleDateButtonClick={handleDateButtonClick}
+        />
+
         <TableActionButtons
           buttons={[
             {
               label: "초기화",
-              onClick: handleResetSearch,
               color: theme.colors.palette.gray800,
               icon: <IoIosRefresh />,
+              onClick: handleResetSearch,
             },
             {
               label: "검색",
@@ -588,7 +311,8 @@ const ComponentsTable = () => {
 
       <CardSection title="Table 컴포넌트 예시 - ListTable">
         <TableTop>
-          <TotalLength>총 {filteredListTableRows.length}건</TotalLength>
+          <TotalLength>총 {totalCount}건</TotalLength>
+
           <Select
             className="custom-select"
             classNamePrefix="react-select"
@@ -602,9 +326,9 @@ const ComponentsTable = () => {
         <ListTable
           pagination
           columns={listTableColumns}
-          rows={filteredListTableRows}
+          rows={exampleStore.list}
           rowKey="id"
-          currentPage={safePage}
+          currentPage={currentPage}
           totalCount={totalCount}
           pageSize={limit}
           onPageChange={handlePageChange}
@@ -614,7 +338,7 @@ const ComponentsTable = () => {
                 <input
                   type="checkbox"
                   checked={listTableCheckedIds.includes(row.id)}
-                  onChange={() => toggleOne(row.id)}
+                  onChange={() => toggleCheck(row.id)}
                 />
               );
             }
@@ -623,23 +347,22 @@ const ComponentsTable = () => {
               return (
                 <ToggleSwitch
                   checked={!!row.exposureStatus}
-                  onChange={() => toggleExposureStatus(row.id)}
-                  ariaLabel={`${row.bannerGroupName} 노출 상태 토글`}
+                  onChange={() => exampleStore.toggleExposureStatus(row.id)}
                 />
               );
             }
 
             if (col.key === "searchKeyword") {
-              return KEYWORD_LABEL[row.searchKeyword] || row.searchKeyword;
+              return getKeywordLabel(row.searchKeyword, KEYWORD_LABEL);
             }
 
             if (col.key === "features") {
-              return row.features.map((feature) => KEYWORD_LABEL[feature] || feature).join(", ");
+              return row.features.map((feature) => getKeywordLabel(feature, KEYWORD_LABEL)).join(", ");
             }
 
             if (col.key === "manage") {
               return (
-                <Button size="xsm" radius={3} onClick={() => openRegisterModal(row)}>
+                <Button size="xsm" radius={3}>
                   관리
                 </Button>
               );
@@ -648,10 +371,6 @@ const ComponentsTable = () => {
             return row[col.key];
           }}
         />
-      </CardSection>
-
-      <CardSection title="Table 컴포넌트 예시 - InfoTable">
-        <InfoTable rows={infoTableRows} />
       </CardSection>
     </StyledComponents>
   );

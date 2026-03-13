@@ -186,11 +186,6 @@ export const DateInputWrapper = styled.div`
 // 페이지네이션 스타일
 export const ListPagination = styled.div`
   margin-top: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: ${({ $onlyPageButtons }) => ($onlyPageButtons ? "flex-end" : "space-between")};
-  gap: 12px;
-  flex-wrap: wrap;
 `;
 
 // 페이지당 항목 수 선택 스타일
@@ -225,11 +220,6 @@ export const PageButtons = styled.div`
     font-size: 13px;
     cursor: pointer;
     padding: 0 10px;
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
 
     &.is-active {
       border-color: ${({ theme }) => theme.colors.primary.main};

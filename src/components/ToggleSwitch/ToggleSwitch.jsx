@@ -4,8 +4,8 @@ import { Switch } from "./ToggleSwitch.style";
 
 const ToggleSwitch = ({ checked, onChange, ariaLabel }) => {
   return (
-    <Switch className="flex-box jc" $checked={Boolean(checked)}>
-      <input type="checkbox" checked={Boolean(checked)} onChange={onChange} aria-label={ariaLabel} />
+    <Switch className="flex-box jc" $checked={checked}>
+      <input type="checkbox" checked={checked} onChange={onChange} aria-label={ariaLabel} />
       <span />
     </Switch>
   );

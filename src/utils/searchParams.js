@@ -1,76 +1,49 @@
-// searchParams.js
-const SEARCH_PARAM_TYPE = {
+export const SEARCH_PARAM_TYPE = {
   STRING: "string",
   BOOLEAN: "boolean",
   ARRAY: "array",
 };
 
-const normalizeField = (field) => {
-  if (typeof field === "string") {
-    return {
-      key: field,
-      type: SEARCH_PARAM_TYPE.STRING,
-      separator: ",",
-    };
-  }
-
-  return {
-    type: SEARCH_PARAM_TYPE.STRING,
-    separator: ",",
-    ...field,
-  };
+export const getKeywordLabel = (value, labelMap) => {
+  return labelMap?.[value] ?? value;
 };
 
-const parseSearchParamsToForm = ({ searchParams, initialForm = {}, fields = [] }) => {
-  const parsedForm = { ...initialForm };
+// formData 객체
+// 빈 값 제거 / 필요한 값만 필터
+// setSearchParams() 에 넣을 query object 반환
+export const buildSearchParams = (params) => {
+  const result = {};
 
-  fields.map(normalizeField).forEach(({ key, type, separator }) => {
-    const rawValue = searchParams.get(key);
-    if (rawValue === null) return;
-
-    if (type === SEARCH_PARAM_TYPE.BOOLEAN) {
-      parsedForm[key] = rawValue === "true" ? true : rawValue === "false" ? false : (initialForm[key] ?? "");
-      return;
-    }
-
-    if (type === SEARCH_PARAM_TYPE.ARRAY) {
-      parsedForm[key] = rawValue.split(separator).filter(Boolean);
-      return;
-    }
-
-    parsedForm[key] = rawValue;
-  });
-
-  return parsedForm;
-};
-
-const createSearchParamsFromForm = ({ form, fields = [] }) => {
-  const params = new URLSearchParams();
-
-  fields.map(normalizeField).forEach(({ key, type, separator }) => {
-    const value = form[key];
-
-    if (type === SEARCH_PARAM_TYPE.BOOLEAN) {
-      if (value !== "" && value !== null && value !== undefined) {
-        params.set(key, String(value));
-      }
-      return;
-    }
-
-    if (type === SEARCH_PARAM_TYPE.ARRAY) {
-      if (Array.isArray(value) && value.length > 0) {
-        params.set(key, value.join(separator));
-      }
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      if (value.length) result[key] = value.join(",");
       return;
     }
 
     if (value !== "" && value !== null && value !== undefined) {
-      params.set(key, String(value));
+      result[key] = value;
+    }
+  });
+
+  return result;
+};
+
+// URL query(searchParams)를 formData 형태로 변환
+// ?page=1&limit=10&bannerGroupName=메인배너
+//  formData
+//  {
+//    bannerGroupName: "메인배너",
+//    bannerGroupDesc: "",
+//    searchKeyword: ""
+//  }
+export const parseSearchParams = (searchParams) => {
+  const params = Object.fromEntries(searchParams);
+
+  Object.keys(params).forEach((key) => {
+    if (typeof params[key] === "string" && params[key].includes(",")) {
+      params[key] = params[key].split(",");
     }
   });
 
   return params;
 };
-
-// searchParams.js
-export { SEARCH_PARAM_TYPE, parseSearchParamsToForm, createSearchParamsFromForm };
