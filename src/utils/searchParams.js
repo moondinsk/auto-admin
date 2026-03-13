@@ -49,7 +49,8 @@ export const parseSearchParams = (searchParams) => {
   return params;
 };
 
-export const updateFormData = (name, value, type, checked, setFormData) => {
+// formData 업데이트 함수
+export const updateFormData = (name, value, type, checked) => {
   if (type === "checkbox") {
     return (prev) => {
       const list = prev[name] || [];
@@ -67,6 +68,7 @@ export const updateFormData = (name, value, type, checked, setFormData) => {
   });
 };
 
+// formData 업데이트 함수
 export const setFormField = (name, value) => {
   return (prev) => ({
     ...prev,
@@ -74,6 +76,7 @@ export const setFormField = (name, value) => {
   });
 };
 
+// URLSearchParams는 set() 메서드로 기존 키의 값을 업데이트할 수 있지만, 객체 형태로 업데이트할 필드를 받아서 새로운 URLSearchParams 객체를 반환하는 함수
 export const updateSearchParams = (searchParams, updates) => {
   const next = new URLSearchParams(searchParams);
 
