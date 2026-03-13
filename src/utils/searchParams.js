@@ -51,16 +51,14 @@ export const parseSearchParams = (searchParams) => {
 
 export const updateFormData = (name, value, type, checked, setFormData) => {
   if (type === "checkbox") {
-    setFormData((prev) => {
+    return (prev) => {
       const list = prev[name] || [];
 
       return {
         ...prev,
         [name]: checked ? [...list, value] : list.filter((v) => v !== value),
       };
-    });
-
-    return;
+    };
   }
 
   return (prev) => ({
@@ -74,4 +72,14 @@ export const setFormField = (name, value) => {
     ...prev,
     [name]: value,
   });
+};
+
+export const updateSearchParams = (searchParams, updates) => {
+  const next = new URLSearchParams(searchParams);
+
+  Object.entries(updates).forEach(([k, v]) => {
+    next.set(k, v);
+  });
+
+  return next;
 };

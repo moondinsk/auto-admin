@@ -14,6 +14,7 @@ import {
   parseSearchParams,
   setFormField,
   updateFormData,
+  updateSearchParams,
 } from "@/utils/searchParams";
 import { useStore } from "@/store";
 import { StyledComponents } from "./Components.styles";
@@ -171,16 +172,6 @@ const ComponentsTable = () => {
   const isAllChecked =
     exampleStore.list.length > 0 && exampleStore.list.every((row) => listTableCheckedIds.includes(row.id));
 
-  const updateParams = (updates) => {
-    const next = new URLSearchParams(searchParams);
-
-    Object.entries(updates).forEach(([k, v]) => {
-      next.set(k, v);
-    });
-
-    setSearchParams(next);
-  };
-
   const toggleCheck = (id) => {
     setListTableCheckedIds((prev) =>
       prev.includes(id) ? prev.filter((checkedId) => checkedId !== id) : [...prev, id],
@@ -188,12 +179,12 @@ const ComponentsTable = () => {
   };
 
   const handleLimitChange = (option) => {
-    updateParams({ page: 1, limit: option.value });
+    setSearchParams(updateSearchParams(searchParams, { page: 1, limit: option.value }));
     setListTableCheckedIds([]);
   };
 
   const handlePageChange = (page) => {
-    updateParams({ page });
+    setSearchParams(updateSearchParams(searchParams, { page }));
     setListTableCheckedIds([]);
   };
 
