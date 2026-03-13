@@ -68,7 +68,7 @@ export const updateFormData = (name, value, type, checked) => {
   });
 };
 
-// formData 업데이트 함수
+// formData의 특정 필드 업데이트 함수
 export const setFormField = (name, value) => {
   return (prev) => ({
     ...prev,
