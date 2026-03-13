@@ -28,21 +28,24 @@ const fields = [
   },
 ];
 
-const [values, setValues] = useState({ name: "", role: "" });
+const [formData, setFormData] = useState({ name: "", role: "" });
 
-<FormTable
-  fields={fields}
-  values={values}
-  onChange={(e) => setValues((prev) => ({ ...prev, [e.target.name]: e.target.value }))}
-/>;
+const handleFormChange = (e) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
+
+<FormTable fields={fields} formData={formData} handleFormChange={handleFormChange} />;
 ```
 
 ## 주요 Props
 
 - `fields` (`Array`, required): 필드 정의 배열.
-- `values` (`Object`, required): 현재 폼 값 객체.
-- `onChange` (`function`, required): 이벤트 형태를 따르는 공통 변경 핸들러.
-- `columns` (`number`, default: `1`): 한 행에 배치할 필드 그룹 수.
+- `formData` (`Object`, required): 현재 폼 값 객체.
+- `handleFormChange` (`function`, required): 입력 변경 핸들러.
+- `handleDateChange` (`function`): `date-range` DatePicker 변경 핸들러.
+- `activeDateButton` (`string`): `date-range` 빠른 버튼 활성 상태.
+- `handleDateButtonClick` (`function`): `date-range` 빠른 버튼 클릭 핸들러.
 
 ## 지원 필드 타입
 
@@ -57,12 +60,11 @@ const [values, setValues] = useState({ name: "", role: "" });
 ## 필드 스키마 팁
 
 - 자주 쓰는 키: `key`, `label`, `name`, `type`, `placeholder`, `required`.
-- `td` 영역을 넓히려면 `colSpan`을 사용합니다.
+- `select-input`은 `selectName`, `selectOptions`, `inputName`을 사용합니다.
 - `date-range`는 `startName`, `endName`, `dateButtons`를 함께 정의하세요.
 
 ## 참고
 
-- `columns` 값은 내부에서 최소 `1`로 보정됩니다.
-- 레이아웃은 unit(`th` + `td`) 기준으로 계산되어 자동 줄바꿈됩니다.
-- 날짜 값은 `onChange`로 `yyyy-mm-dd` 문자열 형태로 전달됩니다.
+- `FormTable`은 현재 한 행당 하나의 필드(`th` + `td`)를 렌더링합니다.
+- 날짜 값은 `handleDateChange(name, date)`로 전달되며, `date`는 `Date | null` 형식입니다.
 - 현재 데모 페이지는 `src/pages/Components/ComponentsTable.jsx`이며, `limit` 선택은 `FormTable`이 아니라 `ListTable` 상단(`TableTop`)에서 처리합니다.

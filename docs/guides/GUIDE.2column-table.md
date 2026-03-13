@@ -1,14 +1,45 @@
-# 2열 FormTable 가이드
+# 2열 FormTable 가이드 (현행 상태)
 
 ## 위치
 
-`src/components/Table/Table.jsx` (`FormTable`, `columns={2}` 사용)
+`src/components/Table/Table.jsx` (`FormTable`)
 
 ## 목적
 
-입력 항목이 많은 폼을 `FormTable`의 2열 레이아웃으로 효율적으로 구성합니다.
+기존 2열 문서의 사용법을 현재 코드 기준으로 정리합니다.
 
-## 기본 사용법
+## 현재 상태
+
+- 현재 `FormTable`은 `columns` prop을 지원하지 않습니다.
+- 한 행에 하나의 필드(`th` + `td`)를 렌더링하는 구조입니다.
+- 따라서 `columns={2}` 기반 2열 배치는 동작하지 않습니다.
+
+## 대체 패턴
+
+- 많은 필드를 2열로 보여야 한다면, 상위 레이아웃에서 섹션을 나눠 `FormTable`을 분리 배치합니다.
+- 또는 필드 그룹을 카드/아코디언으로 구분해 세로 폼 밀도를 조절합니다.
+
+## 실제 구현 패턴 (URL Sync)
+
+`src/pages/Components/ComponentsTable.jsx`는 URL 쿼리와 폼 상태를 다음 흐름으로 동기화합니다.
+
+- 초기 상태: `parseSearchParams(searchParams)` 결과를 `useState` 초기값에 합성
+- 검색 실행: `buildSearchParams(formData)`로 쿼리 문자열 생성
+- 데이터 조회: `useEffect`에서 `searchParams` 변경 시 API 호출
+- 페이지/limit 변경: URL 파라미터만 갱신하고 목록을 재조회
+
+```jsx
+const [formData, setFormData] = useState(() => ({
+  ...initialForm,
+  ...parseSearchParams(searchParams),
+}));
+
+useEffect(() => {
+  exampleStore.getBanners({ searchParams });
+}, [searchParams, exampleStore]);
+```
+
+## FormTable 연결 예시
 
 ```jsx
 import { useState } from "react";
@@ -26,33 +57,19 @@ const fields = [
       { value: "editor", label: "편집자" },
     ],
   },
-  { key: "bio", label: "소개", name: "bio", type: "textarea", colSpan: 3 },
+  { key: "bio", label: "소개", name: "bio", type: "textarea" },
 ];
 
-const [form, setForm] = useState({ username: "", role: "", bio: "" });
+const [formData, setFormData] = useState({ username: "", role: "", bio: "" });
 
-<FormTable
-  columns={2}
-  fields={fields}
-  values={form}
-  onChange={(e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))}
-/>;
+const handleFormChange = (e) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
+
+<FormTable fields={fields} formData={formData} handleFormChange={handleFormChange} />;
 ```
-
-## 레이아웃 규칙
-
-- `columns={2}`일 때 한 행의 최대 unit은 `4`입니다.
-- 필드 1개는 `1 + colSpan` unit을 사용합니다.
-- `colSpan`은 내부에서 안전 범위로 보정됩니다.
-- 현재 행에 들어가지 않는 필드는 다음 행으로 자동 이동합니다.
-
-## 권장 패턴
-
-- 짧은 입력 필드는 기본 너비로 배치합니다.
-- 긴 텍스트나 결합 컨트롤은 `colSpan: 3`을 권장합니다.
-- 모든 필드에서 공통 `onChange` 핸들러를 재사용합니다.
 
 ## 참고
 
-- 별도 컴포넌트가 아니라 `FormTable`의 구성 방식입니다.
-- 동작 예시는 `src/pages/Components/ComponentsTable.jsx`를 참고하세요.
+- 향후 2열 레이아웃이 필요하면 `FormTable` 컴포넌트 확장(`columns`, `colSpan`)을 별도 이슈로 관리하세요.
