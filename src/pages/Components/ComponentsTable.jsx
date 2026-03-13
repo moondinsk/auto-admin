@@ -221,7 +221,7 @@ const ComponentsTable = () => {
     exampleStore.getBanners({
       searchParams,
     });
-  }, [searchParams, exampleStore]);
+  }, [searchParams]);
 
   const listTableColumns = [
     {
