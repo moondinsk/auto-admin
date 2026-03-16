@@ -14,8 +14,8 @@ const Modal = ({
   onClose,
   onConfirm,
   onCancel,
-  confirmText,
-  cancelText,
+  confirmText = "확인",
+  cancelText = "취소",
   isTop = true,
   zIndex = 1000,
   ...contentProps

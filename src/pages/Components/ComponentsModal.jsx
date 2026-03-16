@@ -25,17 +25,29 @@ const ComponentsModal = () => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((current) => current !== id) : [...prev, id]));
   };
 
-  const openRegisterModal = () => {
-    modalStore.openByPayload(
-      MODAL_PAYLOAD.REGISTER_MODAL({
-        component: RegisterModalContent,
-        props: {
-          title: "등록 모달",
-          description: "새 항목을 등록하세요.",
-          confirmText: "등록",
-        },
-      }),
-    );
+  const openRegisterModal = async () => {
+    try {
+      const confirmed = await modalStore.openConfirmByPayload(
+        CONFIRM_PAYLOAD.REGISTER_MODAL({
+          component: RegisterModalContent,
+          props: {
+            title: "등록 모달",
+            description: "새 항목을 등록하세요.",
+            confirmText: "등록",
+          },
+        }),
+      );
+
+      if (!confirmed) {
+        setToast("warning", "등록이 취소되었습니다.");
+        return;
+      }
+
+      setToast("success", "항목이 등록되었습니다.");
+    } catch (error) {
+      console.error("등록 처리 중 오류", error);
+      setToast("error", "등록 처리 중 오류가 발생했습니다.");
+    }
   };
 
   const openGuideModal = () => {
@@ -123,11 +135,10 @@ const ComponentsModal = () => {
     }
 
     try {
-      // TODO: 실제 삭제 API 연결 위치
       console.log("삭제 진행", selectedIds);
       setToast("success", `선택한 ${selectedIds.length}건이 삭제되었습니다.`);
     } catch (error) {
-      console.error("삭제 실패", error);
+      console.error("error", error);
       setToast("error", "삭제 처리 중 오류가 발생했습니다.");
     }
   };

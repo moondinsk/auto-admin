@@ -26,13 +26,6 @@ export const MODAL_PAYLOAD = {
     ...BASE_MODAL_PROPS,
   }),
 
-  REGISTER_MODAL: createModalPayload({
-    ...BASE_MODAL_PROPS,
-    width: 400,
-    title: "등록 모달",
-    confirmText: "저장",
-  }),
-
   ALERT_MODAL: createModalPayload({
     ...BASE_MODAL_PROPS,
     title: "알림 모달",
@@ -40,12 +33,18 @@ export const MODAL_PAYLOAD = {
 };
 
 export const CONFIRM_PAYLOAD = {
+  REGISTER_MODAL: createModalPayload({
+    ...BASE_MODAL_PROPS,
+    width: 400,
+    title: "등록 모달",
+    confirmText: "저장",
+  }),
+
   DELETE_CONFIRM: createModalPayload({
     ...BASE_CONFIRM_PROPS,
     title: "삭제 모달",
     message: "선택한 항목을 삭제하시겠습니까?",
     confirmText: "삭제",
-    cancelText: "취소",
   }),
 
   INPUT_CONFIRM: createModalPayload({
@@ -53,6 +52,5 @@ export const CONFIRM_PAYLOAD = {
     title: "입력 모달",
     message: "입력 내용을 확인해주세요.",
     confirmText: "저장",
-    cancelText: "취소",
   }),
 };

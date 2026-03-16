@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 
 const SearchResultFormContent = ({ itemName, onSync, message }) => {
-  const [name, setName] = useState(itemName || "");
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    setName(itemName || "");
+  }, [itemName]);
 
   const handleChange = (e) => {
     const nextName = e.target.value;
-
     setName(nextName);
 
     onSync?.({
