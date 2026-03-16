@@ -42,14 +42,15 @@ function Example() {
 - `contentProps`: 콘텐츠 컴포넌트에 전달할 props.
 - `onConfirm`: 확인 콜백.
 - `onCancel`: 취소 콜백(딤 클릭 포함).
-- `confirmText`: 확인 라벨(기본값: 로컬라이즈된 확인 라벨).
-- `cancelText`: 취소 라벨(기본값: 로컬라이즈된 취소 라벨).
-- `successToastMessage`: 확인 시 노출할 토스트 메시지.
+- `confirmText`: 확인 라벨(기본값: `"확인"`).
+- `cancelText`: 취소 라벨(기본값: `"취소"`).
+- `successToastMessage`: 확인 시 노출할 토스트 메시지(기본값: `"확인되었습니다."`).
 
 ## 참고
 
 - `Modal`과 달리 `children`을 직접 받지 않습니다.
 - `confirmStore.openByPayload`는 확인/취소 결과로 resolve되는 Promise를 반환합니다.
+- `Modal`과 달리 `cancelText` 기본값이 `"취소"`라서 취소 버튼이 항상 렌더링됩니다.
 - 전역 마운트 위치는 `src/layouts/Root.jsx`입니다.
 - 확인 시 토스트는 `src/utils/toast.js`의 `showToast`를 통해 노출됩니다.
 - 현재 데모 페이지(`src/pages/Components/ComponentsModal.jsx`)는 `selectedIds` 기본값을 빈 배열로 두고 체크박스로 선택값을 채운 뒤 확인 모달을 엽니다.

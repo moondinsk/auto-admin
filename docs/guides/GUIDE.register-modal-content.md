@@ -46,3 +46,5 @@ function Example() {
 - 입력값은 `defaultValue` 기반이라 uncontrolled 방식입니다.
 - 효과 선택에는 `react-select`를 사용합니다.
 - 실제 값 수집/저장은 외부 로직에서 처리합니다.
+- 현재 데모 페이지(`src/pages/Components/ComponentsModal.jsx`)의 `openRegisterModal`은 `data.title`, `data.description`를 전달하지만, `RegisterModalContent`는 해당 값을 사용하지 않습니다.
+- 초기값을 표시하려면 `data.groupName`, `data.effect`, `data.bannerCode`를 전달하세요.

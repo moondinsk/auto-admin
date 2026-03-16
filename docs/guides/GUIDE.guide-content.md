@@ -36,8 +36,8 @@ function Example() {
 
 ## 주요 Props
 
-- `data.title`: 제목 텍스트 (기본값: 로컬라이즈된 가이드 제목).
-- `data.description`: 설명 텍스트 (기본값: 로컬라이즈된 가이드 설명).
+- `data.title`: 제목 텍스트 (기본값: `"가이드 제목"`).
+- `data.description`: 설명 텍스트 (기본값: `"가이드 설명"`).
 
 ## 참고
 

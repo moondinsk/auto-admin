@@ -36,7 +36,7 @@ const [formData, setFormData] = useState(() => ({
 
 useEffect(() => {
   exampleStore.getBanners({ searchParams });
-}, [searchParams, exampleStore]);
+}, [searchParams]);
 ```
 
 ## FormTable 연결 예시

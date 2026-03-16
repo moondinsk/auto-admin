@@ -114,18 +114,20 @@ export class ModalStore {
     const isTop = index === modalStore.modals.length - 1;
 
     return (
-      <Modal
+      <ModalTransitionItem
         key={modal.id}
-        {...modal.props}
+        modal={modal}
         isTop={isTop}
-        zIndex={1000 + index * 10}
-        onClose={() => modalStore.closeById(modal.id)}>
-        {modal.content}
-      </Modal>
+        zIndex={MODAL_BASE_Z_INDEX + index * MODAL_Z_INDEX_STEP}
+        onClose={() => modalStore.closeById(modal.id)}
+      />
     );
   });
 }
 ```
+
+- `ModalTransitionItem` 내부에서 `CSSTransition`으로 `Modal`을 감싸 애니메이션을 적용합니다.
+- 현재 payload 기반 흐름에서는 `contentComponent/contentProps`를 사용하므로 `modal.content`(`children`) 슬롯은 일반적으로 비어 있습니다.
 
 ## 개발 디버깅 로그
 

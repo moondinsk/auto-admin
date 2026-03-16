@@ -62,8 +62,8 @@ function Example() {
 - `onClose`: 닫힘 흐름에서 호출.
 - `onConfirm`: 확인 시 닫기 전에 호출.
 - `onCancel`: 취소/배경 클릭 시 닫기 전에 호출.
-- `confirmText`: 확인 버튼 라벨(기본값: 로컬라이즈된 확인 라벨).
-- `cancelText`: 취소 버튼 라벨(빈 문자열이면 취소 버튼 숨김).
+- `confirmText`: 확인 버튼 라벨(기본값: `"확인"`).
+- `cancelText`: 취소 버튼 라벨(기본값: `""`, 빈 문자열이면 취소 버튼 숨김).
 - `successToastMessage`: 확인 후 표시할 토스트 메시지(비어 있지 않을 때).
 - `isTop`: 스택에서 최상위 모달인지 여부(기본값: `true`).
 - `zIndex`: 모달 dim/panel의 z-index 기준값(기본값: `1000`).
@@ -79,5 +79,6 @@ function Example() {
 - 배경 클릭 시 취소 흐름(`onCancel` -> `onClose`)이 실행됩니다.
 - 확인 흐름은 `onConfirm` 호출 후(필요 시 `showToast`) `onClose`로 마무리됩니다.
 - `isTop=false`인 모달은 확인/취소/ESC 이벤트를 처리하지 않습니다.
+- 직접 렌더링 시 `onClose`를 전달하지 않으면 확인/취소 후 모달이 닫히지 않을 수 있습니다.
 - 전역 마운트 위치는 `src/layouts/Root.jsx`입니다.
 - 다중 모달(2중/3중/n중)은 `src/store/modal/modalStore.js`의 `modals` 배열로 관리됩니다.

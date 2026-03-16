@@ -44,8 +44,12 @@ const handleFormChange = (e) => {
 - `formData` (`Object`, required): 현재 폼 값 객체.
 - `handleFormChange` (`function`, required): 입력 변경 핸들러.
 - `handleDateChange` (`function`): `date-range` DatePicker 변경 핸들러.
+  - 시그니처: `(name, date) => void`
+  - `name`: `startName` 또는 `endName`
+  - `date`: `Date | null`
 - `activeDateButton` (`string`): `date-range` 빠른 버튼 활성 상태.
 - `handleDateButtonClick` (`function`): `date-range` 빠른 버튼 클릭 핸들러.
+  - 시그니처: `(dateButton) => void`
 
 ## 지원 필드 타입
 
@@ -62,6 +66,7 @@ const handleFormChange = (e) => {
 - 자주 쓰는 키: `key`, `label`, `name`, `type`, `placeholder`, `required`.
 - `select-input`은 `selectName`, `selectOptions`, `inputName`을 사용합니다.
 - `date-range`는 `startName`, `endName`, `dateButtons`를 함께 정의하세요.
+- `dateButtons[*]`는 `label`, `value`, `onClick(handleFormChange)` 형태를 사용합니다.
 
 ## 참고
 
