@@ -258,4 +258,48 @@ export const GlobalStyle = createGlobalStyle`
     transform: none;
     transition: opacity 0.5s;
   }
+
+  /* toast */
+  .custom-toast {
+    min-height: 52px;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: 500;
+    gap: 8px;
+    align-items: center;
+    min-width: 344px;
+    padding:16px;
+
+
+    .Toastify__toast-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 0;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .toast-success {
+    border: 1px solid #35C63C;
+    background: linear-gradient(0deg, rgba(53, 198, 60, 0.20) 0%, rgba(53, 198, 60, 0.20) 100%), rgba(255, 255, 255, 0.90);
+    color:#35C63C;
+  }
+
+  .toast-error {
+    border: 1px solid #FF463F;
+    background: linear-gradient(0deg, rgba(255, 70, 63, 0.20) 0%, rgba(255, 70, 63, 0.20) 100%), rgba(255, 255, 255, 0.90);
+    color:#FF463F;
+  }
+
+  .toast-warning {
+    border: 1px solid #FFA007;
+    background: linear-gradient(0deg, rgba(255, 160, 7, 0.20) 0%, rgba(255, 160, 7, 0.20) 100%), rgba(255, 255, 255, 0.90);
+    color:#FFA007;
+  }
+
+
 `;

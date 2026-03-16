@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { getStore, useStore } from "../index.js";
 
 const SHOULD_DEBUG_MODAL_STACK = import.meta.env.DEV;
@@ -19,11 +19,11 @@ export class ModalStore {
     return this.modals[this.modals.length - 1] ?? null;
   }
 
-  get content() {
-    return this.topModal?.content ?? null;
+  get topType() {
+    return this.topModal?.type ?? null;
   }
 
-  get props() {
+  get topProps() {
     return this.topModal?.props ?? {};
   }
 
@@ -35,8 +35,9 @@ export class ModalStore {
     const snapshot = this.modals.map((modal, index) => ({
       index,
       id: modal.id,
+      type: modal.type,
       title: modal.props?.title || "(no-title)",
-      component: modal.props?.contentComponent?.name || "(unknown)",
+      component: modal.component?.name || "(unknown)",
     }));
 
     console.groupCollapsed(`[ModalStack] ${action} (length: ${this.modals.length})`);
@@ -47,16 +48,32 @@ export class ModalStore {
     console.groupEnd();
   }
 
-  open(props = {}) {
-    const id = props.id ?? `modal-${crypto.randomUUID()}`;
+  createModal({ type = "default", id, component = null, props = {}, resolve = null }) {
+    return {
+      id: id ?? `modal-${crypto.randomUUID()}`,
+      type,
+      component,
+      props,
+      resolve,
+    };
+  }
 
-    this.modals.push({
+  open({ id, component = null, props = {} } = {}) {
+    const modal = this.createModal({
+      type: "default",
       id,
+      component,
       props,
     });
 
-    this.debugStack("open", { id, title: props?.title || "(no-title)" });
-    return id;
+    this.modals.push(modal);
+    this.debugStack("open", {
+      id: modal.id,
+      type: modal.type,
+      title: props?.title || "(no-title)",
+    });
+
+    return modal.id;
   }
 
   openByPayload(payload) {
@@ -64,30 +81,91 @@ export class ModalStore {
       return null;
     }
 
-    const { component: ContentComponent, modalProps = {}, content = null } = payload;
-    const { contentProps = {}, data, ...restModalProps } = modalProps;
+    const { component, props = {} } = payload;
+    return this.open({ component, props });
+  }
 
-    return this.open({
-      ...restModalProps,
-      contentComponent: ContentComponent,
-      contentProps: {
-        ...contentProps,
-        data,
-      },
+  openConfirm({ id, component = null, props = {} } = {}) {
+    return new Promise((resolve) => {
+      const modal = this.createModal({
+        type: "confirm",
+        id,
+        component,
+        props,
+        resolve,
+      });
+
+      this.modals.push(modal);
+      this.debugStack("openConfirm", {
+        id: modal.id,
+        type: modal.type,
+        title: props?.title || "(no-title)",
+      });
     });
   }
 
-  closeTop() {
-    const removedId = this.topModal?.id;
+  openConfirmByPayload(payload) {
+    if (!payload?.component) {
+      return null;
+    }
+
+    const { component, props = {} } = payload;
+    return this.openConfirm({ component, props });
+  }
+
+  confirm(value = true) {
+    const modal = this.topModal;
+    if (!modal) {
+      return;
+    }
+
+    modal.resolve?.(value);
+    this.debugStack("confirm", { id: modal.id, type: modal.type });
     this.modals.pop();
-    this.debugStack("closeTop", { removedId });
+  }
+
+  cancel(value = false) {
+    const modal = this.topModal;
+    if (!modal) {
+      return;
+    }
+
+    modal.resolve?.(value);
+    this.debugStack("cancel", { id: modal.id, type: modal.type });
+    this.modals.pop();
+  }
+
+  closeTop() {
+    const modal = this.topModal;
+    if (!modal) {
+      return;
+    }
+
+    if (modal.type === "confirm") {
+      modal.resolve?.(false);
+    }
+
+    this.modals.pop();
+    this.debugStack("closeTop", {
+      removedId: modal.id,
+      removedType: modal.type,
+    });
   }
 
   closeById(id) {
-    const beforeLength = this.modals.length;
+    const target = this.modals.find((modal) => modal.id === id);
 
+    if (target?.type === "confirm") {
+      target.resolve?.(false);
+    }
+
+    const beforeLength = this.modals.length;
     this.modals = this.modals.filter((modal) => modal.id !== id);
-    this.debugStack("closeById", { targetId: id, removedCount: beforeLength - this.modals.length });
+
+    this.debugStack("closeById", {
+      targetId: id,
+      removedCount: beforeLength - this.modals.length,
+    });
   }
 
   close() {
@@ -95,6 +173,12 @@ export class ModalStore {
   }
 
   closeAll() {
+    this.modals.forEach((modal) => {
+      if (modal.type === "confirm") {
+        modal.resolve?.(false);
+      }
+    });
+
     const beforeLength = this.modals.length;
     this.modals = [];
     this.debugStack("closeAll", { beforeLength });

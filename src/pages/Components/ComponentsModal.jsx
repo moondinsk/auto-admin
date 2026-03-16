@@ -12,10 +12,11 @@ import SearchStepModalContent from "@/components/Modal/SearchStepModalContent";
 import TripleNestedModalContent from "@/components/Modal/TripleNestedModalContent";
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
 import { useStore } from "@/store";
+import { setToast } from "@/utils/toast";
 import { StyledComponents } from "./Components.styles";
 
 const ComponentsModal = () => {
-  const { modalStore, confirmStore } = useStore();
+  const { modalStore } = useStore();
   const [selectedIds, setSelectedIds] = useState([]);
 
   const candidates = ["b1", "b2", "b3"];
@@ -28,9 +29,10 @@ const ComponentsModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.REGISTER_MODAL({
         component: RegisterModalContent,
-        data: {
+        props: {
           title: "등록 모달",
           description: "새 항목을 등록하세요.",
+          confirmText: "등록",
         },
       }),
     );
@@ -40,9 +42,10 @@ const ComponentsModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: GuideContent,
-        data: {
+        props: {
           title: "배너 운영 가이드",
           description: "배너 등록 전 노출 효과와 기간을 먼저 확인하세요.",
+          confirmText: "닫기",
         },
       }),
     );
@@ -52,7 +55,11 @@ const ComponentsModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.ALERT_MODAL({
         component: AlertModalContent,
-        message: "요청하신 작업이 정상적으로 처리되었습니다.",
+        props: {
+          title: "알림 모달",
+          message: "요청하신 작업이 정상적으로 처리되었습니다.",
+          confirmText: "확인",
+        },
       }),
     );
   };
@@ -61,8 +68,9 @@ const ComponentsModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: NestedModalContent,
-        data: {
+        props: {
           description: "1차 모달에서 버튼을 눌러 2차 모달을 열 수 있습니다.",
+          confirmText: "닫기",
         },
       }),
     );
@@ -72,7 +80,9 @@ const ComponentsModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: SearchStepModalContent,
-        data: {},
+        props: {
+          confirmText: "닫기",
+        },
       }),
     );
   };
@@ -81,23 +91,45 @@ const ComponentsModal = () => {
     modalStore.openByPayload(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: TripleNestedModalContent,
-        data: {
+        props: {
           description: "1차 모달에서 2차, 3차까지 순차적으로 열 수 있습니다.",
+          confirmText: "닫기",
         },
       }),
     );
   };
 
-  const openDeleteModal = () => {
-    confirmStore.openByPayload(
+  const openDeleteModal = async () => {
+    if (selectedIds.length === 0) {
+      setToast("warning", "삭제할 항목을 먼저 선택해주세요.");
+      return;
+    }
+
+    const confirmed = await modalStore.openConfirmByPayload(
       CONFIRM_PAYLOAD.DELETE_CONFIRM({
         component: DeleteConfirmContent,
-        data: {
+        props: {
           selectedIds,
+          message: "선택한 항목을 삭제하시겠습니까?",
+          confirmText: "커스텀 삭제",
+          cancelText: "커스텀 취소",
         },
-        message: "선택한 항목을 삭제하시겠습니까?",
       }),
     );
+
+    if (!confirmed) {
+      setToast("warning", "삭제가 취소되었습니다.");
+      return;
+    }
+
+    try {
+      // TODO: 실제 삭제 API 연결 위치
+      console.log("삭제 진행", selectedIds);
+      setToast("success", `선택한 ${selectedIds.length}건이 삭제되었습니다.`);
+    } catch (error) {
+      console.error("삭제 실패", error);
+      setToast("error", "삭제 처리 중 오류가 발생했습니다.");
+    }
   };
 
   return (
