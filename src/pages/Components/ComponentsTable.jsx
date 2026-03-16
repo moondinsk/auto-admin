@@ -5,7 +5,7 @@ import Select from "react-select";
 import { useSearchParams } from "react-router-dom";
 import Button from "@/components/Button/Button";
 import CardSection from "@/components/Layout/CardSection";
-import { FormTable, ListTable } from "@/components/Table/Table";
+import { FormTable, InfoTable, ListTable } from "@/components/Table/Table";
 import ToggleSwitch from "@/components/ToggleSwitch/ToggleSwitch";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "@/constants/pagination";
 import {
@@ -249,6 +249,31 @@ const ComponentsTable = () => {
     { key: "manage", header: "관리", width: 100 },
   ];
 
+  const infoTableRows = [
+    [
+      { label: "글번호", value: 10 },
+      { label: "날짜", value: "2026-03-11" },
+      { label: "작성자", value: "관리자" },
+      { label: "조회수", value: 124 },
+    ],
+    [
+      { label: "카테고리", value: "운영 공지" },
+      { label: "상태", value: "게시중" },
+    ],
+    [{ label: "제목", value: "사업자 인증 운영 정책 안내" }],
+    [
+      {
+        label: "내용",
+        value:
+          "사업자 인증 요청 검수 기준과 승인 처리 절차가 일부 변경되었습니다. 운영 정책을 확인한 뒤 회원 인증 및 승인 관리 업무를 진행해 주세요.",
+      },
+    ],
+    [
+      { label: "첨부파일", value: "bizauth-notice-guide.pdf" },
+      { label: "다운로드", value: <Button size="xsm">파일 다운로드</Button> },
+    ],
+  ];
+
   return (
     <StyledComponents className="flex-box col">
       <CardSection title="Table 컴포넌트 예시 - FormTable">
@@ -335,6 +360,10 @@ const ComponentsTable = () => {
             return row[col.key];
           }}
         />
+      </CardSection>
+
+      <CardSection title="Table 컴포넌트 예시 - InfoTable">
+        <InfoTable rows={infoTableRows} />
       </CardSection>
     </StyledComponents>
   );

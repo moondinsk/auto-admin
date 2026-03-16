@@ -359,4 +359,45 @@ export function FormTable({
   );
 }
 
+export function InfoTable({ rows = [], emptyMessage = "데이터가 없습니다" }) {
+  const normalizedRows = Array.isArray(rows) ? rows.filter((row) => Array.isArray(row) && row.length > 0) : [];
+
+  const maxPairCount = normalizedRows.reduce((acc, row) => Math.max(acc, row.length), 0);
+  const totalColumns = Math.max(2, maxPairCount * 2);
+
+  return (
+    <Table variant="form">
+      <tbody>
+        {normalizedRows.length > 0 ? (
+          normalizedRows.map((row, rowIndex) => (
+            <tr key={`info-row-${rowIndex}`}>
+              {row.map((cell, cellIndex) => {
+                const rowPairCount = row.length;
+                const basePairWidth = Math.floor(totalColumns / rowPairCount);
+                const extraColumns = totalColumns % rowPairCount;
+                const pairWidth = basePairWidth + (cellIndex < extraColumns ? 1 : 0);
+                const safeColSpan =
+                  cell?.colSpan != null ? Math.max(1, Number(cell.colSpan) || 1) : Math.max(1, pairWidth - 1);
+
+                return (
+                  <React.Fragment key={cell?.key || `${rowIndex}-${cellIndex}`}>
+                    <th>{cell?.label ?? "-"}</th>
+                    <td colSpan={safeColSpan}>{cell?.value ?? "-"}</td>
+                  </React.Fragment>
+                );
+              })}
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={totalColumns} style={{ textAlign: "center" }}>
+              {emptyMessage}
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </Table>
+  );
+}
+
 export default Table;
