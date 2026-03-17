@@ -13,6 +13,7 @@ import TripleNestedModalContent from "@/components/Modal/TripleNestedModalConten
 import { CONFIRM_PAYLOAD, MODAL_PAYLOAD } from "@/constants/modal";
 import { useStore } from "@/store";
 import { setToast } from "@/utils/toast";
+import { createValidator, validateWithToast } from "@/utils/validation";
 import { StyledComponents } from "./Components.styles";
 
 const ComponentsModal = () => {
@@ -20,6 +21,18 @@ const ComponentsModal = () => {
   const [selectedIds, setSelectedIds] = useState([]);
 
   const candidates = ["b1", "b2", "b3"];
+
+  // 등록 폼 검증 규칙
+  const registerFormValidator = createValidator([
+    {
+      validate: (data) => ({ valid: !!data.bannerName?.trim() }),
+      message: "배너명은 필수입니다.",
+    },
+    {
+      validate: (data) => ({ valid: !!data.effect }),
+      message: "배너효과는 필수입니다.",
+    },
+  ]);
 
   const toggleSelectedId = (id) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((current) => current !== id) : [...prev, id]));
@@ -39,16 +52,7 @@ const ComponentsModal = () => {
             formData = data;
           },
           confirmFunc: () => {
-            // 유효성 검사
-            if (!formData?.bannerName?.trim()) {
-              setToast("error", "배너명은 필수입니다.");
-              throw new Error("배너명 필수");
-            }
-            if (!formData?.effect) {
-              setToast("error", "배너효과는 필수입니다.");
-              throw new Error("배너효과 필수");
-            }
-
+            validateWithToast(formData, registerFormValidator, setToast);
             console.log("등록되었습니다.", formData);
             setToast("success", "항목이 등록되었습니다.");
           },
