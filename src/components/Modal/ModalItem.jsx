@@ -8,8 +8,8 @@ const ModalItem = ({ modal, zIndex, closeModal, ...transitionProps }) => {
   const nodeRef = useRef(null);
 
   const runAndClose = (action) => {
-    console.log(action());
-    if (action?.() === false) return;
+    const shouldClose = action?.();
+    if (shouldClose === false) return;
     closeModal?.();
   };
 

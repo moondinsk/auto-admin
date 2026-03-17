@@ -14,9 +14,12 @@ const RegisterModalContent = ({ data, onFormDataChange }) => {
   });
 
   // 폼 데이터 변경 시 부모에 전달
-  useEffect(() => {
-    onFormDataChange?.(formData);
-  }, [formData, onFormDataChange]);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
+    onFormDataChange?.(updatedFormData);
+  };
 
   return (
     <div className="flex-box col gap-12">
@@ -24,8 +27,9 @@ const RegisterModalContent = ({ data, onFormDataChange }) => {
         <span>배너명</span>
         <input
           type="text"
+          name="bannerName"
           value={formData.bannerName}
-          onChange={(e) => setFormData((prev) => ({ ...prev, bannerName: e.target.value }))}
+          onChange={(e) => handleChange(e)}
           placeholder="배너명을 입력하세요"
         />
       </label>
@@ -36,15 +40,16 @@ const RegisterModalContent = ({ data, onFormDataChange }) => {
           classNamePrefix="react-select"
           options={effectOptions}
           value={effectOptions.find((option) => option.value === formData.effect) || null}
-          onChange={(selected) => setFormData((prev) => ({ ...prev, effect: selected?.value || null }))}
+          onChange={(selected) => handleChange({ target: { name: "effect", value: selected?.value || null } })}
         />
       </label>
       <label className="flex-box col gap-6">
         <span>메모</span>
         <textarea
+          name="memo"
           rows={3}
           value={formData.memo}
-          onChange={(e) => setFormData((prev) => ({ ...prev, memo: e.target.value }))}
+          onChange={(e) => handleChange(e)}
           placeholder="메모를 입력하세요"
         />
       </label>
