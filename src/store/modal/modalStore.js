@@ -15,7 +15,7 @@ export class ModalStore {
       return null;
     }
 
-    const { type = "modal", ...modalProps } = props;
+    const { type, ...modalProps } = props;
 
     const modalData = {
       id: id ?? `modal-${crypto.randomUUID()}`,
