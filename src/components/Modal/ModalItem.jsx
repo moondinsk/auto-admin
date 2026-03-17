@@ -8,12 +8,9 @@ const ModalItem = ({ modal, zIndex, closeModal, ...transitionProps }) => {
   const nodeRef = useRef(null);
 
   const runAndClose = (action) => {
-    try {
-      if (action?.() === false) return;
-      closeModal?.();
-    } catch {
-      return;
-    }
+    console.log(action());
+    if (action?.() === false) return;
+    closeModal?.();
   };
 
   const handleCancel = () => runAndClose(modal.props?.onCancel);

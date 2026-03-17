@@ -17,14 +17,6 @@ const ModalManager = () => {
       const topModal = modalStore.modals[modalStore.modals.length - 1];
       if (!topModal) return;
 
-      try {
-        if ((await topModal.props?.onCancel?.()) === false) {
-          return;
-        }
-      } catch {
-        return;
-      }
-
       modalStore.closeById(topModal.id);
     };
 

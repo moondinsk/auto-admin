@@ -48,6 +48,7 @@ const ComponentsModal = () => {
           title: "등록 모달",
           description: "새 항목을 등록하세요.",
           confirmText: "등록",
+          cancelText: "취소",
           onFormDataChange: (data) => {
             formData = data;
           },

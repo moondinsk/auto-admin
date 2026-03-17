@@ -20,31 +20,20 @@ const Modal = ({
 }) => {
   const isConfirmModal = type === "confirm";
 
-  const handleCancel = () => {
-    void onCancel?.();
-  };
-
-  const handleConfirm = () => {
-    void onConfirm?.();
-  };
-
   const renderedContent =
     children || (ContentComponent ? <ContentComponent {...contentProps} message={message} /> : message);
   return (
-    <Dim
-      className="modal-dim"
-      $zIndex={zIndex}
-      onClick={handleCancel}>
+    <Dim className="modal-dim" $zIndex={zIndex} onClick={onCancel}>
       <ModalPanel className="modal-panel" $width={width} $maxHeight={maxHeight} onClick={(e) => e.stopPropagation()}>
         {title && <ModalHeader>{title}</ModalHeader>}
         <ModalBody>{renderedContent}</ModalBody>
         <ModalFooter>
           {isConfirmModal && (
-            <Button outlined color={theme.colors.palette.gray800} onClick={handleCancel}>
+            <Button outlined color={theme.colors.palette.gray800} onClick={onCancel}>
               {cancelText}
             </Button>
           )}
-          <Button onClick={handleConfirm}>{confirmText}</Button>
+          <Button onClick={onConfirm}>{confirmText}</Button>
         </ModalFooter>
       </ModalPanel>
     </Dim>

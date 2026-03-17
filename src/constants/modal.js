@@ -36,7 +36,7 @@ export const MODAL_PAYLOAD = {
 
 export const CONFIRM_PAYLOAD = {
   REGISTER_MODAL: createModalPayload({
-    ...BASE_MODAL_PROPS,
+    ...BASE_CONFIRM_PROPS,
     width: 400,
     title: "등록 모달",
     confirmText: "저장",
