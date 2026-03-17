@@ -26,6 +26,8 @@ const ComponentsModal = () => {
   };
 
   const openRegisterModal = () => {
+    let formData = null;
+
     modalStore.open(
       CONFIRM_PAYLOAD.REGISTER_MODAL({
         component: RegisterModalContent,
@@ -33,7 +35,21 @@ const ComponentsModal = () => {
           title: "등록 모달",
           description: "새 항목을 등록하세요.",
           confirmText: "등록",
+          onFormDataChange: (data) => {
+            formData = data;
+          },
           confirmFunc: () => {
+            // 유효성 검사
+            if (!formData?.bannerName?.trim()) {
+              setToast("error", "배너명은 필수입니다.");
+              throw new Error("배너명 필수");
+            }
+            if (!formData?.effect) {
+              setToast("error", "배너효과는 필수입니다.");
+              throw new Error("배너효과 필수");
+            }
+
+            console.log("등록되었습니다.", formData);
             setToast("success", "항목이 등록되었습니다.");
           },
           cancelFunc: () => {
