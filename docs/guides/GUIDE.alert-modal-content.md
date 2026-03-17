@@ -19,10 +19,12 @@ function Example() {
   const { modalStore } = useStore();
 
   const openAlert = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.ALERT_MODAL({
         component: AlertModalContent,
-        message: "요청이 정상적으로 처리되었습니다.",
+        props: {
+          message: "요청이 정상적으로 처리되었습니다.",
+        },
       }),
     );
   };
@@ -34,9 +36,8 @@ function Example() {
 ## 주요 Props
 
 - `message`: 바디에 렌더링할 텍스트.
-- 그 외 props도 전달은 가능하지만 사용하지 않습니다.
 
 ## 참고
 
 - 빠른 안내 목적의 최소 콘텐츠 구조로 작성되었습니다.
-- 일반적으로 `MODAL_PAYLOAD.ALERT_MODAL`로 열어 사용합니다.
+- 일반적으로 `MODAL_PAYLOAD.ALERT_MODAL`과 `modalStore.open`으로 열어 사용합니다.

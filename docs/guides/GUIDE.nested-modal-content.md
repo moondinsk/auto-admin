@@ -19,10 +19,12 @@ function Example() {
   const { modalStore } = useStore();
 
   const openNested = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: NestedModalContent,
-        data: { description: "이 1차 모달에서 2차 모달을 열 수 있습니다." },
+        props: {
+          data: { description: "이 1차 모달에서 2차 모달을 열 수 있습니다." },
+        },
       }),
     );
   };

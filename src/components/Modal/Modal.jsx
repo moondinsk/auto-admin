@@ -19,7 +19,6 @@ const Modal = ({
   ...contentProps
 }) => {
   const isConfirmModal = type === "confirm";
-  console.log("contentProps in Modal:", contentProps);
   const renderedContent =
     children || (ContentComponent ? <ContentComponent {...contentProps} message={message} /> : message);
   return (

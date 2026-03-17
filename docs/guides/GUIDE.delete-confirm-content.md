@@ -17,15 +17,23 @@ import { useStore } from "@/store";
 import { CONFIRM_PAYLOAD } from "@/constants/modal";
 
 function Example() {
-  const { confirmStore } = useStore();
+  const { modalStore } = useStore();
   const [selectedIds, setSelectedIds] = useState([]);
 
   const openDeleteConfirm = () => {
-    confirmStore.openByPayload(
+    modalStore.open(
       CONFIRM_PAYLOAD.DELETE_CONFIRM({
         component: DeleteConfirmContent,
-        message: "선택한 행을 삭제할까요?",
-        data: { selectedIds },
+        props: {
+          message: "선택한 행을 삭제할까요?",
+          selectedIds,
+          onConfirm: () => {
+            console.log("삭제 확인", selectedIds);
+          },
+          onCancel: () => {
+            console.log("삭제 취소");
+          },
+        },
       }),
     );
   };
@@ -40,6 +48,6 @@ function Example() {
 
 ## 참고
 
-- 이 컴포넌트는 `message`만 렌더링하며 `data`는 사용하지 않습니다.
-- 실제 확인/취소 처리 로직은 `ConfirmModal`과 `confirmStore`가 담당합니다.
+- 이 컴포넌트는 `message`만 렌더링하며 `selectedIds`는 직접 사용하지 않습니다.
+- 실제 확인/취소 처리 로직은 `ModalItem`과 상위 `onConfirm`, `onCancel`이 담당합니다.
 - `selectedIds`가 빈 배열이어도 컴포넌트 렌더링에는 영향이 없고, 삭제 가능 여부 판단은 상위 로직에서 처리합니다.

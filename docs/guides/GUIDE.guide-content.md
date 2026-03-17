@@ -19,12 +19,14 @@ function Example() {
   const { modalStore } = useStore();
 
   const openGuide = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: GuideContent,
-        data: {
-          title: "배너 가이드",
-          description: "저장 전 노출 기간과 상태를 확인하세요.",
+        props: {
+          data: {
+            title: "배너 가이드",
+            description: "저장 전 노출 기간과 상태를 확인하세요.",
+          },
         },
       }),
     );

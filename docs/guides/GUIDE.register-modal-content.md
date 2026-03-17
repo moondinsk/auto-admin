@@ -13,19 +13,32 @@
 ```jsx
 import RegisterModalContent from "@/components/Modal/RegisterModalContent";
 import { useStore } from "@/store";
-import { MODAL_PAYLOAD } from "@/constants/modal";
+import { CONFIRM_PAYLOAD } from "@/constants/modal";
+import { validateWithToast } from "@/utils/validation";
 
 function Example() {
   const { modalStore } = useStore();
+  const validator = () => true;
 
   const openRegister = () => {
-    modalStore.openByPayload(
-      MODAL_PAYLOAD.REGISTER_MODAL({
+    modalStore.open(
+      CONFIRM_PAYLOAD.REGISTER_MODAL({
         component: RegisterModalContent,
-        data: {
-          groupName: "메인 배너",
-          effect: "slide",
-          bannerCode: "B0000001",
+        props: {
+          data: {
+            groupName: "메인 배너",
+            effect: "slide",
+            bannerCode: "B0000001",
+          },
+          onConfirm: (formData) => {
+            if (!validateWithToast(formData, validator, setToast)) {
+              return false;
+            }
+            console.log("등록", formData);
+          },
+          onCancel: (formData) => {
+            console.log("등록 취소", formData);
+          },
         },
       }),
     );
@@ -40,11 +53,11 @@ function Example() {
 - `data.groupName`: 배너명 입력의 초기 텍스트.
 - `data.effect`: 셀렉트 초기값(`slide` 또는 `fade`).
 - `data.bannerCode`: 메모 필드 초기 텍스트.
+- `onActionDataChange`: 현재 폼 데이터를 상위에 전달하기 위한 내부 브리지 props입니다.
 
 ## 참고
 
-- 입력값은 `defaultValue` 기반이라 uncontrolled 방식입니다.
+- 입력값은 `useState` 기반 controlled 방식입니다.
 - 효과 선택에는 `react-select`를 사용합니다.
-- 실제 값 수집/저장은 외부 로직에서 처리합니다.
-- 현재 데모 페이지(`src/pages/Components/ComponentsModal.jsx`)의 `openRegisterModal`은 `data.title`, `data.description`를 전달하지만, `RegisterModalContent`는 해당 값을 사용하지 않습니다.
+- 입력 변경 시 최신 `formData`가 상위로 전달되며, 확인/취소 콜백에서 `data` 인자로 받을 수 있습니다.
 - 초기값을 표시하려면 `data.groupName`, `data.effect`, `data.bannerCode`를 전달하세요.

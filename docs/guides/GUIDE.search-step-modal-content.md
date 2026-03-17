@@ -19,10 +19,12 @@ function Example() {
   const { modalStore } = useStore();
 
   const openInputStepModal = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: SearchStepModalContent,
-        data: { itemName: "초기값" },
+        props: {
+          data: { itemName: "초기값" },
+        },
       }),
     );
   };
@@ -44,4 +46,4 @@ function Example() {
 ## 참고
 
 - 모달 단계 간 부모-자식 값 동기화 패턴을 보여주는 예시입니다.
-- 2차 모달은 `confirmStore.openByPayload` + `CONFIRM_PAYLOAD.INPUT_CONFIRM` 조합으로 열립니다.
+- 2차 모달은 `modalStore.open` + `CONFIRM_PAYLOAD.INPUT_CONFIRM` 조합으로 열립니다.

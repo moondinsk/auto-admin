@@ -19,11 +19,13 @@ function Example() {
   const { modalStore } = useStore();
 
   const openTripleNestedModal = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: TripleNestedModalContent,
-        data: {
-          description: "1차 모달에서 2차, 3차까지 순차적으로 열 수 있습니다.",
+        props: {
+          data: {
+            description: "1차 모달에서 2차, 3차까지 순차적으로 열 수 있습니다.",
+          },
         },
       }),
     );
@@ -46,5 +48,4 @@ function Example() {
 ## 참고
 
 - 다중 모달 렌더링은 `modalStore.modals` 스택과 `Root.jsx`의 `TransitionGroup` 렌더링에 의존합니다.
-- 동작 로그는 개발 환경에서 `modalStore.debugStack` 콘솔 출력으로 확인할 수 있습니다.
 - `TripleNestedSecondModalContent`는 같은 파일 내부에 정의되어 있으며 별도 export되지 않습니다.
