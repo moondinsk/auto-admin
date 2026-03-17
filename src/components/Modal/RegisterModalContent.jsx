@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Select from "react-select";
 
 const RegisterModalContent = ({ data, onActionDataChange }) => {
@@ -17,7 +17,7 @@ const RegisterModalContent = ({ data, onActionDataChange }) => {
     const { name, value } = e.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
-    onActionDataChange?.(formData);
+    onActionDataChange?.(updatedFormData);
   };
 
   return (
