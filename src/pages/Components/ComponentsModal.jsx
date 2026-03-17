@@ -51,12 +51,14 @@ const ComponentsModal = () => {
           onFormDataChange: (data) => {
             formData = data;
           },
-          confirmFunc: () => {
-            validateWithToast(formData, registerFormValidator, setToast);
+          onConfirm: () => {
+            if (!validateWithToast(formData, registerFormValidator, setToast)) {
+              return false;
+            }
             console.log("등록되었습니다.", formData);
             setToast("success", "항목이 등록되었습니다.");
           },
-          cancelFunc: () => {
+          onClose: () => {
             setToast("warning", "등록이 취소되었습니다.");
           },
         },
@@ -75,7 +77,7 @@ const ComponentsModal = () => {
             title: "배너 운영 가이드",
             description: "data값 인자로 넘기기 가능한 테스트 모달입니다.",
           },
-          confirmFunc: async () => {
+          onConfirm: async () => {
             setToast("success", "완료 되었을때 해당 영역에서 함수 실행 가능");
           },
         },
@@ -147,10 +149,10 @@ const ComponentsModal = () => {
           message: "선택한 항목을 삭제하시겠습니까?",
           confirmText: "커스텀 삭제",
           cancelText: "커스텀 취소",
-          confirmFunc: () => {
+          onConfirm: () => {
             setToast("success", `선택한 ${targetIds.length}건이 삭제되었습니다.`);
           },
-          cancelFunc: () => {
+          onClose: () => {
             setToast("warning", "삭제가 취소되었습니다.");
           },
         },

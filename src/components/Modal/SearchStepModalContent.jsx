@@ -34,7 +34,7 @@ const SearchStepModalContent = ({ data }) => {
               ...nextValues,
             };
           },
-          confirmFunc: () => {
+          onConfirm: () => {
             setSearchedItem((prev) => ({
               ...prev,
               ...draftItemRef.current,
@@ -42,7 +42,7 @@ const SearchStepModalContent = ({ data }) => {
             setToast("success", `저장되었습니다: ${draftItemRef.current.itemName || "(비어있음)"}`);
             draftItemRef.current = emptyDraft;
           },
-          cancelFunc: () => {
+          onClose: () => {
             draftItemRef.current = emptyDraft;
             setToast("warning", "입력값 저장이 취소되었습니다.");
           },

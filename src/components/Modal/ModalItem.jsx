@@ -4,7 +4,7 @@ import Modal from "./Modal";
 
 const TRANSITION_TIMEOUT = 500;
 
-const ModalItem = ({ modal, isTop, zIndex, onClose, ...transitionProps }) => {
+const ModalItem = ({ modal, zIndex, closeModal, ...transitionProps }) => {
   const nodeRef = useRef(null);
 
   return (
@@ -19,9 +19,8 @@ const ModalItem = ({ modal, isTop, zIndex, onClose, ...transitionProps }) => {
           type={modal.type}
           component={modal.component}
           {...modal.props}
-          isTop={isTop}
           zIndex={zIndex}
-          onClose={onClose}
+          closeModal={closeModal}
         />
       </div>
     </CSSTransition>

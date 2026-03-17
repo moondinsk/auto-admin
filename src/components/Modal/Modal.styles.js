@@ -8,7 +8,6 @@ export const Dim = styled.div`
   align-items: center;
   justify-content: center;
   padding: 16px;
-  pointer-events: ${({ $isTop = true }) => ($isTop ? "auto" : "none")};
   background: ${({ theme }) => `${theme.colors.palette.gray900}66`};
 `;
 

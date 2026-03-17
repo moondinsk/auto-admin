@@ -38,13 +38,12 @@ export const createValidator = (rules) => {
  * @param {Function} validator - createValidator로 생성한 검증 함수
  * @param {Function} setToast - toast 표시 함수
  * @returns {boolean} 검증 성공 여부
- * @throws {Error} 검증 실패 시 에러 발생
  */
 export const validateWithToast = (data, validator, setToast) => {
   const result = validator(data);
   if (!result.valid) {
     setToast("error", result.message);
-    throw new Error(result.message);
+    return false;
   }
   return true;
 };

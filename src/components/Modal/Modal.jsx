@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Button from "@/components/Button/Button";
 import { theme } from "@/styles/theme";
 import { Dim, ModalBody, ModalFooter, ModalHeader, ModalPanel } from "./Modal.styles";
@@ -11,75 +11,48 @@ const Modal = ({
   component: ContentComponent,
   width,
   maxHeight,
+  closeModal,
+  onConfirm,
   onClose,
-  closeFunc,
-  confirmFunc,
-  cancelFunc,
   confirmText = "확인",
   cancelText = "취소",
-  isTop = true,
   zIndex = 1000,
   ...contentProps
 }) => {
   const isConfirmModal = type === "confirm";
 
   const runModalAction = async (action) => {
-    if (!isTop) {
-      return;
-    }
-
     try {
-      await action?.();
+      const shouldClose = await action?.();
+      if (shouldClose === false) {
+        return;
+      }
     } catch {
       return;
     }
 
-    onClose?.();
+    closeModal?.();
   };
 
-  const handleRequestClose = () => {
-    void runModalAction(closeFunc);
+  const handleDimClick = () => {
+    void runModalAction(onClose);
   };
 
   const handleCancel = () => {
-    void runModalAction(cancelFunc);
+    void runModalAction(onClose);
   };
 
   const handleConfirm = () => {
-    void runModalAction(confirmFunc);
+    void runModalAction(onConfirm);
   };
-
-  useEffect(() => {
-    if (!isTop) {
-      return undefined;
-    }
-
-    const onKeyDown = async (event) => {
-      if (event.key !== "Escape") {
-        return;
-      }
-
-      const action = isConfirmModal ? cancelFunc : closeFunc;
-      try {
-        await action?.();
-      } catch {
-        return;
-      }
-      onClose?.();
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [cancelFunc, closeFunc, isConfirmModal, isTop, onClose]);
 
   const renderedContent =
     children || (ContentComponent ? <ContentComponent {...contentProps} message={message} /> : message);
   return (
     <Dim
       className="modal-dim"
-      $isTop={isTop}
       $zIndex={zIndex}
-      onClick={isConfirmModal ? handleCancel : handleRequestClose}>
+      onClick={handleDimClick}>
       <ModalPanel className="modal-panel" $width={width} $maxHeight={maxHeight} onClick={(e) => e.stopPropagation()}>
         {title && <ModalHeader>{title}</ModalHeader>}
         <ModalBody>{renderedContent}</ModalBody>
