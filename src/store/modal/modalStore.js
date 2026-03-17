@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { useStore } from "../index.js";
+import { getStore,useStore } from "../index.js";
 
 export class ModalStore {
   modals = [];
@@ -44,3 +44,7 @@ export class ModalStore {
 export const useModalStore = () => {
   return useStore().modalStore;
 };
+
+export const getModalStore = () => {
+  return getStore().modalStore;
+}
