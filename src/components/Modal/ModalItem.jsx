@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import Modal from "./Modal";
 
@@ -6,9 +6,10 @@ const TRANSITION_TIMEOUT = 500;
 
 const ModalItem = ({ modal, zIndex, closeModal, ...transitionProps }) => {
   const nodeRef = useRef(null);
+  const [actionData, setActionData] = useState();
 
   const runAndClose = (action) => {
-    const shouldClose = action?.();
+    const shouldClose = action?.(actionData);
     if (shouldClose === false) return;
     closeModal?.();
   };
@@ -28,6 +29,7 @@ const ModalItem = ({ modal, zIndex, closeModal, ...transitionProps }) => {
           type={modal.type}
           component={modal.component}
           {...modal.props}
+          onActionDataChange={setActionData}
           zIndex={zIndex}
           onCancel={handleCancel}
           onConfirm={handleConfirm}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
 
-const RegisterModalContent = ({ data, onFormDataChange }) => {
+const RegisterModalContent = ({ data, onActionDataChange }) => {
   const effectOptions = [
     { value: "slide", label: "슬라이드" },
     { value: "fade", label: "페이드" },
@@ -13,12 +13,11 @@ const RegisterModalContent = ({ data, onFormDataChange }) => {
     memo: data?.bannerCode ? `${data.bannerCode}` : "",
   });
 
-  // 폼 데이터 변경 시 부모에 전달
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
-    onFormDataChange?.(updatedFormData);
+    onActionDataChange?.(formData);
   };
 
   return (

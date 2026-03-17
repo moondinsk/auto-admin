@@ -25,11 +25,11 @@ const ComponentsModal = () => {
   // 등록 폼 검증 규칙
   const registerFormValidator = createValidator([
     {
-      validate: (data) => ({ valid: !!data.bannerName?.trim() }),
+      validate: (data) => ({ valid: !!data?.bannerName?.trim() }),
       message: "배너명은 필수입니다.",
     },
     {
-      validate: (data) => ({ valid: !!data.effect }),
+      validate: (data) => ({ valid: !!data?.effect }),
       message: "배너효과는 필수입니다.",
     },
   ]);
@@ -39,8 +39,6 @@ const ComponentsModal = () => {
   };
 
   const openRegisterModal = () => {
-    let formData = null;
-
     modalStore.open(
       CONFIRM_PAYLOAD.REGISTER_MODAL({
         component: RegisterModalContent,
@@ -49,17 +47,15 @@ const ComponentsModal = () => {
           description: "새 항목을 등록하세요.",
           confirmText: "등록",
           cancelText: "취소",
-          onFormDataChange: (data) => {
-            formData = data;
-          },
-          onConfirm: () => {
-            if (!validateWithToast(formData, registerFormValidator, setToast)) {
+          onConfirm: (data) => {
+            if (!validateWithToast(data, registerFormValidator, setToast)) {
               return false;
             }
-            console.log("등록되었습니다.", formData);
+            console.log("등록되었습니다.", data);
             setToast("success", "항목이 등록되었습니다.");
           },
-          onCancel: () => {
+          onCancel: (data) => {
+            console.log("등록 취소", data);
             setToast("warning", "등록이 취소되었습니다.");
           },
         },
@@ -175,8 +171,8 @@ const ComponentsModal = () => {
       </CardSection>
 
       <CardSection title="삭제 모달 예시">
-        <div className="flex-box col gap-10" >
-          <div className="flex-box gap-12" >
+        <div className="flex-box col gap-10">
+          <div className="flex-box gap-12">
             {candidates.map((id) => (
               <label key={id} className="flex-box gap-6">
                 <input type="checkbox" checked={selectedIds.includes(id)} onChange={() => toggleSelectedId(id)} />
@@ -197,7 +193,7 @@ const ComponentsModal = () => {
       </CardSection>
 
       <CardSection title="2중 모달 예시">
-        <div className="flex-box gap-10" >
+        <div className="flex-box gap-10">
           <Button outlined onClick={openNestedModal}>
             기본 2중 모달 열기
           </Button>
@@ -208,7 +204,7 @@ const ComponentsModal = () => {
       </CardSection>
 
       <CardSection title="3중 모달 예시">
-        <div className="flex-box gap-10" >
+        <div className="flex-box gap-10">
           <Button outlined onClick={openTripleNestedModal}>
             기본 3중 모달 열기
           </Button>
