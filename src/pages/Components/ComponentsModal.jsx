@@ -25,46 +25,46 @@ const ComponentsModal = () => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((current) => current !== id) : [...prev, id]));
   };
 
-  const openRegisterModal = async () => {
-    try {
-      const confirmed = await modalStore.openConfirmByPayload(
-        CONFIRM_PAYLOAD.REGISTER_MODAL({
-          component: RegisterModalContent,
-          props: {
-            title: "등록 모달",
-            description: "새 항목을 등록하세요.",
-            confirmText: "등록",
+  const openRegisterModal = () => {
+    modalStore.open(
+      CONFIRM_PAYLOAD.REGISTER_MODAL({
+        component: RegisterModalContent,
+        props: {
+          title: "등록 모달",
+          description: "새 항목을 등록하세요.",
+          confirmText: "등록",
+          confirmFunc: () => {
+            setToast("success", "항목이 등록되었습니다.");
           },
-        }),
-      );
-
-      if (!confirmed) {
-        setToast("warning", "등록이 취소되었습니다.");
-        return;
-      }
-
-      setToast("success", "항목이 등록되었습니다.");
-    } catch (error) {
-      console.error("등록 처리 중 오류", error);
-      setToast("error", "등록 처리 중 오류가 발생했습니다.");
-    }
+          cancelFunc: () => {
+            setToast("warning", "등록이 취소되었습니다.");
+          },
+        },
+      }),
+    );
   };
 
   const openGuideModal = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: GuideContent,
         props: {
           title: "배너 운영 가이드",
-          description: "배너 등록 전 노출 효과와 기간을 먼저 확인하세요.",
           confirmText: "닫기",
+          data: {
+            title: "배너 운영 가이드",
+            description: "data값 인자로 넘기기 가능한 테스트 모달입니다.",
+          },
+          confirmFunc: async () => {
+            setToast("success", "완료 되었을때 해당 영역에서 함수 실행 가능");
+          },
         },
       }),
     );
   };
 
   const openAlertModal = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.ALERT_MODAL({
         component: AlertModalContent,
         props: {
@@ -77,7 +77,7 @@ const ComponentsModal = () => {
   };
 
   const openNestedModal = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: NestedModalContent,
         props: {
@@ -89,7 +89,7 @@ const ComponentsModal = () => {
   };
 
   const openNestedInputModal = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: SearchStepModalContent,
         props: {
@@ -100,7 +100,7 @@ const ComponentsModal = () => {
   };
 
   const openTripleNestedModal = () => {
-    modalStore.openByPayload(
+    modalStore.open(
       MODAL_PAYLOAD.GUIDE_MODAL({
         component: TripleNestedModalContent,
         props: {
@@ -111,42 +111,37 @@ const ComponentsModal = () => {
     );
   };
 
-  const openDeleteModal = async () => {
+  const openDeleteModal = () => {
     if (selectedIds.length === 0) {
       setToast("warning", "삭제할 항목을 먼저 선택해주세요.");
       return;
     }
 
-    const confirmed = await modalStore.openConfirmByPayload(
+    const targetIds = [...selectedIds];
+
+    modalStore.open(
       CONFIRM_PAYLOAD.DELETE_CONFIRM({
         component: DeleteConfirmContent,
         props: {
-          selectedIds,
+          selectedIds: targetIds,
           message: "선택한 항목을 삭제하시겠습니까?",
           confirmText: "커스텀 삭제",
           cancelText: "커스텀 취소",
+          confirmFunc: () => {
+            setToast("success", `선택한 ${targetIds.length}건이 삭제되었습니다.`);
+          },
+          cancelFunc: () => {
+            setToast("warning", "삭제가 취소되었습니다.");
+          },
         },
       }),
     );
-
-    if (!confirmed) {
-      setToast("warning", "삭제가 취소되었습니다.");
-      return;
-    }
-
-    try {
-      console.log("삭제 진행", selectedIds);
-      setToast("success", `선택한 ${selectedIds.length}건이 삭제되었습니다.`);
-    } catch (error) {
-      console.error("error", error);
-      setToast("error", "삭제 처리 중 오류가 발생했습니다.");
-    }
   };
 
   return (
     <StyledComponents className="flex-box col">
       <CardSection title="모달 예시">
-        <div className="flex-box" style={{ gap: 10 }}>
+        <div className="flex-box gap-10">
           <Button outlined onClick={openRegisterModal}>
             등록 모달 열기
           </Button>
@@ -157,10 +152,10 @@ const ComponentsModal = () => {
       </CardSection>
 
       <CardSection title="삭제 모달 예시">
-        <div className="flex-box col" style={{ gap: 10 }}>
-          <div className="flex-box" style={{ gap: 12 }}>
+        <div className="flex-box col gap-10" >
+          <div className="flex-box gap-12" >
             {candidates.map((id) => (
-              <label key={id} className="flex-box" style={{ gap: 6 }}>
+              <label key={id} className="flex-box gap-6">
                 <input type="checkbox" checked={selectedIds.includes(id)} onChange={() => toggleSelectedId(id)} />
                 {id}
               </label>
@@ -179,7 +174,7 @@ const ComponentsModal = () => {
       </CardSection>
 
       <CardSection title="2중 모달 예시">
-        <div className="flex-box" style={{ gap: 10 }}>
+        <div className="flex-box gap-10" >
           <Button outlined onClick={openNestedModal}>
             기본 2중 모달 열기
           </Button>
@@ -190,7 +185,7 @@ const ComponentsModal = () => {
       </CardSection>
 
       <CardSection title="3중 모달 예시">
-        <div className="flex-box" style={{ gap: 10 }}>
+        <div className="flex-box gap-10" >
           <Button outlined onClick={openTripleNestedModal}>
             기본 3중 모달 열기
           </Button>

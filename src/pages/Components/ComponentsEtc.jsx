@@ -48,17 +48,21 @@ const ComponentsEtc = () => {
 
       const products = Array.isArray(data) ? data : (data?.items ?? data?.list ?? []);
 
-      modalStore.openByPayload(
+      modalStore.open(
         MODAL_PAYLOAD.ALERT_MODAL({
           component: AlertModalContent,
-          message: `상품 조회 성공 (${products.length}건) - 콘솔에서 상세 결과를 확인하세요.`,
+          props: {
+            message: `상품 조회 성공 (${products.length}건) - 콘솔에서 상세 결과를 확인하세요.`,
+          },
         }),
       );
     } catch (error) {
-      modalStore.openByPayload(
+      modalStore.open(
         MODAL_PAYLOAD.ALERT_MODAL({
           component: AlertModalContent,
-          message: error?.response?.data?.message || "상품 조회에 실패했습니다.",
+          props: {
+            message: error?.response?.data?.message || "상품 조회에 실패했습니다.",
+          },
         }),
       );
     }
@@ -96,7 +100,7 @@ const ComponentsEtc = () => {
       </CardSection>
 
       <CardSection title="Axios API 호출 예시 - getProductsApi">
-        <div className="flex-box col" style={{ gap: 12 }}>
+        <div className="flex-box col gap-12">
           <Button outlined onClick={handleGetProductsExample}>
             상품 목록 조회
           </Button>

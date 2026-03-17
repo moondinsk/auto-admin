@@ -9,6 +9,7 @@ const createModalPayload =
   });
 
 const BASE_MODAL_PROPS = {
+  type: "modal",
   width: 600,
   title: "가이드 모달",
   maxHeight: "50vh",
@@ -16,6 +17,7 @@ const BASE_MODAL_PROPS = {
 };
 
 const BASE_CONFIRM_PROPS = {
+  type: "confirm",
   title: "확인 모달",
   confirmText: "확인",
   cancelText: "취소",

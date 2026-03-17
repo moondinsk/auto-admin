@@ -13,7 +13,6 @@ const ModalManager = () => {
     <TransitionGroup component={null}>
       {modalStore.modals.map((modal, index) => {
         const isTop = index === modalStore.modals.length - 1;
-        const isConfirm = modal.type === "confirm";
         return (
           <ModalItem
             key={modal.id}
@@ -21,8 +20,6 @@ const ModalManager = () => {
             isTop={isTop}
             zIndex={MODAL_BASE_Z_INDEX + index * MODAL_Z_INDEX_STEP}
             onClose={() => modalStore.closeById(modal.id)}
-            onConfirm={isConfirm ? () => modalStore.confirm() : () => modalStore.closeById(modal.id)}
-            onCancel={isConfirm ? () => modalStore.cancel() : () => modalStore.closeById(modal.id)}
           />
         );
       })}

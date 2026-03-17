@@ -17,7 +17,7 @@ const SearchResultFormContent = ({ itemName, onSync, message }) => {
   };
 
   return (
-    <div className="flex-box col" style={{ gap: 10 }}>
+    <div className="flex-box col gap-10">
       <p>{message}</p>
 
       <input value={name} onChange={handleChange} placeholder="항목명" type="text" />

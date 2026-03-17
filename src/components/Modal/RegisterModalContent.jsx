@@ -7,12 +7,12 @@ const RegisterModalContent = ({ data }) => {
   const fallbackMemo = data?.bannerCode ? `${data.bannerCode}` : "";
 
   return (
-    <div className="flex-box col" style={{ gap: 12 }}>
-      <label className="flex-box col" style={{ gap: 6 }}>
+    <div className="flex-box col gap-12">
+      <label className="flex-box col gap-6">
         <span>배너명</span>
         <input type="text" defaultValue={fallbackName} placeholder="배너명을 입력하세요" />
       </label>
-      <label className="flex-box col" style={{ gap: 6 }}>
+      <label className="flex-box col gap-6">
         <span>배너 효과</span>
         <Select
           className="custom-select"
@@ -27,7 +27,7 @@ const RegisterModalContent = ({ data }) => {
           }}
         />
       </label>
-      <label className="flex-box col" style={{ gap: 6 }}>
+      <label className="flex-box col gap-6">
         <span>메모</span>
         <textarea rows={3} defaultValue={fallbackMemo} placeholder="메모를 입력하세요" />
       </label>
