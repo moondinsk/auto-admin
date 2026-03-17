@@ -45,5 +45,6 @@ export const validateWithToast = (data, validator, setToast) => {
     setToast("error", result.message);
     return false;
   }
+
   return true;
 };

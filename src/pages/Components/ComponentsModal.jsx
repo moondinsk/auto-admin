@@ -58,7 +58,7 @@ const ComponentsModal = () => {
             console.log("등록되었습니다.", formData);
             setToast("success", "항목이 등록되었습니다.");
           },
-          onClose: () => {
+          onCancel: () => {
             setToast("warning", "등록이 취소되었습니다.");
           },
         },
@@ -152,7 +152,7 @@ const ComponentsModal = () => {
           onConfirm: () => {
             setToast("success", `선택한 ${targetIds.length}건이 삭제되었습니다.`);
           },
-          onClose: () => {
+          onCancel: () => {
             setToast("warning", "삭제가 취소되었습니다.");
           },
         },

@@ -11,9 +11,8 @@ const Modal = ({
   component: ContentComponent,
   width,
   maxHeight,
-  closeModal,
   onConfirm,
-  onClose,
+  onCancel,
   confirmText = "확인",
   cancelText = "취소",
   zIndex = 1000,
@@ -21,29 +20,12 @@ const Modal = ({
 }) => {
   const isConfirmModal = type === "confirm";
 
-  const runModalAction = async (action) => {
-    try {
-      const shouldClose = await action?.();
-      if (shouldClose === false) {
-        return;
-      }
-    } catch {
-      return;
-    }
-
-    closeModal?.();
-  };
-
-  const handleDimClick = () => {
-    void runModalAction(onClose);
-  };
-
   const handleCancel = () => {
-    void runModalAction(onClose);
+    void onCancel?.();
   };
 
   const handleConfirm = () => {
-    void runModalAction(onConfirm);
+    void onConfirm?.();
   };
 
   const renderedContent =
@@ -52,7 +34,7 @@ const Modal = ({
     <Dim
       className="modal-dim"
       $zIndex={zIndex}
-      onClick={handleDimClick}>
+      onClick={handleCancel}>
       <ModalPanel className="modal-panel" $width={width} $maxHeight={maxHeight} onClick={(e) => e.stopPropagation()}>
         {title && <ModalHeader>{title}</ModalHeader>}
         <ModalBody>{renderedContent}</ModalBody>

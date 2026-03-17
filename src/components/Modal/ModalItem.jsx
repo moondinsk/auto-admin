@@ -7,6 +7,18 @@ const TRANSITION_TIMEOUT = 500;
 const ModalItem = ({ modal, zIndex, closeModal, ...transitionProps }) => {
   const nodeRef = useRef(null);
 
+  const runAndClose = (action) => {
+    try {
+      if (action?.() === false) return;
+      closeModal?.();
+    } catch {
+      return;
+    }
+  };
+
+  const handleCancel = () => runAndClose(modal.props?.onCancel);
+  const handleConfirm = () => runAndClose(modal.props?.onConfirm);
+
   return (
     <CSSTransition
       {...transitionProps}
@@ -20,7 +32,8 @@ const ModalItem = ({ modal, zIndex, closeModal, ...transitionProps }) => {
           component={modal.component}
           {...modal.props}
           zIndex={zIndex}
-          closeModal={closeModal}
+          onCancel={handleCancel}
+          onConfirm={handleConfirm}
         />
       </div>
     </CSSTransition>
