@@ -41,7 +41,7 @@ const Header = () => {
       <Logo>
         <img src={LOGO} alt="" />
       </Logo>
-      <Buttons className="flex-box" gap={10}>
+      <Buttons className="flex-box gap-10">
         {ACTIONS.map(({ label, icon: Icon }) => (
           <li key={label}>
             <Button bgColor={theme.colors.palette.gray800} radius="sm" gap={6} onClick={() => handleButtonClick(label)}>
