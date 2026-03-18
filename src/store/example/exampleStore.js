@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import axios from "axios";
+import axios from "@/api/axios.js";
 import { getStore, useStore } from "../index.js";
 
 export class ExampleStore {

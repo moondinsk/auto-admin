@@ -3,6 +3,7 @@ import { ModalStore } from "./modal/modalStore";
 import { UserStore } from "./user/userStore";
 import { FormTableStore } from "./form/formTableStore";
 import { ExampleStore } from "./example/exampleStore";
+import { LoadingStore } from "./loading/loadingStore";
 
 export const StoreContext = createContext(null);
 
@@ -11,11 +12,13 @@ export class Store {
   userStore;
   formTableStore;
   exampleStore;
+  loadingStore;
   constructor() {
     this.modalStore = new ModalStore(this);
     this.userStore = new UserStore(this);
     this.formTableStore = new FormTableStore(this);
     this.exampleStore = new ExampleStore(this);
+    this.loadingStore = new LoadingStore(this);
   }
 }
 
