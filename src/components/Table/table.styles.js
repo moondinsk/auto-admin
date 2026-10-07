@@ -2,7 +2,14 @@ import { theme } from "@/styles/theme";
 import Select from "react-select";
 import styled, { css } from "styled-components";
 
-export const TableWrap = styled.div``;
+export const TableWrap = styled.div`
+  ${({ $variant }) =>
+    $variant === "list" &&
+    css`
+      width: 100%;
+      overflow-x: auto;
+    `}
+`;
 
 export const StyledTable = styled.table`
   width: 100%;
@@ -27,8 +34,33 @@ export const StyledTable = styled.table`
         padding: 20px 0;
         border-bottom: 1px solid ${theme.colors.palette.gray100};
       }
-      button {
+      button.center {
         margin: 0 auto;
+      }
+    `}
+
+  ${({ $variant }) =>
+    $variant === "info" &&
+    css`
+      border-top: 1px solid #dedcec;
+      th,
+      td {
+        padding: 12px 24px;
+        border-bottom: 1px solid #dedcec;
+      }
+      tr th:not(:first-child) {
+        border-left: 1px solid #dedcec;
+        border-right: 1px solid #dedcec;
+      }
+      th {
+        width: 130px;
+        text-align: left;
+        background: ${({ theme }) => theme.colors.bg?.subtle || theme.colors.palette.gray100};
+        font-weight: 600;
+      }
+      td {
+        text-align: left;
+        background: ${({ theme }) => theme.colors.gray.white};
       }
     `}
 
@@ -73,6 +105,48 @@ export const SelectInputWrapper = styled.div`
   }
 `;
 
+export const FileInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+
+  .file-name {
+    flex: 1;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    border: 1px solid #D1D5E0;
+    border-radius: 8px;
+    background: ${({ theme }) => theme.colors.gray.white};
+    color: ${({ theme }) => theme.colors.text.primary};
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .file-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: 8px;
+    background: ${({ theme }) => theme.colors.bg.subtle};
+    color: ${({ theme }) => theme.colors.text.primary};
+    cursor: pointer;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+`;
+
 // 체크박스, 라디오 버튼 스타일
 export const ChoiceInput = styled.div`
   display: flex;
@@ -92,7 +166,9 @@ export const ChoiceInput = styled.div`
 // 날짜 범위 선택 스타일
 export const DateRangeWrapper = styled.div`
   display: flex;
+  align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 
   .date-inputs {
     display: flex;
@@ -223,3 +299,8 @@ export const TableTop = styled.div`
 export const TotalLength = styled.div`
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
+
+export const TableRequiredChk = styled.span`
+    margin-left: 3px;
+    color: ${theme.colors.palette.red500}
+`
